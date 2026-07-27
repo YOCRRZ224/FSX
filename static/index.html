@@ -1,0 +1,2748 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>FSX</title>
+<script src="static/gsap.js" type="text/javascript" charset="utf-8"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        
+        * { box-sizing: border-box; }
+        body { margin: 0; background: #000; color: white; font-family: sans-serif; overflow-x: hidden; }
+  .header {
+    position: fixed;
+    top: 14px;
+    left: 50%;
+    transform: translateX(-50%);
+
+    width: calc(100% - 24px);
+    max-width: 520px;
+
+    z-index: 500;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 10px 14px;
+
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+
+    border-radius: 18px;
+
+    background: rgba(10,10,10,0.72);
+
+    backdrop-filter: blur(18px) saturate(180%);
+    -webkit-backdrop-filter: blur(18px) saturate(180%);
+
+    border: 1px solid rgba(255,255,255,0.05);
+
+    box-shadow:
+        0 8px 30px rgba(0,0,0,0.35);
+
+    overflow: hidden;
+}
+
+/* subtle top highlight */
+.header::before {
+    content: "";
+
+    position: absolute;
+    top: 0;
+    left: 12px;
+
+    width: 40%;
+    height: 1px;
+
+    background:
+        linear-gradient(
+            90deg,
+            rgba(255,255,255,0.22),
+            transparent
+        );
+}
+
+/* logo text */
+.header span {
+    font-size: 13px;
+    font-weight: 900;
+    letter-spacing: 1.6px;
+
+    color: rgba(255,255,255,0.92);
+
+    text-transform: uppercase;
+}
+
+/* action button */
+.header button {
+    width: 34px;
+    height: 34px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,0.03) !important;
+
+    border:
+        1px solid rgba(255,255,255,0.04);
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition:
+        transform 0.2s ease,
+        background 0.2s ease,
+        border-color 0.2s ease;
+}
+
+/* hover */
+.header button:hover {
+    transform: scale(1.04);
+
+    background:
+        rgba(255,255,255,0.06) !important;
+
+    border-color:
+        rgba(255,255,255,0.08);
+}
+
+/* active press */
+.header button:active {
+    transform: scale(0.95);
+}
+
+/* icon sizing */
+.header button svg {
+    width: 15px;
+    height: 15px;
+
+    opacity: 0.9;
+}
+        .tab { display: none; padding: 15px; padding-bottom: 150px; }
+        .active { display: block; }
+
+        /* [SONG LIST] */
+        .song { display: flex; align-items: center; padding: 12px; border-radius: 12px; margin-bottom: 10px; background: #111; cursor: pointer; transition: 0.2s; gap: 12px; }
+        .song:hover { background: #222; }
+        .cover { width: 50px; height: 50px; border-radius: 8px; object-fit: cover; flex-shrink: 0; }
+        input { width: 100%; padding: 12px; border-radius: 12px; border: none; background: #111; color: white; margin-bottom: 10px; font-size: 16px; }
+body {
+    padding-top: 90px;
+}
+        /* [NAV] */
+        /* [NAV OVERHAUL] */
+.nav { 
+    position: fixed; 
+    bottom: 20px; /* Float it slightly off the bottom */
+    left: 50%;
+    transform: translateX(-50%);
+    width: 90%; 
+    max-width: 400px;
+    display: flex; 
+    justify-content: space-around; 
+    background: rgba(18, 18, 18, 0.8); 
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    padding: 12px 0; 
+    z-index: 200; 
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    border-radius: 25px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+.nav-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    color: rgba(255, 255, 255, 0.4);
+    transition: all 0.3s ease;
+    font-size: 20px;
+}
+
+.nav-btn.active {
+    color: #1db954;
+    text-shadow: 0 0 15px rgba(29, 185, 84, 0.4);
+}
+
+.nav-btn span {
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* [MINI PLAYER — FLOATING DOCK EDITION] */
+.player-container {
+    position: fixed;
+    bottom: calc(90px + env(safe-area-inset-bottom));
+    left: 0;
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 0 12px;
+    z-index: 180;
+    pointer-events: none;
+}
+
+/* MAIN SHELL */
+.player {
+    pointer-events: auto;
+    width: 100%;
+    max-width: 520px;
+
+    background: rgba(18, 18, 18, 0.72);
+    backdrop-filter: blur(22px);
+    -webkit-backdrop-filter: blur(22px);
+
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-radius: 18px;
+
+    padding: 10px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.6);
+
+    position: relative;
+    overflow: hidden;
+
+    transform: translateY(0);
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+/* subtle hover lift (feels premium) */
+.player:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 50px rgba(0, 0, 0, 0.75);
+}
+
+/* TOP FAINT GLOW LINE */
+.player::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 10%;
+    width: 80%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(29,185,84,0.4), transparent);
+    opacity: 0.5;
+}
+
+/* PROGRESS BAR BASE */
+.mini-progress-container {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: rgba(255,255,255,0.06);
+    overflow: hidden;
+}
+
+/* PROGRESS FILL */
+.mini-progress-bar {
+    width: 0%;
+    height: 100%;
+    background: linear-gradient(90deg, #1db954, #38f27a);
+    box-shadow: 0 0 10px rgba(29,185,84,0.6);
+    transition: width 0.2s linear;
+}
+
+/* LEFT INFO AREA */
+.mini-info {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    cursor: pointer;
+}
+
+/* TEXT WRAPPER */
+.text-meta {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    margin-left: 10px;
+}
+
+/* TITLE */
+#now {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: #f5f5f5;
+    letter-spacing: 0.2px;
+}
+
+/* ARTIST */
+.mini-artist {
+    font-size: 11px;
+    opacity: 0.55;
+    color: #cfcfcf;
+    margin-top: 2px;
+}
+
+/* CONTROLS */
+.mini-controls {
+    display: flex;
+    gap: 14px;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+/* BUTTONS (this fixes your “what about that button” issue indirectly too) */
+.mini-controls button {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.8);
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 6px;
+    border-radius: 10px;
+}
+
+/* hover glow */
+.mini-controls button:hover {
+    background: rgba(255,255,255,0.06);
+    color: #fff;
+    transform: scale(1.05);
+}
+
+/* active/primary button feel */
+.mini-controls button:active {
+    transform: scale(0.95);
+}
+
+/* optional play button highlight (if you have one) */
+.mini-controls .play-btn {
+    background: #1db954;
+    color: #000;
+    border-radius: 50%;
+    width: 34px;
+    height: 34px;
+}
+
+.mini-controls .play-btn:hover {
+    background: #22d860;
+}
+
+
+/* [OLED BLACK FULL PLAYER — AMBIENT GLOW EDITION] */
+.fullPlayer { 
+    position: fixed; 
+    top: 0; 
+    left: 0; 
+    width: 100%; 
+    height: 100%; 
+    z-index: 1000; 
+    display: flex; 
+    justify-content: center; 
+    align-items: center; 
+    opacity: 0; 
+    pointer-events: none; 
+    background: #000; /* Fallback */
+    transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1), opacity 0.3s;
+    transform: translateY(100%);
+    overflow: hidden;
+}
+
+.fullPlayer.active { 
+    opacity: 1; 
+    pointer-events: auto; 
+    transform: translateY(0); 
+}
+
+/* THE BLUR LAYERS */
+/* THE BLUR LAYERS */
+.fp-bg, .fp-bg2 { 
+    display: block !important; 
+    position: absolute;
+    inset: -40px; 
+    background-size: cover;
+    background-position: center;
+    filter: blur(20px) saturate(250%); /* Slightly reduced blur for performance */
+    border-radius: 2px;
+    opacity: 0.5; 
+    z-index: 1;
+    transform: scale(1.1);
+    will-change: transform, opacity, background-image;
+    background-color: #111; /* Fallback color so it's never purely transparent */
+}
+
+/* Smooth transition crossfade wrapper */
+.fp-bg2 {
+    opacity: 0;
+    transition: opacity 0.6s ease-in-out;
+}
+
+/* THE BLACK OVERLAY (Deepens the darks near the bottom/top) */
+.fp-overlay { 
+    display: block;
+    position: absolute;
+    inset: 0;
+    
+    z-index: 2;
+}
+
+/* Ensure content sits cleanly on top of the background bloom */
+.fp-content { 
+    position: relative; 
+    z-index: 3; /* Lift above overlay and bg */
+    width: 90%; 
+    max-width: 400px; 
+    height: 80vh; 
+    display: flex; 
+    flex-direction: column; 
+    justify-content: center; 
+    padding: 20px 0;
+}
+
+
+/* Close Indicator */
+.closeBtn.top {
+    position: absolute; top: -20px; align-self: center;
+    background: rgba(255, 255, 255, 0.2); border-radius: 10px;
+    width: 40px; height: 4px; padding: 0; border: none;
+    cursor: pointer;
+}
+
+/* Artwork: Slightly smaller and cleaner */
+.fp-artwork-area {
+    width: 100%; display: flex; align-items: center; justify-content: center;
+    margin-bottom: 40px;
+}
+.fp-artwork-area img { 
+    width: 100%; max-width: 320px; aspect-ratio: 1; border-radius: 12px; 
+    box-shadow: 0 4px 20px rgba(255,255,255,0.05); /* Very subtle glow */
+    object-fit: cover;
+}
+
+/* Meta Data */
+.fp-meta-area { text-align: left; padding: 0 5px; }
+.fp-title { 
+    font-size: 22px; font-weight: 700; margin-bottom: 4px; 
+    color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.fp-artist { font-size: 16px; opacity: 0.5; color: #fff; }
+
+/* Progress: Compact & Clean */
+.fp-progress-area {
+  margin: 30px 0;
+}
+/* WRAPPER */
+.progress-wrap {
+  position: relative;
+  width: 100%;
+  height: 18px;
+  display: flex;
+  align-items: center;
+}
+
+/* BACKGROUND TRACK */
+.progress-wrap::after {
+  content: "";
+  position: absolute;
+  inset: 50% 0 auto 0;
+  transform: translateY(-50%);
+  height: 4px;
+  background: rgba(255,255,255,0.08);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+/* PROGRESS FILL */
+.progress-wrap::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+
+  width: var(--progress, 0%);
+  height: 4px;
+
+  border-radius: 999px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #1db954 0%,
+      #38f27a 100%
+    );
+
+  box-shadow:
+    0 0 12px rgba(29,185,84,0.25);
+
+  pointer-events: none;
+  z-index: 2;
+}
+
+/* RANGE INPUT */
+#fpProgress {
+  appearance: none;
+  -webkit-appearance: none;
+
+  width: 100%;
+  height: 18px;
+
+  background: transparent;
+
+  position: relative;
+  z-index: 3;
+
+  margin: 0;
+  padding: 0;
+
+  cursor: pointer;
+}
+
+/* REMOVE TRACK */
+#fpProgress::-webkit-slider-runnable-track {
+  background: transparent;
+  height: 18px;
+}
+
+#fpProgress::-moz-range-track {
+  background: transparent;
+  height: 18px;
+}
+
+/* REMOVE THUMB */
+#fpProgress::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 0;
+  height: 0;
+  opacity: 0;
+}
+
+#fpProgress::-moz-range-thumb {
+  width: 0;
+  height: 0;
+  border: none;
+  opacity: 0;
+}
+.time-stamps { 
+    display: flex; justify-content: space-between; 
+    font-size: 11px; margin-top: 8px; font-family: monospace; 
+    opacity: 0.4;
+}
+button { 
+    background: transparent !important; 
+    border: none; 
+    color: white; 
+    font-size: 18px; 
+    cursor: pointer; 
+    transition: all 0.2s ease; 
+    outline: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Controls: Smaller & Symmetrical */
+.fp-controls-area { 
+    display: flex; justify-content: space-between; align-items: center; 
+    margin-top: 10px;
+}
+
+.main-ctrls { display: flex; align-items: center; gap: 25px; }
+.main-ctrls button { 
+    font-size: 24px; /* Scaled down from 38px */
+}
+
+.play-main { 
+    width: 64px;
+    height: 64px;
+
+    border-radius: 17px !important; 
+
+    background: white !important;
+    color: black !important;
+
+    font-size: 26px !important;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    position: relative;
+
+    box-shadow:
+        0 10px 25px rgba(0,0,0,0.65),
+        0 2px 8px rgba(255,255,255,0.08);
+
+    transition: 
+        transform 0.25s ease,
+        box-shadow 0.25s ease,
+        background 0.25s ease;
+}
+
+/* subtle inner glow ring */
+.play-main::before {
+    content: "";
+
+    position: absolute;
+    inset: -3px;
+
+    border-radius: 50%;
+
+    background: radial-gradient(
+        circle,
+        rgba(29,185,84,0.25),
+        transparent 60%
+    );
+
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+/* hover = premium lift */
+.play-main:hover {
+    transform: scale(1.08);
+    box-shadow:
+        0 18px 40px rgba(0,0,0,0.75),
+        0 0 18px rgba(29,185,84,0.25);
+}
+
+/* show glow on hover */
+.play-main:hover::before {
+    opacity: 1;
+}
+
+/* click feel */
+.play-main:active {
+    transform: scale(0.94);
+}
+
+.side-btn { 
+    font-size: 18px; opacity: 0.4; 
+}
+.side-btn.active { opacity: 1; color: #1db954; }
+/* Pulse animation for the 'Continue' artwork */
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(29, 185, 84, 0.4); }
+    70% { box-shadow: 0 0 0 10px rgba(29, 185, 84, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(29, 185, 84, 0); }
+}
+
+
+
+.recent-item:hover img {
+    transform: scale(1.08);
+    filter: brightness(1.2);
+}
+
+.card h3 {
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    opacity: 0.8;
+    color: #1db954; /* YOCRRZ Branding Color */
+}
+
+
+
+        /* [HOME CARDS] */
+        .card { background: #111; padding: 15px; border-radius: 15px; margin-bottom: 15px; }
+        .recent-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(80px, 1fr)); gap: 10px; }
+        .recent-item { cursor: pointer; text-align: center; }
+        .recent-item img { width: 100%; aspect-ratio: 1; border-radius: 10px; object-fit: cover; }
+        /* Horizontal Scroll for Recents */
+.recent-scroll-container {
+    display: flex;
+    overflow-x: auto;
+    gap: 15px;
+    padding-bottom: 10px;
+    scrollbar-width: none; /* Hide scrollbar for clean look */
+}
+.recent-scroll-container::-webkit-scrollbar { display: none; }
+
+.glass-card {
+    position: relative;
+
+    background: rgba(255, 255, 255, 0.04) !important;
+    border: 1px solid rgba(255, 255, 255, 0.08) !important;
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    border-radius: 16px;
+
+    transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275),
+                border-color 0.25s ease,
+                box-shadow 0.25s ease;
+
+    box-shadow:
+        0 10px 30px rgba(0, 0, 0, 0.4),
+        inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+/* subtle glow edge (makes it feel “lit”) */
+.glass-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+
+    border-radius: inherit;
+
+    background: radial-gradient(
+        circle at top left,
+        rgba(29, 185, 84, 0.08),
+        transparent 60%
+    );
+
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* hover = lift + glow */
+.glass-card:hover {
+    transform: translateY(-3px) scale(1.02);
+
+    border-color: rgba(29, 185, 84, 0.35) !important;
+
+    box-shadow:
+        0 18px 50px rgba(0, 0, 0, 0.55),
+        0 0 0 1px rgba(29, 185, 84, 0.08),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+/* Dynamic Badge */
+.status-badge {
+    padding: 4px 8px;
+    border-radius: 20px;
+    font-size: 10px;
+    font-weight: 900;
+    text-transform: uppercase;
+    background: #1db954;
+    color: #000;
+}
+
+/* Floating Animation */
+@keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-5px); }
+    100% { transform: translateY(0px); }
+}
+.floating { animation: float 4s ease-in-out infinite; }
+.hero {
+    padding: 15px 8px 25px;
+    position: relative;
+}
+
+/* Main title */
+.hero-title {
+    margin: 0;
+    font-size: 30px;
+    font-weight: 900;
+    letter-spacing: -1px;
+    line-height: 1.2;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Greeting text */
+.greet {
+    opacity: 0.7;
+    font-size: 16px;
+    animation: fadeSlide 0.6s ease forwards;
+}
+
+/* Name styling */
+.name {
+    font-size: 32px;
+    background: linear-gradient(90deg, #1db954, #1ed760, #1db954);
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: gradientMove 4s linear infinite, popIn 0.5s ease forwards;
+}
+
+/* Glow behind name */
+.hero::after {
+    content: "";
+    position: absolute;
+    width: 120px;
+    height: 40px;
+    background: rgba(29,185,84,0.2);
+    filter: blur(25px);
+    top: 30px;
+    left: 10px;
+    z-index: -1;
+}
+
+/* Animations */
+@keyframes gradientMove {
+    0% { background-position: 0% }
+    100% { background-position: 200% }
+}
+
+@keyframes fadeSlide {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 0.7;
+        transform: translateY(0);
+    }
+}
+
+@keyframes popIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px) scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+#uploadModal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 300;
+
+    background: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    align-items: center;
+    justify-content: center;
+
+    animation: fadeIn 0.25s ease;
+}
+
+/* modal card */
+#uploadModal .card {
+    width: 90%;
+    max-width: 360px;
+
+    padding: 22px;
+
+    border-radius: 18px;
+
+    background: rgba(18, 18, 18, 0.85);
+    border: 1px solid rgba(255,255,255,0.08);
+
+    box-shadow: 0 20px 60px rgba(0,0,0,0.6);
+
+    transform: translateY(10px) scale(0.98);
+    animation: popUp 0.25s ease forwards;
+
+    text-align: center;
+}
+
+/* title */
+#uploadModal h3 {
+    margin-top: 0;
+    margin-bottom: 18px;
+
+    font-size: 18px;
+    font-weight: 600;
+    color: #f5f5f5;
+    letter-spacing: 0.3px;
+}
+
+/* file drop area */
+#fileLabel {
+    display: block;
+    padding: 22px;
+
+    border: 1px dashed rgba(255,255,255,0.15);
+    border-radius: 14px;
+
+    cursor: pointer;
+
+    margin-bottom: 16px;
+
+    color: rgba(255,255,255,0.6);
+    font-size: 13px;
+
+    transition: all 0.2s ease;
+}
+
+/* hover feel */
+#fileLabel:hover {
+    border-color: rgba(29,185,84,0.6);
+    background: rgba(29,185,84,0.05);
+    color: #fff;
+    transform: scale(1.01);
+}
+
+/* progress bar */
+#uploadProgress {
+    width: 0%;
+    height: 4px;
+
+    background: linear-gradient(90deg, #1db954, #38f27a);
+    border-radius: 999px;
+
+    margin-bottom: 16px;
+
+    transition: width 0.25s ease;
+
+    box-shadow: 0 0 10px rgba(29,185,84,0.4);
+}
+
+/* buttons container */
+#uploadModal .card div {
+    display: flex;
+    gap: 10px;
+}
+
+/* buttons base */
+#uploadModal button {
+    flex: 1;
+
+    padding: 10px;
+
+    border-radius: 10px;
+
+    border: none;
+
+    cursor: pointer;
+
+    font-size: 13px;
+
+    transition: all 0.2s ease;
+}
+
+/* cancel */
+#uploadModal button:first-child {
+    background: rgba(255,255,255,0.06);
+    color: rgba(255,255,255,0.6);
+}
+
+/* hover cancel */
+#uploadModal button:first-child:hover {
+    background: rgba(255,255,255,0.1);
+    color: #fff;
+}
+
+/* upload button */
+#uploadBtn {
+    background: #1db954 !important;
+    color: #000 !important;
+    font-weight: 600;
+}
+
+/* upload hover */
+#uploadBtn:hover {
+    background: #22d860 !important;
+    transform: translateY(-1px);
+}
+
+/* animations */
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+@keyframes popUp {
+    from {
+        transform: translateY(20px) scale(0.95);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+}
+#search.tab {
+    padding: 18px 14px;
+}
+
+/* TITLE */
+#search h2 {
+    margin: 0 0 18px 0;
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 0.4px;
+    color: #f5f5f5;
+    opacity: 0.95;
+}
+
+/* SEARCH INPUT */
+#searchInput {
+    width: 100%;
+
+    padding: 14px 14px;
+
+    border-radius: 12px;
+
+    border: 1px solid rgba(255,255,255,0.08);
+
+    background: rgba(20, 20, 20, 0.6);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+
+    color: #fff;
+
+    font-size: 14px;
+
+    outline: none;
+
+    transition: all 0.2s ease;
+
+    box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+}
+
+/* focus state = “active search mode” */
+#searchInput:focus {
+    border-color: rgba(29, 185, 84, 0.5);
+
+    box-shadow:
+        0 0 0 2px rgba(29,185,84,0.08),
+        0 10px 30px rgba(0,0,0,0.4);
+
+    transform: translateY(-1px);
+}
+
+/* placeholder */
+#searchInput::placeholder {
+    color: rgba(255,255,255,0.35);
+}
+
+/* RESULTS AREA */
+#searchResults {
+    margin-top: 18px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* optional result card styling (if you use divs inside results) */
+#searchResults > div {
+    padding: 12px 14px;
+
+    border-radius: 12px;
+
+    background: rgba(255,255,255,0.03);
+
+    border: 1px solid rgba(255,255,255,0.06);
+
+    cursor: pointer;
+
+    transition: all 0.2s ease;
+}
+
+#searchResults > div:hover {
+    background: rgba(255,255,255,0.06);
+    border-color: rgba(29,185,84,0.25);
+    transform: translateY(-1px);
+}
+/* GPU acceleration */
+.song,
+.cover {
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+/* image loading feel */
+.cover {
+  background: #111;
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
+}
+
+/* loaded state */
+.cover.loaded {
+  opacity: 1;
+}
+
+/* smoother scrolling */
+#songList {
+  contain: content;
+}
+@keyframes terminalBlink {
+    0%, 100% { opacity: 0; }
+    50% { opacity: 1; }
+}
+
+.terminal-cursor {
+    animation: terminalBlink 0.8s infinite;
+    font-weight: 900;
+    color: #1db954;
+}
+
+/* SHARP HIGH-CONTRAST LIQUID BASS CONTAINER */
+.audio-border-panel {
+    position: relative;
+    width: 100%;
+    max-width: 320px;
+    aspect-ratio: 1 / 1;
+    margin: 0 auto 40px auto;
+    z-index: 10;
+}
+
+/* CRISP RIGID COVER ART */
+.audio-border-panel img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    object-fit: cover;
+    display: block;
+    border-radius: 16px; /* Strict structural geometry */
+    position: relative;
+    z-index: 2;
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.9);
+}
+
+/* SOLID LIQUID GENERATOR CORE (BEHIND THE ARTWORK) */
+.audio-border-panel::before {
+    content: "";
+    position: absolute;
+    inset: -2px; /* Tightly matched behind the album border */
+    z-index: 1;
+    
+    /* Solid high-impact color assignment */
+    background: var(--dynamic-glow-color, #1db954);
+    
+    /* Clean, unblurred fluid geometry configurations */
+    border-radius: var(--liquid-radius, 50%);
+    transform: scale(var(--glob-scale, 1));
+    opacity: var(--glob-alpha, 0.85);
+    
+    /* Absolute visual rendering (Zero Blur Cringe) */
+    filter: none !important; 
+    
+    /* Brutalist clean outline definition */
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    
+    /* Sleek internal gloss mapping to simulate light hitting a liquid pool */
+    box-shadow: 
+        0 20px 40px rgba(0, 0, 0, 0.7),
+        inset 0 4px 12px rgba(255, 255, 255, 0.25),
+        inset 0 -4px 12px rgba(0, 0, 0, 0.4);
+        
+    will-change: border-radius, transform, opacity;
+}
+.song-content{
+    display:flex;
+    flex-direction:row;
+    align-items:center;
+    gap:15px;
+
+    position:relative;
+    z-index:2;
+
+    transition:transform .25s ease;
+}
+/* [DESKTOP FULL PLAYER LAYOUT] */
+@media (min-width: 768px) {
+    .fp-content {
+        flex-direction: row; /* Places art and controls side-by-side */
+        max-width: 850px; /* Widens the container */
+        gap: 60px; /* Space between left and right sides */
+        align-items: center;
+    }
+    
+    .fp-artwork-area {
+        flex: 1;
+        margin-bottom: 0; /* Removes mobile spacing */
+        max-width: 380px; /* Keeps the liquid visualizer contained */
+    }
+    
+    .fp-right-pane {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .fp-meta-area {
+        text-align: center; /* Centers the title/artist over the controls */
+    }
+
+    /* Transforms the mobile "swipe pill" into a proper desktop button */
+    .closeBtn.top {
+        position: relative;
+        top: auto;
+        width: 44px;
+        height: 44px;
+        margin: 40px auto 0 auto; /* Drops it below the controls */
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.2s ease;
+        opacity: 0.7;
+    }
+
+    .closeBtn.top:hover {
+        background: rgba(255, 255, 255, 0.15);
+        transform: scale(1.05);
+        opacity: 1;
+    }
+}
+
+    </style>
+</head>
+<body>
+
+<div class="header">
+    <span>FSX</span>
+    <button onclick="toggleShuffle()" id="headerShuffle"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#FFFFFF" viewBox="0 0 256 256"><path d="M237.66,178.34a8,8,0,0,1,0,11.32l-24,24a8,8,0,0,1-11.32-11.32L212.69,192H200.94a72.12,72.12,0,0,1-58.59-30.15l-41.72-58.4A56.1,56.1,0,0,0,55.06,80H32a8,8,0,0,1,0-16H55.06a72.12,72.12,0,0,1,58.59,30.15l41.72,58.4A56.1,56.1,0,0,0,200.94,176h11.75l-10.35-10.34a8,8,0,0,1,11.32-11.32ZM143,107a8,8,0,0,0,11.16-1.86l1.2-1.67A56.1,56.1,0,0,1,200.94,80h11.75L202.34,90.34a8,8,0,0,0,11.32,11.32l24-24a8,8,0,0,0,0-11.32l-24-24a8,8,0,0,0-11.32,11.32L212.69,64H200.94a72.12,72.12,0,0,0-58.59,30.15l-1.2,1.67A8,8,0,0,0,143,107Zm-30,42a8,8,0,0,0-11.16,1.86l-1.2,1.67A56.1,56.1,0,0,1,55.06,176H32a8,8,0,0,0,0,16H55.06a72.12,72.12,0,0,0,58.59-30.15l1.2-1.67A8,8,0,0,0,113,149Z"></path></svg></button>
+    <button
+onclick="toggleSpotifyModal(true)"
+class="glass-card" id="headerShuffle">
+
+
+<svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#FFFFFF" viewBox="0 0 256 256"><path d="M128,24A104,104,0,1,0,232,128,104.11,104.11,0,0,0,128,24Zm0,192a88,88,0,1,1,88-88A88.1,88.1,0,0,1,128,216Zm31.07-46.26a8,8,0,0,1-10.81,3.33,42.79,42.79,0,0,0-40.52,0,8,8,0,0,1-7.48-14.14,59.33,59.33,0,0,1,55.48,0A8,8,0,0,1,159.07,169.74Zm32-56a8,8,0,0,1-10.83,3.29,110.62,110.62,0,0,0-104.46,0,8,8,0,0,1-7.54-14.12,126.67,126.67,0,0,1,119.54,0A8,8,0,0,1,191.06,113.76Zm-16,28a8,8,0,0,1-10.82,3.3,77,77,0,0,0-72.48,0,8,8,0,0,1-7.52-14.12,93,93,0,0,1,87.52,0A8,8,0,0,1,175.06,141.76Z"></path></svg>
+</button>
+</div>
+
+<div id="home" class="tab active"></div>
+
+<div id="songs" class="tab">
+    <div style="padding: 10px 0 20px 0;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <span class="status-badge" style="background:#1db954 !important; color:#000; letter-spacing: 2px;">Vault</span>
+                <h2 style="margin: 5px 0 0 0; font-size: 32px; font-weight: 900;">Library</h2>
+            </div>
+            <button onclick="toggleUploadModal(true)" class="glass-card" style="width: 50px; height: 50px; border-radius: 50%; background: #1db954 !important; color: #000; box-shadow: 0 0 20px rgba(29, 185, 84, 0.3);">
+                <span style="font-size: 24px; font-weight: bold;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#FFFFFF" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"></path></svg></span>
+            </button>
+        </div>
+        
+        <div style="display: flex; gap: 10px; margin-top: 20px; overflow-x: auto; padding-bottom: 5px; scrollbar-width: none;">
+            <div onclick="renderSongs(songs)" class="status-badge glass-card" style="cursor:pointer; background: #1db954 !important; color:#000;">All</div>
+            <div onclick="sortSongs('title')" class="status-badge glass-card" style="cursor:pointer; background: rgba(255,255,255,0.05) !important; color:#fff;">A-Z</div>
+            <div onclick="sortSongs('artist')" class="status-badge glass-card" style="cursor:pointer; background: rgba(255,255,255,0.05) !important; color:#fff;">Artist</div>
+        </div>
+    </div>
+    <div id="songList"></div>
+</div>
+
+<div id="search" class="tab">
+    <div style="padding: 10px 0 20px 0;">
+        <h2 style="margin: 0 0 20px 0; font-size: 32px; font-weight: 900;">Search</h2>
+        <input type="text" id="searchInput" placeholder="Search songs or artists..." autocomplete="off">
+    </div>
+    <div id="searchResults"></div>
+</div>
+
+<div id="uploadModal" style="display: none; position: fixed; inset: 0; z-index: 300; background: rgba(0,0,0,0.9); backdrop-filter: blur(10px); align-items: center; justify-content: center;">
+    <div class="card glass-card" style="width: 90%; max-width: 350px; border: 1px solid #222; text-align: center; padding: 20px;">
+        <h3 style="margin-top: 0;">Upload Track</h3>
+        <input type="file" id="fileInput" accept=".mp3" style="display: none;" onchange="updateFileLabel()">
+        <label for="fileInput" id="fileLabel" style="display: block; padding: 20px; border: 2px dashed #333; border-radius: 12px; cursor: pointer; margin-bottom: 15px;">
+            Click to select MP3
+        </label>
+        <div id="uploadProgress" style="width: 0%; height: 4px; background: #1db954; border-radius: 2px; margin-bottom: 15px; transition: width 0.3s;"></div>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="toggleUploadModal(false)" style="flex: 1; padding: 10px; opacity: 0.5;">Cancel</button>
+            <button onclick="startUpload()" id="uploadBtn" style="flex: 1; padding: 10px; background: #1db954 !important; color: black; border-radius: 8px; font-weight: bold;">Upload</button>
+        </div>
+    </div>
+</div>
+
+<div class="player-container">
+    <div class="player">
+        <div class="mini-progress-container"><div id="miniProgress" class="mini-progress-bar"></div></div>
+        <div class="mini-info" onclick="openPlayer()">
+            <img id="miniCover" class="cover" src="">
+            <div class="text-meta">
+                <span id="now">Nothing playing</span>
+                <span id="miniArtist" class="mini-artist">Select a track</span>
+            </div>
+        </div>
+        <div class="mini-controls">
+            <button onclick="prevSong(event)"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#ffffff" viewBox="0 0 256 256"><path d="M199.81,34a16,16,0,0,0-16.24.43L64,109.23V40a8,8,0,0,0-16,0V216a8,8,0,0,0,16,0V146.77l119.57,74.78A15.95,15.95,0,0,0,208,208.12V47.88A15.86,15.86,0,0,0,199.81,34ZM192,208,64.16,128,192,48.07Z"></path></svg></button>
+            <button onclick="togglePlay(event)" id="miniPlayBtn"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#ffffff" viewBox="0 0 256 256"><path d="M232.4,114.49,88.32,26.35a16,16,0,0,0-16.2-.3A15.86,15.86,0,0,0,64,39.87V216.13A15.94,15.94,0,0,0,80,232a16.07,16.07,0,0,0,8.36-2.35L232.4,141.51a15.81,15.81,0,0,0,0-27ZM80,215.94V40l143.83,88Z"></path></svg></button>
+            <button onclick="nextSong(event)"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#ffffff" viewBox="0 0 256 256"><path d="M200,32a8,8,0,0,0-8,8v69.23L72.43,34.45A15.95,15.95,0,0,0,48,47.88V208.12a16,16,0,0,0,24.43,13.43L192,146.77V216a8,8,0,0,0,16,0V40A8,8,0,0,0,200,32ZM64,207.93V48.05l127.84,80Z"></path></svg></button>
+        </div>
+    </div>
+</div>
+
+<div id="fullPlayer" class="fullPlayer">
+    <div class="fp-bg" id="bg"></div>
+    <div class="fp-bg2" id="bg2"></div>
+    <div class="fp-overlay"></div>
+    
+    <div class="fp-content">
+        <div class="fp-artwork-area audio-border-panel">
+            <img id="cover" crossorigin="anonymous" src="">
+        </div>
+
+        <div class="fp-right-pane">
+            <div class="fp-meta-area">
+                <div class="fp-title" id="fpTitle">Song Name</div>
+                <div class="fp-artist" id="fpArtist">Artist</div>
+            </div>
+
+            <div class="fp-progress-area">
+                <div class="progress-wrap">
+                    <input type="range" id="fpProgress" value="0">
+                </div>
+                <div class="time-stamps">
+                    <span id="timeCurrent">0:00</span>
+                    <span id="timeTotal">0:00</span>
+                </div>
+            </div>
+
+            <div class="fp-controls-area">
+                <button class="side-btn" id="fpShuffleBtn" onclick="toggleShuffle()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#FFFFFF" viewBox="0 0 256 256"><path d="M237.66,178.34a8,8,0,0,1,0,11.32l-24,24a8,8,0,0,1-11.32-11.32L212.69,192H200.94a72.12,72.12,0,0,1-58.59-30.15l-41.72-58.4A56.1,56.1,0,0,0,55.06,80H32a8,8,0,0,1,0-16H55.06a72.12,72.12,0,0,1,58.59,30.15l41.72,58.4A56.1,56.1,0,0,0,200.94,176h11.75l-10.35-10.34a8,8,0,0,1,11.32-11.32ZM143,107a8,8,0,0,0,11.16-1.86l1.2-1.67A56.1,56.1,0,0,1,200.94,80h11.75L202.34,90.34a8,8,0,0,0,11.32,11.32l24-24a8,8,0,0,0,0-11.32l-24-24a8,8,0,0,0-11.32,11.32L212.69,64H200.94a72.12,72.12,0,0,0-58.59,30.15l-1.2,1.67A8,8,0,0,0,143,107Zm-30,42a8,8,0,0,0-11.16,1.86l-1.2,1.67A56.1,56.1,0,0,1,55.06,176H32a8,8,0,0,0,0,16H55.06a72.12,72.12,0,0,0,58.59-30.15l1.2-1.67A8,8,0,0,0,113,149Z"></path></svg>
+                </button>
+                <div class="main-ctrls">
+                    <button onclick="prevSong()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#FFFFFF" viewBox="0 0 256 256"><path d="M199.81,34a16,16,0,0,0-16.24.43L64,109.23V40a8,8,0,0,0-16,0V216a8,8,0,0,0,16,0V146.77l119.57,74.78A15.95,15.95,0,0,0,208,208.12V47.88A15.86,15.86,0,0,0,199.81,34ZM192,208,64.16,128,192,48.07Z"></path></svg>
+                    </button>
+                    <button onclick="togglePlay()" id="fpPlayBtn" class="play-main">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#000000" viewBox="0 0 256 256"><path d="M232.4,114.49,88.32,26.35a16,16,0,0,0-16.2-.3A15.86,15.86,0,0,0,64,39.87V216.13A15.94,15.94,0,0,0,80,232a16.07,16.07,0,0,0,8.36-2.35L232.4,141.51a15.81,15.81,0,0,0,0-27ZM80,215.94V40l143.83,88Z"></path></svg>
+                    </button>
+                    <button onclick="nextSong()">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#ffffff" viewBox="0 0 256 256"><path d="M200,32a8,8,0,0,0-8,8v69.23L72.43,34.45A15.95,15.95,0,0,0,48,47.88V208.12a16,16,0,0,0,24.43,13.43L192,146.77V216a8,8,0,0,0,16,0V40A8,8,0,0,0,200,32ZM64,207.93V48.05l127.84,80Z"></path></svg>
+                    </button>
+                </div>
+                <button class="side-btn" id="fpRepeatBtn" onclick="toggleRepeat()">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#ffffff" viewBox="0 0 256 256"><path d="M24,128A72.08,72.08,0,0,1,96,56H204.69L194.34,45.66a8,8,0,0,1,11.32-11.32l24,24a8,8,0,0,1,0,11.32l-24,24a8,8,0,0,1-11.32-11.32L204.69,72H96a56.06,56.06,0,0,0-56,56,8,8,0,0,1-16,0Zm200-8a8,8,0,0,0-8,8,56.06,56.06,0,0,1-56,56H51.31l10.35-10.34a8,8,0,0,0-11.32-11.32l-24,24a8,8,0,0,0,0,11.32l24,24a8,8,0,0,0,11.32-11.32L51.31,200H160a72.08,72.08,0,0,0,72-72A8,8,0,0,0,224,120Z"></path></svg>
+                </button>
+            </div>
+
+            <button class="closeBtn top" onclick="closePlayer()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#FFFFFF" viewBox="0 0 256 256"><path d="M213.66,101.66l-80,80a8,8,0,0,1-11.32,0l-80-80A8,8,0,0,1,53.66,90.34L128,164.69l74.34-74.35a8,8,0,0,1,11.32,11.32Z"></path></svg>
+            </button>
+        </div>
+    </div>
+
+</div>
+
+<div class="nav">
+    <div class="nav-btn active" id="nav-home" onclick="switchTab('home')">
+        <span><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#FFFFFF" viewBox="0 0 256 256"><path d="M240,208H224V136l2.34,2.34A8,8,0,0,0,237.66,127L139.31,28.68a16,16,0,0,0-22.62,0L18.34,127a8,8,0,0,0,11.32,11.31L32,136v72H16a8,8,0,0,0,0,16H240a8,8,0,0,0,0-16ZM48,120l80-80,80,80v88H160V152a8,8,0,0,0-8-8H104a8,8,0,0,0-8,8v56H48Zm96,88H112V160h32Z"></path></svg></span><span>Home</span>
+    </div>
+    <div class="nav-btn" id="nav-songs" onclick="switchTab('songs')">
+        <span><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#FFFFFF" viewBox="0 0 256 256"><path d="M231.65,194.55,198.46,36.75a16,16,0,0,0-19-12.39L132.65,34.42a16.08,16.08,0,0,0-12.3,19l33.19,157.8A16,16,0,0,0,169.16,224a16.25,16.25,0,0,0,3.38-.36l46.81-10.06A16.09,16.09,0,0,0,231.65,194.55ZM136,50.15c0-.06,0-.09,0-.09l46.8-10,3.33,15.87L139.33,66Zm6.62,31.47,46.82-10.05,3.34,15.9L146,97.53Zm6.64,31.57,46.82-10.06,13.3,63.24-46.82,10.06ZM216,197.94l-46.8,10-3.33-15.87L212.67,182,216,197.85C216,197.91,216,197.94,216,197.94ZM104,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16h48a16,16,0,0,0,16-16V48A16,16,0,0,0,104,32ZM56,48h48V64H56Zm0,32h48v96H56Zm48,128H56V192h48v16Z"></path></svg></span><span>Library</span>
+    </div>
+    <div class="nav-btn" id="nav-search" onclick="switchTab('search')">
+        <span><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#FFFFFF" viewBox="0 0 256 256"><path d="M229.66,218.34l-50.07-50.06a88.11,88.11,0,1,0-11.31,11.31l50.06,50.07a8,8,0,0,0,11.32-11.32ZM40,112a72,72,0,1,1,72,72A72.08,72.08,0,0,1,40,112Z"></path></svg></span><span>Search</span>
+    </div>
+</div>
+<div id="spotifyModal" style="
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 999;
+    background: rgba(0, 0, 0, 0.85);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    align-items: center;
+    justify-content: center;
+">
+    <div class="card terminal-card" style="
+        width: 92%;
+        max-width: 400px;
+        padding: 20px;
+        background: #0a0a0a;
+        border: 2px solid #222;
+        box-shadow: 0 16px 0px rgba(0, 0, 0, 1);
+        font-family: 'Source Code Pro', monospace, sans-serif;
+        color: #fff;
+        animation: brutalPop 0.15s cubic-bezier(0.1, 0.9, 0.2, 1);
+    ">
+        <div style="
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #222;
+            padding-bottom: 10px;
+            margin-bottom: 16px;
+        ">
+            <h3 style="
+                margin: 0;
+                font-size: 13px;
+                font-weight: 900;
+                text-transform: uppercase;
+                letter-spacing: 1.5px;
+                color: #a0a0a0;
+            ">
+                [ fetch://spotify_engine ]
+            </h3>
+            <span style="font-size: 10px; color: #555;">v1.0.0</span>
+        </div>
+
+        <div style="position: relative; margin-bottom: 12px;">
+            <input id="spotifyUrl" type="text" placeholder="PASTE_TRACK_RESOURCE_URL" style="
+                width: 100%;
+                padding: 12px;
+                background: #000;
+                border: 1px solid #333;
+                color: #1db954;
+                font-family: monospace;
+                font-size: 12px;
+                outline: none;
+                transition: border-color 0.2s ease, background 0.2s ease;
+            " onfocus="this.style.borderColor='#1db954'; this.style.background='#030a05';" onblur="this.style.borderColor='#333'; this.style.background='#000';" />
+        </div>
+
+        <div id="spotifyStatusBox" style="
+    margin-bottom: 16px;
+    padding: 10px;
+    background: #111;
+    border-left: 3px solid #555;
+    font-size: 11px;
+    color: #888;
+    letter-spacing: 0.5px;
+    font-family: monospace;
+    text-transform: uppercase;
+">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
+        <div>
+            <span style="color: #555;">SYS_STATUS:</span>
+            <span id="spotifyStatus" style="color: #fff;">IDLE_READY</span>
+        </div>
+        <span id="terminalCursor" class="terminal-cursor" style="display: none;">_</span>
+    </div>
+    
+    <div id="spotifyLoader" style="
+        display: none; 
+        font-family: monospace; 
+        color: #1db954; 
+        letter-spacing: 1px;
+        margin-top: 6px;
+        border-top: 1px dashed #222;
+        padding-top: 6px;
+    ">
+        [□□□□□□□□□□] 0%
+    </div>
+</div>
+
+
+        <div style="display: flex; gap: 10px;">
+            <button onclick="toggleSpotifyModal(false)" style="
+                flex: 1;
+                padding: 12px;
+                background: transparent;
+                border: 1px solid #333;
+                color: #888;
+                font-family: monospace;
+                font-size: 11px;
+                font-weight: 700;
+                text-transform: uppercase;
+                cursor: pointer;
+                transition: all 0.15s ease;
+            " onmouseover="this.style.background='#161616'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#888';">
+                Abort
+            </button>
+
+            <button onclick="downloadSpotify()" id="spotifyDownloadBtn" style="
+                flex: 1;
+                padding: 12px;
+                background: #fff;
+                border: 1px solid #fff;
+                color: #000;
+                font-family: monospace;
+                font-size: 11px;
+                font-weight: 900;
+                text-transform: uppercase;
+                cursor: pointer;
+                transition: all 0.15s ease;
+            " onmouseover="this.style.background='#1db954'; this.style.borderColor='#1db954';" onmouseout="this.style.background='#fff'; this.style.borderColor='#fff';">
+                Execute
+            </button>
+        </div>
+    </div>
+</div>
+
+
+<style>
+@keyframes popIn {
+from { transform: scale(0.9); opacity: 0; }
+to { transform: scale(1); opacity: 1; }
+}
+
+#spotifyUrl:focus {
+border-color:#1db954;
+box-shadow:0 0 0 3px rgba(29,185,84,0.15);
+transform:scale(1.01);
+}
+
+button:hover {
+transform:translateY(-1px);
+}
+
+button:active {
+transform:scale(0.98);
+}
+.swipe-song{
+    position:relative;
+    overflow:hidden;
+}
+
+.song-content{
+    position:relative;
+    z-index:2;
+    transition:.25s;
+}
+
+
+.stats-card{
+
+    display:flex;
+    justify-content:space-around;
+    text-align:center;
+}
+
+.stat-label{
+
+    opacity:.6;
+    font-size:12px;
+    text-transform:uppercase;
+}
+
+.stat-value{
+
+    font-size:28px;
+    font-weight:900;
+}
+
+#deleteModal{
+
+    position:fixed;
+    inset:0;
+
+    display:none;
+
+    justify-content:center;
+    align-items:center;
+
+    backdrop-filter:blur(10px);
+
+    background:rgba(0,0,0,.7);
+
+    z-index:99999;
+}
+
+.delete-card{
+
+    width:90%;
+    max-width:320px;
+
+    background:#111;
+
+    border-radius:20px;
+
+    padding:20px;
+}
+
+.delete-actions{
+
+    display:flex;
+    gap:10px;
+    margin-top:15px;
+}
+
+.delete-actions button{
+
+    flex:1;
+}
+
+</style>
+<div id="deleteModal">
+
+    <div class="delete-card">
+
+        <h3>Delete Song</h3>
+
+        <p id="deleteSongName"></p>
+
+        <div class="delete-actions">
+
+            <button onclick="closeDeleteModal()">
+                Cancel
+            </button>
+<button onclick="confirmDelete()">
+    Delete <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#FF6A5E" viewBox="0 0 256 256"><path d="M216,48H176V40a24,24,0,0,0-24-24H104A24,24,0,0,0,80,40v8H40a8,8,0,0,0,0,16h8V208a16,16,0,0,0,16,16H192a16,16,0,0,0,16-16V64h8a8,8,0,0,0,0-16ZM96,40a8,8,0,0,1,8-8h48a8,8,0,0,1,8,8v8H96Zm96,168H64V64H192ZM112,104v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Zm48,0v64a8,8,0,0,1-16,0V104a8,8,0,0,1,16,0Z"></path></svg>
+</button>
+
+        </div>
+
+    </div>
+
+</div>
+<audio id="audio" crossorigin="anonymous" preload="auto"></audio>
+
+<script>
+let songs = [];
+let originalSongs = [];
+let shuffleQueue = [];
+let currentIndex = 0;
+let isPlaying = false;
+let shuffleMode = false;
+let repeatMode = 0;
+let playQueue = [];
+let contextTargetIndex = null;
+let longPressTimer = null;
+let deleteTarget = null;
+let swipeStartX = 0;
+let recent = [];
+let lastTime = 0;
+
+const audio = document.getElementById("audio");
+const fullPlayer = document.getElementById("fullPlayer");
+
+
+const YIcon = {
+  icons: {},
+
+  register(name, svg) {
+    this.icons[name] = svg;
+  },
+
+  get(name, size = 20) {
+    return this.icons[name].replace(/__SIZE__/g, size);
+  }
+};
+YIcon.register("prev", `
+<svg viewBox="0 0 256 256" width="__SIZE__" height="__SIZE__" fill="currentColor">
+<path d="M199.81,34a16,16,0,0,0-16.24.43L64,109.23V40a8,8,0,0,0-16,0V216a8,8,0,0,0,16,0V146.77l119.57,74.78A15.95,15.95,0,0,0,208,208.12V47.88A15.86,15.86,0,0,0,199.81,34ZM192,208,64.16,128,192,48.07Z"/>
+</svg>
+`);
+
+YIcon.register("next", `
+<svg viewBox="0 0 256 256" width="__SIZE__" height="__SIZE__" fill="currentColor">
+<path d="M200,32a8,8,0,0,0-8,8v69.23L72.43,34.45A15.95,15.95,0,0,0,48,47.88V208.12a16,16,0,0,0,24.43,13.43L192,146.77V216a8,8,0,0,0,16,0V40A8,8,0,0,0,200,32ZM64,207.93V48.05l127.84,80Z"/>
+</svg>
+`);
+
+YIcon.register("pause", `
+<svg viewBox="0 0 256 256" width="__SIZE__" height="__SIZE__" fill="currentColor">
+<path d="M200,32H160a16,16,0,0,0-16,16V208a16,16,0,0,0,16,16h40a16,16,0,0,0,16-16V48A16,16,0,0,0,200,32Zm0,176H160V48h40ZM96,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16H96a16,16,0,0,0,16-16V48A16,16,0,0,0,96,32Zm0,176H56V48H96Z"/>
+</svg>
+`);
+
+YIcon.register("play", `
+<svg viewBox="0 0 256 256" width="__SIZE__" height="__SIZE__" fill="currentColor">
+<path d="M232.4,114.49,88.32,26.35a16,16,0,0,0-16.2-.3A15.86,15.86,0,0,0,64,39.87V216.13A15.94,15.94,0,0,0,80,232a16.07,16.07,0,0,0,8.36-2.35L232.4,141.51a15.81,15.81,0,0,0,0-27ZM80,215.94V40l143.83,88Z"/>
+</svg>
+`);
+
+YIcon.register("shuffle", `
+<svg viewBox="0 0 256 256" width="__SIZE__" height="__SIZE__" fill="currentColor">
+<path d="M237.66,178.34a8,8,0,0,1,0,11.32l-24,24a8,8,0,0,1-11.32-11.32L212.69,192H200.94a72.12,72.12,0,0,1-58.59-30.15l-41.72-58.4A56.1,56.1,0,0,0,55.06,80H32a8,8,0,0,1,0-16H55.06a72.12,72.12,0,0,1,58.59,30.15l41.72,58.4A56.1,56.1,0,0,0,200.94,176h11.75l-10.35-10.34a8,8,0,0,1,11.32-11.32ZM143,107a8,8,0,0,0,11.16-1.86l1.2-1.67A56.1,56.1,0,0,1,200.94,80h11.75L202.34,90.34a8,8,0,0,0,11.32,11.32l24-24a8,8,0,0,0,0-11.32l-24-24a8,8,0,0,0-11.32,11.32L212.69,64H200.94a72.12,72.12,0,0,0-58.59,30.15l-1.2,1.67A8,8,0,0,0,143,107Zm-30,42a8,8,0,0,0-11.16,1.86l-1.2,1.67A56.1,56.1,0,0,1,55.06,176H32a8,8,0,0,0,0,16H55.06a72.12,72.12,0,0,0,58.59-30.15l1.2-1.67A8,8,0,0,0,113,149Z"/>
+</svg>
+`);
+
+YIcon.register("repeat", `
+<svg viewBox="0 0 256 256" width="__SIZE__" height="__SIZE__" fill="currentColor">
+<path d="M24,128A72.08,72.08,0,0,1,96,56H204.69L194.34,45.66a8,8,0,0,1,11.32-11.32l24,24a8,8,0,0,1,0,11.32l-24,24a8,8,0,0,1-11.32-11.32L204.69,72H96a56.06,56.06,0,0,0-56,56,8,8,0,0,1-16,0Zm200-8a8,8,0,0,0-8,8,56.06,56.06,0,0,1-56,56H51.31l10.35-10.34a8,8,0,0,0-11.32-11.32l-24,24a8,8,0,0,0,0,11.32l24,24a8,8,0,0,0,11.32-11.32L51.31,200H160a72.08,72.08,0,0,0,72-72A8,8,0,0,0,224,120Z"/>
+</svg>
+`);
+
+YIcon.register("repeat-one", `
+<svg viewBox="0 0 256 256" width="__SIZE__" height="__SIZE__" fill="currentColor">
+<path d="M24,128A72.08,72.08,0,0,1,96,56H204.69L194.34,45.66a8,8,0,0,1,11.32-11.32l24,24a8,8,0,0,1,0,11.32l-24,24a8,8,0,0,1-11.32-11.32L204.69,72H96a56.06,56.06,0,0,0-56,56,8,8,0,0,1-16,0Zm200-8a8,8,0,0,0-8,8,56.06,56.06,0,0,1-56,56H51.31l10.35-10.34a8,8,0,0,0-11.32-11.32l-24,24a8,8,0,0,0,0,11.32l24,24a8,8,0,0,0,11.32-11.32L51.31,200H160a72.08,72.08,0,0,0,72-72A8,8,0,0,0,224,120Zm-88,40a8,8,0,0,0,8-8V104a8,8,0,0,0-11.58-7.16l-16,8a8,8,0,1,0,7.16,14.31l4.42-2.21V152A8,8,0,0,0,136,160Z"/>
+</svg>
+`);
+
+YIcon.register("volume", `
+<svg viewBox="0 0 256 256" width="__SIZE__" height="__SIZE__" fill="currentColor">
+<path d="M155.51,24.81a8,8,0,0,0-8.42.88L77.25,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V32A8,8,0,0,0,155.51,24.81ZM32,96H72v64H32ZM144,207.64,88,164.09V91.91l56-43.55Zm54-106.08a40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.58,24,24,0,0,0,0-31.72,8,8,0,0,1,12-10.58ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z"/>
+</svg>
+`);
+function formatTime(secs) {
+    if (isNaN(secs)) return "0:00";
+    const mins = Math.floor(secs / 60);
+    const s = Math.floor(secs % 60);
+    return `${mins}:${s < 10 ? '0' : ''}${s}`;
+}
+
+// 1. DATA LOAD
+fetch("/songs")
+.then(res => res.json())
+.then(data => {
+    songs = typeof data[0] === "object" ? data : data.map(f => ({ file: f, title: f, artist: "Unknown Artist" }));
+    originalSongs = [...songs];
+    renderSongs(songs);
+    loadState();
+    renderHome();
+});
+
+// 2. CORE RENDERING
+function renderSongs(list) {
+    const container = document.getElementById("songList");
+    container.innerHTML = list.map((song) => {
+        const globalIndex = songs.findIndex(x => x.file === song.file);
+        return `
+        <div class="song" 
+             onmousedown="startPress(event, ${globalIndex})" 
+             onmouseup="endPress(event, ${globalIndex})" 
+             onmouseleave="cancelPress()"
+             ontouchstart="startPress(event, ${globalIndex})" 
+             ontouchend="endPress(event, ${globalIndex})">
+            <img class="cover lazy-cover" data-src="/cover/${song.file}" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0nNTAnIGhlaWdodD0nNTAnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zyc+PHJlY3Qgd2lkdGg9JzUwJyBoZWlnaHQ9JzUwJyBmaWxsPScjMTExJy8+PC9zdmc+">
+            <div style="min-width:0;">
+                <div style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${song.title}</div>
+                <div style="font-size:12px; opacity:0.7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${song.artist}</div>
+            </div>
+        </div>
+    `}).join('');
+
+    requestAnimationFrame(() => {
+        document.querySelectorAll(".lazy-cover").forEach(img => observer.observe(img));
+    });
+}
+
+
+// 3. PLAYBACK LOGIC
+function playSongByIndex(index) {
+    currentIndex = index;
+    const song = songs[currentIndex];
+    audio.src = `/play/${song.file}`;
+    audio.play();
+    isPlaying = true;
+    
+    recent = [song, ...recent.filter(s => s.file !== song.file)].slice(0, 5);
+    
+    updateUI(song);
+    saveState();
+    renderHome();
+}
+
+function togglePlay() {
+    if (!audio.src) return;
+    if (isPlaying) audio.pause(); else audio.play();
+    isPlaying = !isPlaying;
+    const icon = isPlaying ? "pause" : "play";
+    document.getElementById("miniPlayBtn").innerHTML = YIcon.get(icon);
+    document.getElementById("fpPlayBtn").innerHTML = YIcon.get(icon);
+}
+
+function nextSong() {
+    let nextIdx;
+    if (shuffleMode && shuffleQueue.length) {
+        let qIdx = shuffleQueue.indexOf(currentIndex);
+        nextIdx = shuffleQueue[(qIdx + 1) % shuffleQueue.length];
+    } else {
+        nextIdx = (currentIndex + 1) % songs.length;
+    }
+    playSongByIndex(nextIdx);
+}
+
+function prevSong() {
+    let prevIdx = (currentIndex - 1 + songs.length) % songs.length;
+    playSongByIndex(prevIdx);
+}
+
+function toggleShuffle() {
+    shuffleMode = !shuffleMode;
+    if (shuffleMode) {
+        shuffleQueue = Array.from(Array(songs.length).keys()).sort(() => Math.random() - 0.5);
+    }
+    const color = shuffleMode ? "#1db954" : "white";
+    document.getElementById("headerShuffle").style.color = color;
+    document.getElementById("fpShuffleBtn").classList.toggle('active', shuffleMode);
+}
+
+function toggleRepeat() {
+    repeatMode = (repeatMode + 1) % 3;
+
+    const btn = document.getElementById("fpRepeatBtn");
+
+    let icon;
+
+    if (repeatMode === 0) {
+        icon = "repeat";        // 🔁 off
+        btn.classList.remove("active");
+    } else if (repeatMode === 1) {
+        icon = "repeat";        // 🔁 on
+        btn.classList.add("active");
+    } else {
+        icon = "repeat-one";    // 🔂
+        btn.classList.add("active");
+    }
+
+    btn.innerHTML = YIcon.get(icon);
+}
+
+// 4. UI UPDATES
+// 4. UI UPDATES
+function updateUI(song) {
+    const url = `/cover/${song.file}`;
+    
+    // Update Mini Player
+    document.getElementById("now").textContent = song.title;
+    document.getElementById("miniArtist").textContent = song.artist;
+    document.getElementById("miniCover").src = url;
+    document.getElementById("miniPlayBtn").innerHTML = YIcon.get("pause");
+    
+    // Update Full Player Artwork & Details
+    document.getElementById("fpTitle").textContent = song.title;
+    document.getElementById("fpArtist").textContent = song.artist;
+        const coverImg = document.getElementById("cover");
+    coverImg.src = url;
+    // Extract color once the image physically loads
+    coverImg.onload = () => extractDominantColor(coverImg);
+
+    document.getElementById("fpPlayBtn").innerHTML = YIcon.get("pause");
+
+        // 🔥 AMBIENT GLOW & LUXURY BACKGROUND CROSSFADE LOGIC
+    const bg1 = document.getElementById("bg");
+    const bg2 = document.getElementById("bg2");
+
+    // Important: Wrap the URL in quotes to handle spaces/special characters in filenames
+    const safeUrl = `url("${url}")`;
+
+    // 1. Set the hidden layer (bg2) to the new artwork and fade it in
+    bg2.style.backgroundImage = safeUrl;
+    bg2.style.opacity = "0.35";
+
+    // 2. Wait for the fade-in transition to complete (600ms)
+    setTimeout(() => {
+        // 3. Set the base layer (bg1) to the new artwork
+        bg1.style.backgroundImage = safeUrl;
+        // 4. Hide the top layer (bg2) instantly so it's ready for the next song
+        bg2.style.opacity = "0";
+    }, 600);
+ // Transitions smoothly over 600ms matching your style definition
+
+    // Media Session API (OS Integration)
+    if ('mediaSession' in navigator) {
+        // 1. Update the Metadata (what you see on the lockscreen)
+        navigator.mediaSession.metadata = new MediaMetadata({
+            title: song.title,
+            artist: song.artist,
+            artwork: [
+                { src: url, sizes: '96x96',   type: 'image/png' },
+                { src: url, sizes: '128x128', type: 'image/png' },
+                { src: url, sizes: '192x192', type: 'image/png' },
+                { src: url, sizes: '256x256', type: 'image/png' },
+                { src: url, sizes: '384x384', type: 'image/png' },
+                { src: url, sizes: '512x512', type: 'image/png' },
+            ]
+        });
+
+        // 2. Link OS Buttons to your JavaScript functions
+        navigator.mediaSession.setActionHandler('play', () => togglePlay());
+        navigator.mediaSession.setActionHandler('pause', () => togglePlay());
+        navigator.mediaSession.setActionHandler('previoustrack', () => prevSong());
+        navigator.mediaSession.setActionHandler('nexttrack', () => nextSong());
+
+        // 3. Optional: Allow seeking from the OS notification seekbar
+        try {
+            navigator.mediaSession.setActionHandler('seekto', (details) => {
+                if (details.seekTime && audio.duration) {
+                    audio.currentTime = details.seekTime;
+                }
+            });
+        } catch (error) {
+            // Some browsers don't support seekto yet
+        }
+    }
+}
+
+
+// 5. PLAYER VISIBILITY
+function openPlayer() {
+    fullPlayer.classList.add("active");
+    gsap.fromTo(".fp-artwork-area", { scale: 0.8, opacity: 0 }, { scale: 1, opacity: 1, duration: 0.6, ease: "back.out(1.7)" });
+    gsap.fromTo(".fp-meta-area, .fp-progress-area, .fp-controls-area", { y: 30, opacity: 0 }, { y: 0, opacity: 1, duration: 0.4, delay: 0.2, stagger: 0.1 });
+}
+
+function closePlayer() {
+    gsap.to(".fp-content", { y: 50, opacity: 0, duration: 0.3, onComplete: () => {
+        fullPlayer.classList.remove("active");
+        gsap.set(".fp-content", { y: 0, opacity: 1 });
+    }});
+}
+
+// 6. PROGRESS & EVENTS
+audio.addEventListener("timeupdate", () => {
+    if (isNaN(audio.duration)) return;
+    const pct = (audio.currentTime / audio.duration) * 100;
+    document.getElementById("miniProgress").style.width = pct + "%";
+    document.getElementById("fpProgress").value = pct;
+    document.getElementById("timeCurrent").textContent = formatTime(audio.currentTime);
+    document.getElementById("timeTotal").textContent = formatTime(audio.duration);
+    lastTime = audio.currentTime;
+});
+
+document.getElementById("fpProgress").addEventListener("input", (e) => {
+    audio.currentTime = (e.target.value / 100) * audio.duration;
+});
+audio.addEventListener("ended", () => {
+    if (repeatMode === 2) {
+        // 🔂 repeat one (highest priority override)
+        audio.currentTime = 0;
+        audio.play();
+    } 
+    // ⚡ NEW QUEUE CHECK STAGING INTERCEPTOR
+    else if (playQueue.length > 0) {
+        // Pull the next slated global index off the front of the queue array stack
+        let nextSlatedIdx = playQueue.shift(); 
+        playSongByIndex(nextSlatedIdx);
+    }
+    else if (repeatMode === 1 || shuffleMode || currentIndex < songs.length - 1) {
+        // 🔁 repeat all OR shuffle OR next exists
+        nextSong();
+    } 
+    else {
+        // ⛔ stop playback (end of standard library playlist reached)
+        isPlaying = false;
+
+        ["miniPlayBtn", "fpPlayBtn"].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = YIcon.get("play");
+        });
+    }
+});
+
+// 7. TABS & SEARCH
+function switchTab(tabId) {
+    // 1. Manage Active Tab Content
+    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
+    const activeTab = document.getElementById(tabId);
+    activeTab.classList.add("active");
+    
+    // 2. Manage Active Nav Button
+    document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
+    document.getElementById('nav-' + tabId).classList.add("active");
+
+    // 3. GSAP Transition for the Content
+    gsap.fromTo(activeTab, 
+        { opacity: 0, y: 20, scale: 0.98 }, 
+        { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "expo.out" }
+    );
+
+    // 4. Icon "Pop" Feedback
+    gsap.fromTo('#nav-' + tabId + ' span:first-child', 
+        { scale: 0.8 }, 
+        { scale: 1.2, duration: 0.3, yoyo: true, repeat: 1, ease: "back.out(2)" }
+    );
+}
+
+
+
+document.getElementById("searchInput").addEventListener("input", e => {
+    const q = e.target.value.toLowerCase();
+    const results = songs.filter(s => s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q));
+    
+    const container = document.getElementById("searchResults");
+    if (q === "") { container.innerHTML = ""; return; }
+
+    container.innerHTML = results.map(song => `
+        <div class="song search-item" onclick="playSongByIndex(${songs.indexOf(song)})" style="animation: slideIn 0.3s ease forwards;">
+            <img src="/cover/${song.file}" class="cover" style="border-radius: 10px;">
+            <div>
+                <div style="font-weight:bold;">${song.title.replace(new RegExp(q, 'gi'), (m) => `<span style="color:#1db954">${m}</span>`)}</div>
+                <div style="font-size:12px; opacity:0.6;">${song.artist}</div>
+            </div>
+        </div>
+    `).join('');
+
+    // GSAP Stagger for smooth results entry
+    gsap.fromTo(".search-item", 
+        { x: -10, opacity: 0 }, 
+        { x: 0, opacity: 1, duration: 0.3, stagger: 0.05, ease: "power2.out" }
+    );
+});
+
+
+
+// 8. HOME & PERSISTENCE
+function saveState() {
+    localStorage.setItem("yocrrz_state", JSON.stringify({
+        lastPlayed: songs[currentIndex],
+        lastTime: audio.currentTime,
+        recent: recent
+    }));
+}
+
+function loadState() {
+    const data = JSON.parse(localStorage.getItem("yocrrz_state"));
+    if (data) {
+        recent = data.recent || [];
+        if (data.lastPlayed) {
+            const idx = songs.findIndex(s => s.file === data.lastPlayed.file);
+            if (idx !== -1) {
+                currentIndex = idx;
+                updateUI(songs[currentIndex]);
+                audio.src = `/play/${songs[currentIndex].file}`;
+                audio.currentTime = data.lastTime || 0;
+            }
+        }
+    }
+}
+
+
+
+
+document.addEventListener("visibilitychange", () => { if (!document.hidden && isPlaying) audio.play().catch(()=>{}); });
+
+function toggleUploadModal(show) {
+    const modal = document.getElementById('uploadModal');
+    modal.style.display = show ? 'flex' : 'none';
+    if (show) gsap.from(modal.children[0], { scale: 0.8, opacity: 0, duration: 0.3 });
+}
+
+function updateFileLabel() {
+    const input = document.getElementById('fileInput');
+    document.getElementById('fileLabel').textContent = input.files[0].name;
+}
+function renderHome() {
+    const home = document.getElementById("home");
+    const hour = new Date().getHours();
+    const greeting = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
+    const totalTracks = songs.length;
+
+    const totalArtists =
+        new Set(
+        songs.map(s => s.artist)
+        ).size;
+    // 1. Dynamic "Continue" logic with progress bar
+    const song = songs[currentIndex];
+    const progressPct = (lastTime / audio.duration) * 100 || 0;
+    
+    const continueListening = (song && lastTime > 5) ? `
+        <div class="card glass-card home-anim">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:15px;">
+                <div>
+                    <span class="status-badge">Jump Back In</span>
+                    <h3 style="margin:8px 0 0 0; color:#fff; text-transform:none; font-size:18px;">${song.title}</h3>
+                </div>
+                <div style="text-align:right;">
+                    <div style="font-family:monospace; color:#1db954; font-size:12px;">${formatTime(lastTime)}</div>
+                </div>
+            </div>
+            <div class="song" onclick="togglePlay()" style="background:transparent; padding:0; gap:15px;">
+                <div style="position:relative; width:60px; height:60px;">
+                    <img src="/cover/${song.file}" class="cover" style="width:60px; height:60px; border-radius:12px; margin:0; ${isPlaying ? 'animation: pulse 2s infinite;' : ''}">
+                    ${isPlaying ? '<div style="position:absolute; bottom:-5px; right:-5px; background:#1db954; border-radius:50%; width:20px; height:20px; display:flex; align-items:center; justify-content:center; border:2px solid #000;"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#ffffff" viewBox="0 0 256 256"><path d="M155.51,24.81a8,8,0,0,0-8.42.88L77.25,80H32A16,16,0,0,0,16,96v64a16,16,0,0,0,16,16H77.25l69.84,54.31A8,8,0,0,0,160,224V32A8,8,0,0,0,155.51,24.81ZM32,96H72v64H32ZM144,207.64,88,164.09V91.91l56-43.55Zm54-106.08a40,40,0,0,1,0,52.88,8,8,0,0,1-12-10.58,24,24,0,0,0,0-31.72,8,8,0,0,1,12-10.58ZM248,128a79.9,79.9,0,0,1-20.37,53.34,8,8,0,0,1-11.92-10.67,64,64,0,0,0,0-85.33,8,8,0,1,1,11.92-10.67A79.83,79.83,0,0,1,248,128Z"></path></svg></div>' : ''}
+                </div>
+                <div style="flex:1;">
+                    <div style="font-size:12px; opacity:0.6; margin-bottom:8px;">${song.artist}</div>
+                    <div style="width:100%; height:3px; background:rgba(255,255,255,0.1); border-radius:2px;">
+                        <div style="width:${progressPct}%; height:100%; background:#1db954; border-radius:2px;"></div>
+                    </div>
+                </div>
+            </div>
+        </div>` : "";
+
+    // 2. Beautiful Recent Scroll
+    const recentHtml = recent.length ? `
+        <div class="card home-anim" style="background:transparent; border:none; padding:0;">
+            <h3 style="margin-left:5px;">Recently Played</h3>
+            <div class="recent-scroll-container">
+                ${recent.map(s => `
+                    <div class="recent-item floating" style="flex: 0 0 100px; text-align:center;" onclick="playSongByIndex(${songs.findIndex(x => x.file === s.file)})">
+                        <img src="/cover/${s.file}" style="width:100px; height:100px; border-radius:15px; box-shadow: 0 10px 20px rgba(0,0,0,0.5);">
+                        <div style="font-size:10px; margin-top:8px; opacity:0.6; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; padding:0 5px;">${s.title}</div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>` : "";
+
+    // 3. Build UI
+    home.innerHTML = `
+<div class="home-anim hero">
+    <h1 class="hero-title">
+        <span class="greet">${greeting},</span>
+        <span class="name">YOCRRZ</span>
+    </h1>
+</div>
+
+        <div class="card glass-card home-anim" style="background: linear-gradient(135deg, rgba(29, 185, 84, 0.1) 0%, rgba(0,0,0,0) 100%) !important;">
+            <h3 style="color:#fff;">Toolbox</h3>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px;">
+                <button onclick="playSongByIndex(Math.floor(Math.random()*songs.length))" 
+                        class="glass-card" style="padding:15px; border-radius:16px; font-weight:bold; color:#1db954;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#ffffff" viewBox="0 0 256 256"><path d="M237.66,178.34a8,8,0,0,1,0,11.32l-24,24a8,8,0,0,1-11.32-11.32L212.69,192H200.94a72.12,72.12,0,0,1-58.59-30.15l-41.72-58.4A56.1,56.1,0,0,0,55.06,80H32a8,8,0,0,1,0-16H55.06a72.12,72.12,0,0,1,58.59,30.15l41.72,58.4A56.1,56.1,0,0,0,200.94,176h11.75l-10.35-10.34a8,8,0,0,1,11.32-11.32ZM143,107a8,8,0,0,0,11.16-1.86l1.2-1.67A56.1,56.1,0,0,1,200.94,80h11.75L202.34,90.34a8,8,0,0,0,11.32,11.32l24-24a8,8,0,0,0,0-11.32l-24-24a8,8,0,0,0-11.32,11.32L212.69,64H200.94a72.12,72.12,0,0,0-58.59,30.15l-1.2,1.67A8,8,0,0,0,143,107Zm-30,42a8,8,0,0,0-11.16,1.86l-1.2,1.67A56.1,56.1,0,0,1,55.06,176H32a8,8,0,0,0,0,16H55.06a72.12,72.12,0,0,0,58.59-30.15l1.2-1.67A8,8,0,0,0,113,149Z"></path></svg> Shuffle All
+                </button>
+                <button onclick="toggleUploadModal(true)" 
+                        class="glass-card" style="padding:15px; border-radius:16px; font-weight:bold;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#ffffff" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"></path></svg>  Add Track
+                </button>
+            </div>
+        </div>
+
+        ${continueListening}
+        ${recentHtml}
+
+        <div class="card glass-card home-anim">
+            <h3> <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#ffffff" viewBox="0 0 256 256"><path d="M208,32H48A16,16,0,0,0,32,48V208a16,16,0,0,0,16,16H208a16,16,0,0,0,16-16V48A16,16,0,0,0,208,32Zm-12.69,88L136,60.69V48h12.69L208,107.32V120ZM136,83.31,172.69,120H136Zm72,1.38L171.31,48H208ZM120,48v72H48V48ZM107.31,208,48,148.69V136H60.69L120,195.31V208ZM120,172.69,83.31,136H120Zm-72-1.38L84.69,208H48ZM208,208H136V136h72v72Z"></path></svg> Discover Something New</h3>
+            ${songs.filter(s => !recent.find(r => r.file === s.file)).sort(() => Math.random() - 0.5).slice(0, 2).map(s => `
+                <div class="song" onclick="playSongByIndex(${songs.indexOf(s)})" style="background:rgba(255,255,255,0.02); margin-bottom:8px; border-radius:12px;">
+                    <img src="/cover/${s.file}" class="cover" style="border-radius:8px;">
+                    <div>
+                        <div style="font-weight:bold; font-size:14px;">${s.title}</div>
+                        <div style="font-size:12px; opacity:0.5;">${s.artist}</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+
+    // 4. Enhanced GSAP Timeline
+    const tl = gsap.timeline();
+    tl.fromTo(".home-anim", 
+        { y: 40, opacity: 0, scale: 0.95 }, 
+        { y: 0, opacity: 1, scale: 1, duration: 0.6, stagger: 0.1, ease: "expo.out" }
+    );
+}
+
+async function startUpload() {
+    const fileInput = document.getElementById('fileInput');
+    const progress = document.getElementById('uploadProgress');
+    const btn = document.getElementById('uploadBtn');
+    
+    if (!fileInput.files.length) return;
+
+    const file = fileInput.files[0];
+    const chunkSize = 1024 * 1024; // 1MB per chunk
+    const totalChunks = Math.ceil(file.size / chunkSize);
+    
+    btn.disabled = true;
+    btn.style.opacity = "0.5";
+    
+    for (let i = 0; i < totalChunks; i++) {
+        const start = i * chunkSize;
+        const end = Math.min(file.size, start + chunkSize);
+        const chunk = file.slice(start, end);
+        
+        const formData = new FormData();
+        formData.append('file', chunk);
+        formData.append('filename', file.name);
+        formData.append('chunkIndex', i);
+        formData.append('totalChunks', totalChunks);
+        
+        try {
+            await fetch('/upload', { method: 'POST', body: formData });
+            const pct = Math.round(((i + 1) / totalChunks) * 100);
+            progress.style.width = pct + "%";
+        } catch (e) {
+            alert("Upload failed at chunk " + i);
+            btn.disabled = false;
+            return;
+        }
+    }
+    
+    // SUCCESS
+    toggleUploadModal(false);
+    btn.disabled = false;
+    btn.style.opacity = "1";
+    progress.style.width = "0%";
+    
+    // Refresh library immediately
+    fetch("/songs").then(res => res.json()).then(data => {
+        songs = data;
+        renderSongs(songs);
+    });
+}
+function sortSongs(criteria) {
+    const sorted = [...songs].sort((a, b) => a[criteria].localeCompare(b[criteria]));
+    renderSongs(sorted);
+    
+    // Smooth transition when sorting
+    gsap.from(".song", {
+        opacity: 0,
+        y: 10,
+        stagger: 0.02,
+        duration: 0.4
+    });
+}
+
+audio.addEventListener("timeupdate", () => {
+  if (!audio.duration) return;
+
+  const pct = (audio.currentTime / audio.duration) * 100;
+
+  const wrap = document.querySelector(".progress-wrap");
+  wrap.style.setProperty("--progress", pct + "%");
+
+  document.getElementById("fpProgress").value = pct;
+
+  document.getElementById("timeCurrent").textContent = formatTime(audio.currentTime);
+  document.getElementById("timeTotal").textContent = formatTime(audio.duration);
+});
+/* SMART COVER LOADER */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (!entry.isIntersecting) return;
+
+    const img = entry.target;
+
+    if (img.dataset.src) {
+      img.src = img.dataset.src;
+      img.removeAttribute("data-src");
+    }
+
+    observer.unobserve(img);
+  });
+}, {
+  rootMargin: "300px"
+});
+
+function renderSongs(list) {
+  const container = document.getElementById("songList");
+
+  container.innerHTML = list.map((song) => `
+    <div class="song swipe-song"
+         data-file="${song.file}"
+         onclick="playSongByIndex(${songs.indexOf(song)})">
+
+      <div class="delete-bg">
+         
+      </div>
+
+      <div class="song-content">
+
+        <img
+          class="cover lazy-cover"
+          data-src="/cover/${song.file}"
+          src="data:image/svg+xml;base64,PHN2Zy..."
+        >
+
+        <div style="min-width:0;">
+          <div style="
+            font-weight:bold;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+          ">
+            ${song.title}
+          </div>
+
+          <div style="
+            font-size:12px;
+            opacity:0.7;
+            white-space:nowrap;
+            overflow:hidden;
+            text-overflow:ellipsis;
+          ">
+            ${song.artist}
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  `).join("");
+
+  requestAnimationFrame(() => {
+
+    document
+      .querySelectorAll(".lazy-cover")
+      .forEach(img => observer.observe(img));
+
+    setupSwipeDelete();
+  });
+}
+function setupSwipeDelete() {
+
+    document.querySelectorAll(".swipe-song")
+    .forEach(song => {
+
+        const content =
+            song.querySelector(".song-content");
+
+        song.addEventListener("touchstart", e => {
+
+            swipeStartX =
+                e.touches[0].clientX;
+
+        });
+
+        song.addEventListener("touchmove", e => {
+
+            const diff =
+                e.touches[0].clientX -
+                swipeStartX;
+
+            if (diff < 0) {
+
+                content.style.transform =
+                    `translateX(${Math.max(diff,-100)}px)`;
+            }
+        });
+
+        song.addEventListener("touchend", () => {
+
+            const transform =
+                content.style.transform;
+
+            if (transform.includes("-100")) {
+
+                deleteTarget =
+                    song.dataset.file;
+
+                showDeleteModal(deleteTarget);
+            }
+
+            content.style.transform =
+                "translateX(0)";
+        });
+
+    });
+}
+function showDeleteModal(file){
+
+    deleteTarget = file;
+
+    document.getElementById(
+        "deleteSongName"
+    ).textContent = file;
+
+    document.getElementById(
+        "deleteModal"
+    ).style.display = "flex";
+
+    gsap.fromTo(
+        ".delete-card",
+        {scale:.8,opacity:0},
+        {scale:1,opacity:1,duration:.25}
+    );
+}
+
+function closeDeleteModal(){
+
+    document.getElementById(
+        "deleteModal"
+    ).style.display = "none";
+}
+document.addEventListener("load", (e) => {
+  if (e.target.classList?.contains("cover")) {
+    e.target.classList.add("loaded");
+  }
+}, true);
+function toggleSpotifyModal(show){
+
+    document.getElementById("spotifyModal").style.display =
+        show ? "flex" : "none";
+
+}
+async function refreshSongs() {
+    const res = await fetch("/songs");
+    const list = await res.json();
+
+    songs = list;
+    originalSongs = [...list];
+
+    renderSongs(songs);
+}
+
+async function trackDownload(jobId) {
+
+    const urlInput = document.getElementById("spotifyUrl");
+    const statusText = document.getElementById("spotifyStatus");
+    const statusBox = document.getElementById("spotifyStatusBox");
+    const loaderFrame = document.getElementById("spotifyLoader");
+    const cursor = document.getElementById("terminalCursor");
+    const execBtn = document.getElementById("spotifyDownloadBtn");
+
+    const poll = setInterval(async () => {
+
+        try {
+
+            const res = await fetch(`/job/${jobId}`);
+            const job = await res.json();
+
+            const progress = Math.max(0, job.progress || 0);
+
+            loaderFrame.textContent = `${progress}%`;
+
+            let status = job.stage || "PROCESSING";
+
+            if (job.speed) {
+                status += ` // ${job.speed}`;
+            }
+
+            if (job.eta && progress < 100) {
+                status += ` // ETA ${job.eta}`;
+            }
+
+            statusText.textContent = status;
+
+            if (progress >= 100) {
+
+                clearInterval(poll);
+
+                statusText.textContent = "SUCCESS_SYNC_COMPLETE";
+                statusBox.style.borderLeftColor = "#1db954";
+                statusText.style.color = "#1db954";
+
+                cursor.style.display = "none";
+
+                await refreshSongs();
+
+                urlInput.value = "";
+
+                setTimeout(() => {
+
+                    toggleSpotifyModal(false);
+
+                    setTimeout(() => {
+
+                        statusText.textContent = "IDLE_READY";
+                        statusText.style.color = "#fff";
+                        statusBox.style.borderLeftColor = "#555";
+
+                        loaderFrame.style.display = "none";
+                        loaderFrame.textContent = "0%";
+
+                        execBtn.disabled = false;
+                        execBtn.style.opacity = "1";
+                        execBtn.style.cursor = "pointer";
+
+                    }, 300);
+
+                }, 1200);
+
+            }
+
+            if (progress === -1) {
+
+                clearInterval(poll);
+
+                statusText.textContent =
+                    job.stage || "DOWNLOAD_FAILED";
+
+                statusBox.style.borderLeftColor = "#ff3333";
+                statusText.style.color = "#ff3333";
+
+                cursor.style.display = "none";
+
+                execBtn.disabled = false;
+                execBtn.style.opacity = "1";
+                execBtn.style.cursor = "pointer";
+            }
+
+        } catch (err) {
+
+            console.error(err);
+
+            clearInterval(poll);
+
+            statusText.textContent = "CONNECTION_LOST";
+            statusBox.style.borderLeftColor = "#ff3333";
+            statusText.style.color = "#ff3333";
+
+            cursor.style.display = "none";
+
+            execBtn.disabled = false;
+            execBtn.style.opacity = "1";
+            execBtn.style.cursor = "pointer";
+        }
+
+    }, 500);
+}
+
+async function downloadSpotify() {
+
+    const urlInput = document.getElementById("spotifyUrl");
+    const statusText = document.getElementById("spotifyStatus");
+    const statusBox = document.getElementById("spotifyStatusBox");
+    const loaderFrame = document.getElementById("spotifyLoader");
+    const cursor = document.getElementById("terminalCursor");
+    const execBtn = document.getElementById("spotifyDownloadBtn");
+
+    const url = urlInput.value.trim();
+
+    if (!url) {
+
+        statusText.textContent = "ERR_URL_EMPTY";
+        statusBox.style.borderLeftColor = "#ff3333";
+        statusText.style.color = "#ff3333";
+
+        loaderFrame.style.display = "none";
+        cursor.style.display = "none";
+
+        return;
+    }
+
+    statusText.textContent = "INITIALIZING_JOB";
+    statusBox.style.borderLeftColor = "#1db954";
+    statusText.style.color = "#1db954";
+
+    loaderFrame.style.display = "block";
+    loaderFrame.textContent = "0%";
+
+    cursor.style.display = "inline-block";
+
+    execBtn.disabled = true;
+    execBtn.style.opacity = "0.4";
+    execBtn.style.cursor = "not-allowed";
+
+    try {
+
+        const response = await fetch("/spotify-download", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                url: url
+            })
+        });
+
+        const data = await response.json();
+
+        if (!data.success) {
+
+            statusText.textContent =
+                `FAILED // ${data.error || "UNKNOWN_ERR"}`;
+
+            statusBox.style.borderLeftColor = "#ff3333";
+            statusText.style.color = "#ff3333";
+
+            cursor.style.display = "none";
+
+            execBtn.disabled = false;
+            execBtn.style.opacity = "1";
+            execBtn.style.cursor = "pointer";
+
+            return;
+        }
+
+        trackDownload(data.job_id);
+
+    } catch (err) {
+
+        statusText.textContent =
+            `CRIT_SYS_ERR // ${err.message.toUpperCase()}`;
+
+        statusBox.style.borderLeftColor = "#ff3333";
+        statusText.style.color = "#ff3333";
+
+        cursor.style.display = "none";
+
+        execBtn.disabled = false;
+        execBtn.style.opacity = "1";
+        execBtn.style.cursor = "pointer";
+    }
+}
+// ==========================================
+// 🎛️ FERAL LIQUID AUDIO VISUALIZER & COLOR ENGINE
+// ==========================================
+
+let audioCtx = null;
+let analyser = null;
+let source = null;
+let freqData = null;
+let visualizerStarted = false;
+let bassMovingAverage = 0;
+let dynamicCoverColor = "rgba(255, 255, 255, "; // Default fallback
+
+// 1. Establish the Audio Context
+function initAudioVisualizer() {
+    if (visualizerStarted) return;
+    
+    try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        analyser = audioCtx.createAnalyser();
+        
+        analyser.fftSize = 256; 
+        analyser.smoothingTimeConstant = 0.0; // ZERO smoothing. Pure, raw data.
+        
+        source = audioCtx.createMediaElementSource(audio);
+        source.connect(analyser);
+        analyser.connect(audioCtx.destination);
+        
+        freqData = new Uint8Array(analyser.frequencyBinCount);
+        visualizerStarted = true;
+        
+        renderAudioBorderTick();
+    } catch (e) {
+        console.log("Web Audio Context bypassed: ", e);
+    }
+}
+
+// 2. Trigger Engine on Play
+audio.addEventListener('play', () => {
+    initAudioVisualizer();
+    if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+    }
+});
+
+// 3. True Album Color Extractor
+function extractDominantColor(imgElement) {
+    try {
+        const canvas = document.createElement('canvas');
+        canvas.width = 1;
+        canvas.height = 1;
+        const ctx = canvas.getContext('2d');
+        
+        // Pull the 1x1 hardware-averaged pixel
+        ctx.drawImage(imgElement, 0, 0, 1, 1);
+        let [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
+        
+        // 🎛️ VIBRANCY MULTIPLIER: Push the dominant color channel so it isn't muddy
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+        
+        // If the cover is mostly greyscale, force a slight tint to prevent dead UI
+        if (max - min < 20) { 
+            r = Math.min(r + 15, 255);
+            g = Math.min(g + 15, 255);
+        } else {
+            // Amplify the strongest color channel by 25%
+            if (r === max) r = Math.min(r * 1.25, 255);
+            if (g === max) g = Math.min(g * 1.25, 255);
+            if (b === max) b = Math.min(b * 1.25, 255);
+        }
+
+        // Floor the floats back to integers
+        r = Math.floor(r); 
+        g = Math.floor(g); 
+        b = Math.floor(b);
+
+        // Update the visualizer's specific string
+        dynamicCoverColor = `rgba(${r}, ${g}, ${b}, `; 
+        
+        // 🔥 THE MAGIC: Inject the raw RGB array globally into the root CSS
+        document.documentElement.style.setProperty('--ambient-rgb', `${r}, ${g}, ${b}`);
+
+    } catch (e) {
+        // Fallback to the signature branding green
+        dynamicCoverColor = "rgba(255, 255, 255, "; 
+        document.documentElement.style.setProperty('--ambient-rgb', `29, 185, 84`);
+    }
+}
+
+// Add this new tracking variable right above the render function
+let currentBass = 0; 
+
+// 4. The High-Gain Structural Fluid Render Loop
+function renderAudioBorderTick() {
+    if (!visualizerStarted || !isPlaying) {
+        requestAnimationFrame(renderAudioBorderTick);
+        return;
+    }
+
+    analyser.getByteFrequencyData(freqData);
+
+    // Grab broad kick drum and sub-impact spectrum arrays
+    let kickSum = freqData[1] + freqData[2] + freqData[3] + freqData[4]; 
+    let rawBass = kickSum / 4;
+
+    // Transient Peak Tracking: Filter background compression noise gates
+    bassMovingAverage = (bassMovingAverage * 0.92) + (rawBass * 0.08);
+    let bassSpike = rawBass - bassMovingAverage;
+    if (bassSpike < 0) bassSpike = 0; 
+
+    // Hyper-Amplify Sensitivity Mapping via Cubic Processing Curves
+    let bassFactor = bassSpike / 35; 
+    let cubicBass = Math.pow(bassFactor, 3); 
+    
+    // Scale target velocity coefficients aggressively
+    let targetBass = Math.min(cubicBass * 3.5, 1.0); 
+    if (targetBass < 0.1) targetBass = 0;
+
+    // Fluid Inertia Lerp Routing (Simulates thick, heavy fluid weight dynamics)
+    currentBass += (targetBass - currentBass) * 0.25; 
+
+    // Time-Varying Non-Linear Trigonometric Coordinate Arrays
+    let t = performance.now() / 180; // Accelerated wave speed rotation intervals
+    let baseR = 50; // Perfect circle spatial geometric midpoint coordinate
+    
+    // Amplified edge deformation coefficients based on active currentBass velocity
+    let waveAmp = 5 + (currentBass * 32); 
+
+    // Map irregular wave structures to construct a living fluid bubble shape
+    let c1 = baseR + (Math.sin(t) * waveAmp);
+    let c2 = baseR + (Math.cos(t * 1.3) * waveAmp);
+    let c3 = baseR + (Math.sin(t * 0.7) * waveAmp);
+    let c4 = baseR + (Math.cos(t * 1.6) * waveAmp);
+    
+    let c5 = baseR + (Math.cos(t * 1.2) * waveAmp);
+    let c6 = baseR + (Math.sin(t * 1.4) * waveAmp);
+    let c7 = baseR + (Math.cos(t * 0.8) * waveAmp);
+    let c8 = baseR + (Math.sin(t * 1.7) * waveAmp);
+    
+    let liquidRadius = `${c1}% ${c2}% ${c3}% ${c4}% / ${c5}% ${c6}% ${c7}% ${c8}%`;
+
+    // Strict structural layout translations
+    const globScale = 1.07 + (currentBass * 0.38);  // Scales cleanly out past the image boundary
+    const globAlpha = 0.75 + (currentBass * 0.25);  // Drives solid opacity saturation during transients
+
+    const root = document.documentElement;
+    root.style.setProperty('--liquid-radius', liquidRadius);
+    root.style.setProperty('--glob-scale', globScale);
+    root.style.setProperty('--glob-alpha', globAlpha);
+    
+    root.style.setProperty('--dynamic-glow-color', `${dynamicCoverColor} 1)`);
+
+    requestAnimationFrame(renderAudioBorderTick);
+}
+async function confirmDelete() {
+
+    if (!deleteTarget) return;
+
+    try {
+
+        const res = await fetch(
+            `/delete/${encodeURIComponent(deleteTarget)}`,
+            {
+                method: "DELETE"
+            }
+        );
+
+        const data = await res.json();
+
+        if (!data.success) {
+            alert(data.error || "Delete failed");
+            return;
+        }
+
+        // Remove from local array
+        songs = songs.filter(
+            s => s.file !== deleteTarget
+        );
+
+        originalSongs = originalSongs.filter(
+            s => s.file !== deleteTarget
+        );
+
+        recent = recent.filter(
+            s => s.file !== deleteTarget
+        );
+
+        // If current song was deleted
+        if (
+            songs[currentIndex] &&
+            songs[currentIndex].file === deleteTarget
+        ) {
+            audio.pause();
+            audio.src = "";
+            isPlaying = false;
+        }
+
+        renderSongs(songs);
+        renderHome();
+
+        closeDeleteModal();
+
+        deleteTarget = null;
+
+    } catch(err) {
+
+        console.error(err);
+        alert("Delete failed");
+
+    }
+}
+
+</script>
+</body>
+</html>
