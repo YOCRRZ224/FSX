@@ -1,0 +1,4 @@
+Flask
+mutagen
+requests
+beautifulsoup4
