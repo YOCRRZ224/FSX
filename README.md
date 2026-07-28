@@ -29,20 +29,7 @@ abduhamid and yocrrz <3
 
 ---
 
-<table>
-
-  <tr>
-    <td align="center">
-      <strong>Android Player</strong><br><br>
-      <video src="./assets/fullscreenplayerandroid.mp4" controls width="200"></video>
-    </td>
-    <td align="center">
-      <strong>Desktop Player</strong><br><br>
-      <video src="./assets/fullscreenplayerdesktop.mp4" controls width="200"></video>
-    </td>
-  </tr>
-</table>
-
+ ![player](assets/fullscreenplayerandroid.mp4)
 ---
 
 ## Features
