@@ -13,10 +13,13 @@ from threading import Thread
 app = Flask(__name__)
 
 MUSIC_FOLDER = "music"
-
+# Configuration for uploads
 UPLOAD_TEMP_FOLDER = "temp"
 os.makedirs(UPLOAD_TEMP_FOLDER, exist_ok=True)
 jobs = {}
+# =========================
+# SPOTIFY HELPER FUNCTIONS
+# =========================
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0",
@@ -216,6 +219,7 @@ def songs():
 @app.route("/play/<song>")
 def play(song):
     return send_from_directory(MUSIC_FOLDER, song)
+# 🎨 COVER API
 from flask import Response
 
 @app.route("/cover/<song>")
@@ -225,7 +229,7 @@ def cover(song):
     try:
         audio = ID3(path)
 
-       
+        # 🔥 Correct way: get ALL APIC frames
         apic = audio.getall("APIC")
 
         if apic:
@@ -242,14 +246,14 @@ def upload():
     chunk_index = int(request.form['chunkIndex'])
     total_chunks = int(request.form['totalChunks'])
     
-    
+    # Use a temp directory for specific files to avoid collisions
     temp_path = os.path.join(UPLOAD_TEMP_FOLDER, filename)
     
-   
+    # Write the chunk to the file (append mode)
     with open(temp_path, "ab") as f:
         f.write(file_data.read())
     
-  
+    # If this is the last chunk, move it to the main music folder
     if chunk_index == total_chunks - 1:
         final_destination = os.path.join(MUSIC_FOLDER, filename)
         os.rename(temp_path, final_destination)
