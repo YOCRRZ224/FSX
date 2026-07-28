@@ -3,7 +3,7 @@ Introducing FSX music player
 this is a music player that can directly find you music you want from spotify and play whatever music with great design of this app
 and more developed by
 
-abduhamid and yocrrz <3
+**abduhamid** and **yocrrz** <3
 
 
 ---
@@ -29,7 +29,18 @@ abduhamid and yocrrz <3
 
 ---
 
- ![player](assets/fullscreenplayerandroid.mp4)
+ <table>
+  <tr>
+    <td align="center">
+      <strong>Android Player</strong><br><br>
+      <img src="./assets/android.webp" width="200">
+    </td>
+    <td align="center">
+      <strong>Desktop Player</strong><br><br>
+      <img src="./assets/desktop.webp" width="200">
+    </td>
+  </tr>
+</table>
 ---
 
 ## Features
