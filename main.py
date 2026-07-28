@@ -13,13 +13,10 @@ from threading import Thread
 app = Flask(__name__)
 
 MUSIC_FOLDER = "music"
-# Configuration for uploads
 UPLOAD_TEMP_FOLDER = "temp"
+os.makedirs(MUSIC_FOLDER, exist_ok=True)
 os.makedirs(UPLOAD_TEMP_FOLDER, exist_ok=True)
 jobs = {}
-# =========================
-# SPOTIFY HELPER FUNCTIONS
-# =========================
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0",
@@ -214,31 +211,122 @@ def songs():
             "album": album
         })
 
-    return jsonify(result)
 
+    result.sort(key=lambda song: song["title"].lower())
+
+    return jsonify(result)
 @app.route("/play/<song>")
 def play(song):
     return send_from_directory(MUSIC_FOLDER, song)
 # 🎨 COVER API
 from flask import Response
 
-@app.route("/cover/<song>")
+os.makedirs(UPLOAD_TEMP_FOLDER, exist_ok=True)from flask import Response, send_from_directory
+from mutagen import File
+from mutagen.id3 import ID3
+from mutagen.mp4 import MP4
+from mutagen.flac import FLAC
+import os
+import base64
+
+@app.route("/cover/<path:song>")
 def cover(song):
     path = os.path.join(MUSIC_FOLDER, song)
 
     try:
-        audio = ID3(path)
+        audio = File(path)
 
-        # 🔥 Correct way: get ALL APIC frames
-        apic = audio.getall("APIC")
+        if audio is None:
+            print("Unsupported audio:", song)
+            raise Exception("Unsupported format")
 
-        if apic:
-            return Response(apic[0].data, mimetype="image/jpeg")
+
+        if isinstance(audio.tags, ID3):
+            apic = audio.tags.getall("APIC")
+
+            if apic:
+                image = apic[0]
+
+                return Response(
+                    image.data,
+                    mimetype=image.mime or "image/jpeg"
+                )
+
+    
+        if isinstance(audio, FLAC):
+            if audio.pictures:
+                picture = audio.pictures[0]
+
+                return Response(
+                    picture.data,
+                    mimetype=picture.mime or "image/jpeg"
+                )
+
+      
+        if isinstance(audio, MP4):
+            if audio.tags and "covr" in audio.tags:
+
+                cover_data = audio.tags["covr"][0]
+
+                # MP4Cover has a .imageformat attribute
+                if hasattr(cover_data, "imageformat"):
+                    image_format = cover_data.imageformat
+
+                    if image_format == 13:
+                        mime = "image/jpeg"
+                    elif image_format == 14:
+                        mime = "image/png"
+                    else:
+                        mime = "image/jpeg"
+                else:
+                    mime = "image/jpeg"
+
+                return Response(
+                    bytes(cover_data),
+                    mimetype=mime
+                )
+
+
+        if audio.tags:
+
+          
+            picture_data = audio.tags.get("metadata_block_picture")
+
+            if picture_data:
+
+              
+                if isinstance(picture_data, list):
+                    picture_data = picture_data[0]
+
+                try:
+                    decoded = base64.b64decode(picture_data)
+
+                    from mutagen.flac import Picture
+
+                    picture = Picture(decoded)
+
+                    return Response(
+                        picture.data,
+                        mimetype=picture.mime or "image/jpeg"
+                    )
+
+                except Exception as e:
+                    print(
+                        "OGG/OPUS cover decode error:",
+                        e
+                    )
 
     except Exception as e:
-        print("Cover error:", e)
+        print(
+            f"Cover error for {song}:",
+            e
+        )
 
-    return send_from_directory("static", "default.jpg")
+
+    return send_from_directory(
+        "static",
+        "default.jpg"
+    )
 @app.route("/upload", methods=["POST"])
 def upload():
     file_data = request.files['file']
