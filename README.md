@@ -1,3 +1,6 @@
-Introducing FSX media player
+Introducing FSX music player
 
-This is A media player that can directly find you music you want from spotify and play whatever music with great design of this app
+this is a music player that can directly find you music you want from spotify and play whatever music with great design of this app
+and more developed by
+
+abduhamid and yocrrz <3
