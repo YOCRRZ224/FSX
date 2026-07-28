@@ -220,8 +220,7 @@ def play(song):
     return send_from_directory(MUSIC_FOLDER, song)
 # 🎨 COVER API
 from flask import Response
-
-os.makedirs(UPLOAD_TEMP_FOLDER, exist_ok=True)from flask import Response, send_from_directory
+from flask import Response, send_from_directory
 from mutagen import File
 from mutagen.id3 import ID3
 from mutagen.mp4 import MP4
