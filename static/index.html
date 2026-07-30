@@ -816,7 +816,6 @@ button {
     position: fixed;
     inset: 0;
     z-index: 300;
-
     background: rgba(0, 0, 0, 0.75);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
@@ -1215,7 +1214,7 @@ button {
                 <h2 style="margin: 5px 0 0 0; font-size: 32px; font-weight: 900;">Library</h2>
             </div>
             <button onclick="toggleUploadModal(true)" class="glass-card" style="width: 50px; height: 50px; border-radius: 50%; background: #1db954 !important; color: #000; box-shadow: 0 0 20px rgba(29, 185, 84, 0.3);">
-                <span style="font-size: 24px; font-weight: bold;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#FFFFFF" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"></path></svg></span>
+                <span style="font-size: 24px; font-weight: bold;"><svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" fill="#000000" viewBox="0 0 256 256"><path d="M224,128a8,8,0,0,1-8,8H136v80a8,8,0,0,1-16,0V136H40a8,8,0,0,1,0-16h80V40a8,8,0,0,1,16,0v80h80A8,8,0,0,1,224,128Z"></path></svg></span>
             </button>
            
         </div>
@@ -1378,13 +1377,13 @@ class="glass-card" id="headerShuffle">
                 letter-spacing: 1.5px;
                 color: #a0a0a0;
             ">
-                [ fetch://spotify_engine ]
+                Download Song
             </h3>
-            <span style="font-size: 10px; color: #555;">v1.0.0</span>
+            <span style="font-size: 10px; color: #555;">yocrrz</span>
         </div>
 
         <div style="position: relative; margin-bottom: 12px;">
-            <input id="spotifyUrl" type="text" placeholder="PASTE_TRACK_RESOURCE_URL" style="
+            <input id="spotifyUrl" type="text" placeholder="write song name or link" style="
                 width: 100%;
                 padding: 12px;
                 background: #000;
@@ -1410,8 +1409,8 @@ class="glass-card" id="headerShuffle">
 ">
     <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px;">
         <div>
-            <span style="color: #555;">SYS_STATUS:</span>
-            <span id="spotifyStatus" style="color: #fff;">IDLE_READY</span>
+            <span style="color: #555;">Status:</span>
+            <span id="spotifyStatus" style="color: #fff;">Ready go ahead</span>
         </div>
         <span id="terminalCursor" class="terminal-cursor" style="display: none;">_</span>
     </div>
@@ -1444,7 +1443,7 @@ class="glass-card" id="headerShuffle">
                 cursor: pointer;
                 transition: all 0.15s ease;
             " onmouseover="this.style.background='#161616'; this.style.color='#fff';" onmouseout="this.style.background='transparent'; this.style.color='#888';">
-                Abort
+                Back
             </button>
 
             <button onclick="downloadSpotify()" id="spotifyDownloadBtn" style="
@@ -1452,7 +1451,7 @@ class="glass-card" id="headerShuffle">
                 padding: 12px;
                 background: #fff;
                 border: 1px solid #fff;
-                color: #000;
+                color: #FFFFFF;
                 font-family: monospace;
                 font-size: 11px;
                 font-weight: 900;
@@ -1460,7 +1459,7 @@ class="glass-card" id="headerShuffle">
                 cursor: pointer;
                 transition: all 0.15s ease;
             " onmouseover="this.style.background='#1db954'; this.style.borderColor='#1db954';" onmouseout="this.style.background='#fff'; this.style.borderColor='#fff';">
-                Execute
+                Download
             </button>
         </div>
     </div>

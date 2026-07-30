@@ -3,7 +3,7 @@ Introducing FSX music player
 this is a music player that can directly find you music you want from spotify and play whatever music with great design of this app
 and more developed by
 
-**abduhamid** and **yocrrz** <3
+**abduhamid** and **yocrrz** <333
 
 
 ---
@@ -19,10 +19,10 @@ and more developed by
 <table>
   <tr>
     <td>
-      <img src="assets/homescreen.jpg" width="200" style="border-radius: 15px;">
+      <img src="assets/lib.jpg" width="200" style="border-radius: 15px;">
     </td>
     <td>
-      <img src="assets/library.jpg" width="200" style="border-radius: 15px;">
+      <img src="assets/lib2.jpg" width="200" style="border-radius: 15px;">
     </td>
   </tr>
 </table>
