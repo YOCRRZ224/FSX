@@ -5,6 +5,7 @@
 <script src="static/gsap.js" type="text/javascript" charset="utf-8"></script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/png" href="static/fsxlogo.svg">
+<script src="https://cdn.jsdelivr.net/npm/fuse.js@7.1.0/dist/fuse.min.js"></script>
     <style>
         
         * { box-sizing: border-box; }
@@ -1667,7 +1668,14 @@ function formatTime(secs) {
     const s = Math.floor(secs % 60);
     return `${mins}:${s < 10 ? '0' : ''}${s}`;
 }
-
+function rebuildFuse() {
+    fuse = new Fuse(songs, {
+        keys: ["title", "artist", "album", "file"],
+        threshold: 0.35,
+        ignoreLocation: true,
+        includeScore: true
+    });
+}
 // 1. DATA LOAD
 fetch("/songs")
 .then(res => res.json())
@@ -1677,32 +1685,8 @@ fetch("/songs")
     renderSongs(songs);
     loadState();
     renderHome();
+    rebuildFuse()
 });
-
-// 2. CORE RENDERING
-function renderSongs(list) {
-    const container = document.getElementById("songList");
-    container.innerHTML = list.map((song) => {
-        const globalIndex = songs.findIndex(x => x.file === song.file);
-        return `
-        <div class="song" 
-             onmousedown="startPress(event, ${globalIndex})" 
-             onmouseup="endPress(event, ${globalIndex})" 
-             onmouseleave="cancelPress()"
-             ontouchstart="startPress(event, ${globalIndex})" 
-             ontouchend="endPress(event, ${globalIndex})">
-            <img class="cover lazy-cover" data-src="/cover/${song.file}" src="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0nNTAnIGhlaWdodD0nNTAnIHhtbG5zPSdodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2Zyc+PHJlY3Qgd2lkdGg9JzUwJyBoZWlnaHQ9JzUwJyBmaWxsPScjMTExJy8+PC9zdmc+">
-            <div style="min-width:0;">
-                <div style="font-weight:bold; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${song.title}</div>
-                <div style="font-size:12px; opacity:0.7; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${song.artist}</div>
-            </div>
-        </div>
-    `}).join('');
-
-    requestAnimationFrame(() => {
-        document.querySelectorAll(".lazy-cover").forEach(img => observer.observe(img));
-    });
-}
 
 
 // 3. PLAYBACK LOGIC
@@ -1931,34 +1915,72 @@ function switchTab(tabId) {
         { scale: 1.2, duration: 0.3, yoyo: true, repeat: 1, ease: "back.out(2)" }
     );
 }
-
-
-
-document.getElementById("searchInput").addEventListener("input", e => {
-    const q = e.target.value.toLowerCase();
-    const results = songs.filter(s => s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q));
-    
-    const container = document.getElementById("searchResults");
-    if (q === "") { container.innerHTML = ""; return; }
-
-    container.innerHTML = results.map(song => `
-        <div class="song search-item" onclick="playSongByIndex(${songs.indexOf(song)})" style="animation: slideIn 0.3s ease forwards;">
-            <img src="/cover/${song.file}" class="cover" style="border-radius: 10px;">
-            <div>
-                <div style="font-weight:bold;">${song.title.replace(new RegExp(q, 'gi'), (m) => `<span style="color:#1db954">${m}</span>`)}</div>
-                <div style="font-size:12px; opacity:0.6;">${song.artist}</div>
-            </div>
-        </div>
-    `).join('');
-
-    // GSAP Stagger for smooth results entry
-    gsap.fromTo(".search-item", 
-        { x: -10, opacity: 0 }, 
-        { x: 0, opacity: 1, duration: 0.3, stagger: 0.05, ease: "power2.out" }
-    );
+let fuse = new Fuse(songs, {
+    keys: [
+        "title",
+        "artist",
+        "album",
+        "file"
+    ],
+    threshold: 0.35,
+    ignoreLocation: true,
+    includeScore: true
 });
 
+document.getElementById("searchInput").addEventListener("input", (e) => {
+    const q = e.target.value.trim().toLowerCase();
+    const container = document.getElementById("searchResults");
 
+    if (!q) {
+        container.innerHTML = "";
+        return;
+    }
+
+    // Escape regex characters so searches like "+" or "[" don't crash
+    const escaped = q.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+    const highlightRegex = new RegExp(escaped, "gi");
+
+    // Fuzzy search
+    const results = fuse.search(q).map(r => r.item);
+
+    container.innerHTML = results.map(song => `
+        <div class="song search-item"
+             onclick="playSongByIndex(${songs.indexOf(song)})"
+             style="animation: slideIn .3s ease forwards;">
+
+            <img
+                src="/cover/${song.file}"
+                class="cover"
+                loading="lazy"
+                decoding="async"
+                style="border-radius:10px;">
+
+            <div>
+                <div style="font-weight:bold;">
+                    ${song.title.replace(
+                        highlightRegex,
+                        m => `<span style="color:#1db954">${m}</span>`
+                    )}
+                </div>
+
+                <div style="font-size:12px;opacity:.6;">
+                    ${song.artist.replace(
+                        highlightRegex,
+                        m => `<span style="color:#1db954">${m}</span>`
+                    )}
+                </div>
+            </div>
+        </div>
+    `).join("");
+
+    gsap.from(".search-item", {
+        x: -10,
+        opacity: 0,
+        duration: 0.3,
+        stagger: 0.05,
+        ease: "power2.out"
+    });
+});
 
 // 8. HOME & PERSISTENCE
 function saveState() {
@@ -2664,11 +2686,9 @@ function extractDominantColor(imgElement) {
         document.documentElement.style.setProperty('--ambient-rgb', `29, 185, 84`);
     }
 }
+// Add this above the render loop
+let currentBass = 0;
 
-// Add this new tracking variable right above the render function
-let currentBass = 0; 
-
-// 4. The High-Gain Structural Fluid Render Loop
 function renderAudioBorderTick() {
     if (!visualizerStarted || !isPlaying) {
         requestAnimationFrame(renderAudioBorderTick);
@@ -2677,56 +2697,106 @@ function renderAudioBorderTick() {
 
     analyser.getByteFrequencyData(freqData);
 
-    // Grab broad kick drum and sub-impact spectrum arrays
-    let kickSum = freqData[1] + freqData[2] + freqData[3] + freqData[4]; 
-    let rawBass = kickSum / 4;
+    // ============================
+    // Wider Bass Region
+    // ============================
 
-    // Transient Peak Tracking: Filter background compression noise gates
-    bassMovingAverage = (bassMovingAverage * 0.92) + (rawBass * 0.08);
+    let kickSum = 0;
+
+    // Covers roughly 20-120Hz depending on fftSize
+    for (let i = 1; i <= 8; i++) {
+        kickSum += freqData[i];
+    }
+
+    let rawBass = kickSum / 8;
+
+    // ============================
+    // Moving Average
+    // ============================
+
+    bassMovingAverage =
+        bassMovingAverage * 0.94 +
+        rawBass * 0.06;
+
     let bassSpike = rawBass - bassMovingAverage;
-    if (bassSpike < 0) bassSpike = 0; 
 
-    // Hyper-Amplify Sensitivity Mapping via Cubic Processing Curves
-    let bassFactor = bassSpike / 35; 
-    let cubicBass = Math.pow(bassFactor, 3); 
-    
-    // Scale target velocity coefficients aggressively
-    let targetBass = Math.min(cubicBass * 3.5, 1.0); 
-    if (targetBass < 0.1) targetBass = 0;
+    bassSpike = Math.max(bassSpike, 0);
 
-    // Fluid Inertia Lerp Routing (Simulates thick, heavy fluid weight dynamics)
-    currentBass += (targetBass - currentBass) * 0.25; 
+    // ============================
+    // Better Sensitivity
+    // ============================
 
-    // Time-Varying Non-Linear Trigonometric Coordinate Arrays
-    let t = performance.now() / 180; // Accelerated wave speed rotation intervals
-    let baseR = 50; // Perfect circle spatial geometric midpoint coordinate
-    
-    // Amplified edge deformation coefficients based on active currentBass velocity
-    let waveAmp = 5 + (currentBass * 32); 
+    let bassFactor = bassSpike / 28;
 
-    // Map irregular wave structures to construct a living fluid bubble shape
-    let c1 = baseR + (Math.sin(t) * waveAmp);
-    let c2 = baseR + (Math.cos(t * 1.3) * waveAmp);
-    let c3 = baseR + (Math.sin(t * 0.7) * waveAmp);
-    let c4 = baseR + (Math.cos(t * 1.6) * waveAmp);
-    
-    let c5 = baseR + (Math.cos(t * 1.2) * waveAmp);
-    let c6 = baseR + (Math.sin(t * 1.4) * waveAmp);
-    let c7 = baseR + (Math.cos(t * 0.8) * waveAmp);
-    let c8 = baseR + (Math.sin(t * 1.7) * waveAmp);
-    
-    let liquidRadius = `${c1}% ${c2}% ${c3}% ${c4}% / ${c5}% ${c6}% ${c7}% ${c8}%`;
+    bassFactor = Math.min(bassFactor, 1);
 
-    // Strict structural layout translations
-    const globScale = 1.07 + (currentBass * 0.38);  // Scales cleanly out past the image boundary
-    const globAlpha = 0.75 + (currentBass * 0.25);  // Drives solid opacity saturation during transients
+    // Much nicer than cubic
+    let shaped =
+        Math.pow(bassFactor, 1.8);
+
+    let targetBass =
+        Math.min(shaped * 2.2, 1);
+
+    // Tiny noise gate
+    if (bassSpike < 3)
+        targetBass = 0;
+
+    // ============================
+    // Separate Attack / Release
+    // ============================
+
+    if (targetBass > currentBass) {
+
+        // Fast attack
+        currentBass +=
+            (targetBass - currentBass) * 0.45;
+
+    } else {
+
+        // Slow release
+        currentBass +=
+            (targetBass - currentBass) * 0.12;
+
+    }
+
+    // ============================
+    // Blob Animation
+    // ============================
+
+    const t = performance.now() / 180;
+    const baseR = 50;
+
+    const waveAmp =
+        5 +
+        currentBass * 34;
+
+    const c1 = baseR + Math.sin(t) * waveAmp;
+    const c2 = baseR + Math.cos(t * 1.3) * waveAmp;
+    const c3 = baseR + Math.sin(t * 0.7) * waveAmp;
+    const c4 = baseR + Math.cos(t * 1.6) * waveAmp;
+
+    const c5 = baseR + Math.cos(t * 1.2) * waveAmp;
+    const c6 = baseR + Math.sin(t * 1.4) * waveAmp;
+    const c7 = baseR + Math.cos(t * 0.8) * waveAmp;
+    const c8 = baseR + Math.sin(t * 1.7) * waveAmp;
+
+    const liquidRadius =
+        `${c1}% ${c2}% ${c3}% ${c4}% / ${c5}% ${c6}% ${c7}% ${c8}%`;
+
+    const globScale = 1.06 + (currentBass * 0.34);
+    const globAlpha =
+        0.75 +
+        currentBass * 0.25;
 
     const root = document.documentElement;
-    root.style.setProperty('--liquid-radius', liquidRadius);
-    root.style.setProperty('--glob-scale', globScale);
-    root.style.setProperty('--glob-alpha', globAlpha);
-    
-    root.style.setProperty('--dynamic-glow-color', `${dynamicCoverColor} 1)`);
+
+    root.style.setProperty("--liquid-radius", liquidRadius);
+    root.style.setProperty("--glob-scale", globScale);
+    root.style.setProperty("--glob-alpha", globAlpha);
+    root.style.setProperty(
+        "--dynamic-glow-color",
+        `${dynamicCoverColor} 1)`
+    );
 
     requestAnimationFrame(renderAudioBorderTick);
 }
