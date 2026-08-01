@@ -71,7 +71,7 @@ python main.py
 - Step 4
 - copy and paste in web use your local address or wlan address given
 ```bash
-http://127.0.0.1/
+http://127.0.0.1/5000
 ```
 
 - Step 5 (optional)
