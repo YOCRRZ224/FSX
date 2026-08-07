@@ -1054,49 +1054,124 @@ audio.addEventListener('play', () => {
         audioCtx.resume();
     }
 });
-
-// 3. True Album Color Extractor
 function extractDominantColor(imgElement) {
     try {
-        const canvas = document.createElement('canvas');
-        canvas.width = 1;
-        canvas.height = 1;
-        const ctx = canvas.getContext('2d');
-        
-        // Pull the 1x1 hardware-averaged pixel
-        ctx.drawImage(imgElement, 0, 0, 1, 1);
-        let [r, g, b] = ctx.getImageData(0, 0, 1, 1).data;
-        
-        // 🎛️ VIBRANCY MULTIPLIER: Push the dominant color channel so it isn't muddy
-        const max = Math.max(r, g, b);
-        const min = Math.min(r, g, b);
-        
-        // If the cover is mostly greyscale, force a slight tint to prevent dead UI
-        if (max - min < 20) { 
-            r = Math.min(r + 15, 255);
-            g = Math.min(g + 15, 255);
-        } else {
-            // Amplify the strongest color channel by 25%
-            if (r === max) r = Math.min(r * 1.25, 255);
-            if (g === max) g = Math.min(g * 1.25, 255);
-            if (b === max) b = Math.min(b * 1.25, 255);
+        const canvas = document.createElement("canvas");
+        const size = 32;
+
+        canvas.width = size;
+        canvas.height = size;
+
+        const ctx = canvas.getContext("2d", {
+            willReadFrequently: true
+        });
+
+        ctx.drawImage(imgElement, 0, 0, size, size);
+
+        const data = ctx.getImageData(0, 0, size, size).data;
+
+        const colors = [];
+
+        for (let i = 0; i < data.length; i += 4) {
+            const r = data[i];
+            const g = data[i + 1];
+            const b = data[i + 2];
+            const a = data[i + 3];
+
+            if (a < 128) continue;
+
+            // Ignore extremely dark pixels
+            const brightness = (r + g + b) / 3;
+            if (brightness < 15) continue;
+
+            // RGB → rough saturation
+            const max = Math.max(r, g, b);
+            const min = Math.min(r, g, b);
+            const saturation = max - min;
+
+            colors.push({
+                r,
+                g,
+                b,
+                brightness,
+                saturation
+            });
         }
 
-        // Floor the floats back to integers
-        r = Math.floor(r); 
-        g = Math.floor(g); 
-        b = Math.floor(b);
+        if (!colors.length) throw new Error("No usable colors");
 
-        // Update the visualizer's specific string
-        dynamicCoverColor = `rgba(${r}, ${g}, ${b}, `; 
-        
-        // 🔥 THE MAGIC: Inject the raw RGB array globally into the root CSS
-        document.documentElement.style.setProperty('--ambient-rgb', `${r}, ${g}, ${b}`);
+        /*
+         * Quantize colors.
+         *
+         * This groups similar colors together so one random
+         * green pixel doesn't become its own "dominant" color.
+         */
+        const buckets = new Map();
+
+        for (const c of colors) {
+            const r = Math.floor(c.r / 32);
+            const g = Math.floor(c.g / 32);
+            const b = Math.floor(c.b / 32);
+
+            const key = `${r},${g},${b}`;
+
+            if (!buckets.has(key)) {
+                buckets.set(key, {
+                    count: 0,
+                    r: 0,
+                    g: 0,
+                    b: 0
+                });
+            }
+
+            const bucket = buckets.get(key);
+
+            bucket.count++;
+            bucket.r += c.r;
+            bucket.g += c.g;
+            bucket.b += c.b;
+        }
+
+        // Find the largest color cluster
+        let dominant = null;
+
+        for (const bucket of buckets.values()) {
+            if (!dominant || bucket.count > dominant.count) {
+                dominant = bucket;
+            }
+        }
+
+        let r = Math.round(dominant.r / dominant.count);
+        let g = Math.round(dominant.g / dominant.count);
+        let b = Math.round(dominant.b / dominant.count);
+
+        /*
+         * Slight vibrancy boost.
+         * Don't brutally amplify one channel.
+         */
+        const max = Math.max(r, g, b);
+        const min = Math.min(r, g, b);
+
+        if (max - min > 20) {
+            if (r === max) r = Math.min(Math.round(r * 1.10), 255);
+            if (g === max) g = Math.min(Math.round(g * 1.10), 255);
+            if (b === max) b = Math.min(Math.round(b * 1.10), 255);
+        }
+
+        dynamicCoverColor = `rgba(${r}, ${g}, ${b}, `;
+
+        document.documentElement.style.setProperty(
+            "--ambient-rgb",
+            `${r}, ${g}, ${b}`
+        );
 
     } catch (e) {
-        // Fallback to the signature branding green
-        dynamicCoverColor = "rgba(255, 255, 255, "; 
-        document.documentElement.style.setProperty('--ambient-rgb', `29, 185, 84`);
+        dynamicCoverColor = "rgba(255, 255, 255, ";
+
+        document.documentElement.style.setProperty(
+            "--ambient-rgb",
+            "29, 185, 84"
+        );
     }
 }
 // Add this above the render loop
