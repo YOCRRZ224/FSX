@@ -44,6 +44,9 @@ and more developed by
 
 ---
 
+## Latest version (new feature)
+- lyrics support fk yeah
+- color thingy enhnaced
 
 ## Features
 
@@ -111,8 +114,8 @@ this was the last step you could run main.py and go on web.
 there's a NCS song in the music folder for test so here's the attribution also thanks NCS 
 
 ```bash
-Song: Aizu, SFRNG, SOVAGI - IN MY HEAD
+Song: Cartoon, Jéja - On & On (feat. Daniel Levi) [NCS Release]
 Music provided by NoCopyrightSounds
-Free Download/Stream: https://ncs.io/S_inmyhead
-Watch: http://ncs.lnk.to/S_inmyheadAT/youtube
+Free Download/Stream: http://ncs.io/onandon
+Watch: http://youtu.be/K4DyBUG242c
 ```

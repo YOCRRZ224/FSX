@@ -134,6 +134,33 @@ class="glass-card" id="headerShuffle">
                 <button class="side-btn" id="fpRepeatBtn" onclick="toggleRepeat()">
                     <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="#ffffff" viewBox="0 0 256 256"><path d="M24,128A72.08,72.08,0,0,1,96,56H204.69L194.34,45.66a8,8,0,0,1,11.32-11.32l24,24a8,8,0,0,1,0,11.32l-24,24a8,8,0,0,1-11.32-11.32L204.69,72H96a56.06,56.06,0,0,0-56,56,8,8,0,0,1-16,0Zm200-8a8,8,0,0,0-8,8,56.06,56.06,0,0,1-56,56H51.31l10.35-10.34a8,8,0,0,0-11.32-11.32l-24,24a8,8,0,0,0,0,11.32l24,24a8,8,0,0,0,11.32-11.32L51.31,200H160a72.08,72.08,0,0,0,72-72A8,8,0,0,0,224,120Z"></path></svg>
                 </button>
+                <button
+    class="side-btn"
+    id="fpLyricsBtn"
+    onclick="
+        console.log('LYRICS BUTTON CLICKED');
+        console.log('openLyrics =', typeof window.openLyrics);
+        console.log('currentSong =', typeof window.currentSong);
+        try {
+            openLyrics();
+        } catch (e) {
+            console.error('OPEN LYRICS CALL FAILED:', e);
+        }
+    "
+    aria-label="Lyrics"
+>
+    <svg xmlns="http://www.w3.org/2000/svg"
+         width="20"
+         height="20"
+         fill="none"
+         viewBox="0 0 256 256">
+        <path
+            d="M40 48h176M40 104h176M40 160h112"
+            stroke="currentColor"
+            stroke-width="16"
+            stroke-linecap="round"/>
+    </svg>
+</button>
             </div>
 
             <button class="closeBtn top" onclick="closePlayer()">
@@ -303,6 +330,107 @@ class="glass-card" id="headerShuffle">
 
     </div>
 
+</div>
+<div id="lyricsOverlay" class="lyrics-overlay">
+
+    <div id="lyricsBg" class="lyrics-bg"></div>
+
+    <div class="lyrics-drawer">
+
+        <header class="lyrics-header">
+
+            <div class="lyrics-heading">
+                <span>LYRICS</span>
+                <small id="lyricsStatus">SYNCED</small>
+            </div>
+
+            <div class="lyrics-header-actions">
+
+                <!-- Expand -->
+                <button
+                    id="lyricsExpand"
+                    class="lyrics-icon-btn"
+                    onclick="expandLyrics()"
+                    aria-label="Fullscreen lyrics"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         width="20"
+                         height="20"
+                         fill="none"
+                         viewBox="0 0 256 256">
+                        <path
+                            d="M40 96V56a16 16 0 0 1 16-16h40M216 96V56a16 16 0 0 0-16-16h-40M40 160v40a16 16 0 0 0 16 16h40M216 160v40a16 16 0 0 1-16 16h-40"
+                            stroke="currentColor"
+                            stroke-width="16"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"/>
+                    </svg>
+                </button>
+
+                <!-- Close -->
+                <button
+                    id="lyricsClose"
+                    class="lyrics-icon-btn"
+                    onclick="toggleLyrics()"
+                    aria-label="Close lyrics"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg"
+                         width="20"
+                         height="20"
+                         fill="none"
+                         viewBox="0 0 256 256">
+                        <path
+                            d="M200 56 56 200M56 56l144 144"
+                            stroke="currentColor"
+                            stroke-width="16"
+                            stroke-linecap="round"/>
+                    </svg>
+                </button>
+
+            </div>
+
+        </header>
+
+        <div class="lyrics-song-info">
+            <h2 id="lyricsTitle">Unknown Track</h2>
+            <p id="lyricsArtist">Unknown Artist</p>
+        </div>
+
+        <main id="lyricsViewport" class="lyrics-viewport">
+            <div id="lyricsContainer" class="lyrics-container"></div>
+        </main>
+
+        <div class="lyrics-bottom">
+
+            <div class="lyrics-progress">
+                <span id="lyricsCurrentTime">0:00</span>
+
+                <div class="lyrics-progress-track">
+                    <div id="lyricsProgressFill"></div>
+                </div>
+
+                <span id="lyricsDuration">0:00</span>
+            </div>
+
+            <button
+                id="lyricsPlayBtn"
+                class="lyrics-play-btn"
+                onclick="togglePlay()"
+                aria-label="Play / Pause"
+            >
+                <svg id="lyricsPlayIcon"
+                     xmlns="http://www.w3.org/2000/svg"
+                     width="22"
+                     height="22"
+                     fill="currentColor"
+                     viewBox="0 0 256 256">
+                    <path d="M228.04 103.95 84.15 19.96A16 16 0 0 0 60 33.76v188.48a16 16 0 0 0 24.15 13.8l143.89-84a28 28 0 0 0 0-48.09Z"/>
+                </svg>
+            </button>
+
+        </div>
+
+    </div>
 </div>
 <audio id="audio" crossorigin="anonymous" preload="auto"></audio>
 

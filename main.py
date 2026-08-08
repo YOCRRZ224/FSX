@@ -14,8 +14,10 @@ app = Flask(__name__)
 
 MUSIC_FOLDER = "music"
 UPLOAD_TEMP_FOLDER = "temp"
+LRC_FOLDER = "lrc"
 os.makedirs(MUSIC_FOLDER, exist_ok=True)
 os.makedirs(UPLOAD_TEMP_FOLDER, exist_ok=True)
+os.makedirs(LRC_FOLDER, exist_ok=True)
 jobs = {}
 
 HEADERS = {
@@ -180,6 +182,257 @@ def fetch_track(spotify_url, job_id=None):
         "title": title,
         "filename": filename
     }
+def get_lrc_filename(song):
+    return os.path.splitext(song)[0] + ".lrc"
+def fetch_lyrics(title, artist, album, duration):
+
+    headers = {
+        "User-Agent": "FSX Music Player/1.0"
+    }
+
+    # --------------------------------------------------
+    # 1. Exact match
+    # --------------------------------------------------
+
+    try:
+        response = requests.get(
+            "https://lrclib.net/api/get",
+            params={
+                "track_name": title,
+                "artist_name": artist,
+                "album_name": album,
+                "duration": int(duration)
+            },
+            headers=headers,
+            timeout=15
+        )
+
+        if response.status_code == 200:
+
+            data = response.json()
+
+            if data.get("syncedLyrics"):
+                return data["syncedLyrics"]
+
+            if data.get("plainLyrics"):
+                return data["plainLyrics"]
+
+    except Exception as e:
+        print("⚠️ Exact lyrics lookup failed:", e)
+
+
+    # --------------------------------------------------
+    # 2. Search fallback
+    # --------------------------------------------------
+
+    try:
+
+        response = requests.get(
+            "https://lrclib.net/api/search",
+            params={
+                "track_name": title,
+                "artist_name": artist
+            },
+            headers=headers,
+            timeout=15
+        )
+
+        response.raise_for_status()
+
+        results = response.json()
+
+        if not results:
+            return None
+
+        # Prefer synchronized lyrics
+        for result in results:
+
+            if result.get("syncedLyrics"):
+                return result["syncedLyrics"]
+
+        # Otherwise plain lyrics
+        for result in results:
+
+            if result.get("plainLyrics"):
+                return result["plainLyrics"]
+
+    except Exception as e:
+        print("⚠️ Lyrics search failed:", e)
+
+    return None
+def scan_lyrics(job_id=None):
+
+    os.makedirs(LRC_FOLDER, exist_ok=True)
+
+    music_files = [
+        file for file in os.listdir(MUSIC_FOLDER)
+        if file.lower().endswith((
+            ".mp3",
+            ".flac",
+            ".m4a",
+            ".ogg",
+            ".opus"
+        ))
+    ]
+
+    total = len(music_files)
+
+    if total == 0:
+        if job_id:
+            jobs[job_id]["stage"] = "No songs found"
+            jobs[job_id]["progress"] = 100
+
+        return
+
+    for index, file in enumerate(music_files):
+
+        progress = int((index / total) * 100)
+
+        if job_id:
+            jobs[job_id]["progress"] = progress
+            jobs[job_id]["stage"] = f"Checking {file}"
+
+        lrc_name = os.path.splitext(file)[0] + ".lrc"
+        lrc_path = os.path.join(LRC_FOLDER, lrc_name)
+
+        # Already exists
+        if os.path.exists(lrc_path):
+            print(f"⏭️ Lyrics already exist: {lrc_name}")
+            continue
+
+        music_path = os.path.join(MUSIC_FOLDER, file)
+
+        try:
+            audio = File(music_path, easy=True)
+
+            if audio is None:
+                print(f"⚠️ Unsupported audio: {file}")
+                continue
+
+            title = audio.get(
+                "title",
+                [os.path.splitext(file)[0]]
+            )[0]
+
+            artist = audio.get(
+                "artist",
+                ["Unknown Artist"]
+            )[0]
+
+            album = audio.get(
+                "album",
+                [""]
+            )[0]
+
+            try:
+                duration = int(round(audio.info.length))
+            except Exception:
+                duration = 0
+
+            print(
+                f"🎵 Searching lyrics: "
+                f"{artist} - {title}"
+            )
+
+            if job_id:
+                jobs[job_id]["stage"] = (
+                    f"Searching: {title}"
+                )
+
+            lyrics = fetch_lyrics(
+                title,
+                artist,
+                album,
+                duration
+            )
+
+            if lyrics:
+
+                with open(
+                    lrc_path,
+                    "w",
+                    encoding="utf-8"
+                ) as f:
+                    f.write(lyrics)
+
+                print(
+                    f"✅ Lyrics saved: {lrc_name}"
+                )
+
+            else:
+
+                with open(
+                    lrc_path,
+                    "w",
+                    encoding="utf-8"
+                ) as f:
+                    f.write(
+                        "[00:00.00] Lyrics not found"
+                    )
+
+                print(
+                    f"❌ Lyrics not found: "
+                    f"{lrc_name}"
+                )
+
+            # Small delay between requests
+            time.sleep(0.3)
+
+        except Exception as e:
+
+            print(
+                f"⚠️ Lyrics error for "
+                f"{file}: {e}"
+            )
+
+    if job_id:
+        jobs[job_id]["progress"] = 100
+        jobs[job_id]["stage"] = "Complete"
+@app.route("/lyrics/scan", methods=["POST"])
+def lyrics_scan():
+
+    job_id = str(uuid.uuid4())
+
+    jobs[job_id] = {
+        "progress": 0,
+        "stage": "Starting lyrics scan",
+        "speed": "",
+        "eta": ""
+    }
+
+    def worker():
+        try:
+            scan_lyrics(job_id)
+
+            jobs[job_id]["progress"] = 100
+            jobs[job_id]["stage"] = "Complete"
+
+        except Exception as e:
+            jobs[job_id]["stage"] = f"Failed: {e}"
+
+    Thread(target=worker, daemon=True).start()
+
+    return jsonify({
+        "success": True,
+        "job_id": job_id
+    })
+@app.route("/lyrics/<path:song>")
+def lyrics(song):
+
+    lrc_name = get_lrc_filename(song)
+    lrc_path = os.path.join(LRC_FOLDER, lrc_name)
+
+    if not os.path.exists(lrc_path):
+        return jsonify({
+            "success": False,
+            "error": "Lyrics not found"
+        }), 404
+
+    return send_from_directory(
+        LRC_FOLDER,
+        lrc_name,
+        mimetype="text/plain"
+    )
 @app.route("/")
 def home():
     return send_from_directory("static", "index.html")
@@ -326,6 +579,67 @@ def cover(song):
         "static",
         "default.jpg"
     )
+def ensure_lyrics_for_song(song):
+
+    music_path = os.path.join(MUSIC_FOLDER, song)
+
+    if not os.path.exists(music_path):
+        raise FileNotFoundError(f"Song not found: {song}")
+
+    audio = File(music_path, easy=True)
+
+    if audio is None:
+        raise Exception("Unsupported audio format")
+
+    title = audio.get(
+        "title",
+        [os.path.splitext(song)[0]]
+    )[0]
+
+    artist = audio.get(
+        "artist",
+        ["Unknown Artist"]
+    )[0]
+
+    album = audio.get(
+        "album",
+        [""]
+    )[0]
+
+    try:
+        duration = int(round(audio.info.length))
+    except Exception:
+        duration = 0
+
+    print(
+        f"🎵 Fetching lyrics: {artist} - {title}"
+    )
+
+    lyrics = fetch_lyrics(
+        title,
+        artist,
+        album,
+        duration
+    )
+
+    # IMPORTANT:
+    # Only synced lyrics should become an LRC file.
+    if not lyrics:
+        return False
+
+    lrc_name = get_lrc_filename(song)
+    lrc_path = os.path.join(LRC_FOLDER, lrc_name)
+
+    with open(
+        lrc_path,
+        "w",
+        encoding="utf-8"
+    ) as f:
+        f.write(lyrics)
+
+    print(f"✅ Lyrics saved: {lrc_name}")
+
+    return True
 @app.route("/upload", methods=["POST"])
 def upload():
     file_data = request.files['file']
@@ -391,6 +705,39 @@ def delete_song(song):
             "success": True,
             "message": f"{song} deleted"
         })
+
+    except Exception as e:
+        return jsonify({
+            "success": False,
+            "error": str(e)
+        }), 500
+@app.route("/lyrics/ensure/<path:song>", methods=["POST"])
+def ensure_lyrics(song):
+
+    lrc_name = get_lrc_filename(song)
+    lrc_path = os.path.join(LRC_FOLDER, lrc_name)
+
+    if os.path.exists(lrc_path):
+        return jsonify({
+            "success": True,
+            "available": True,
+            "existing": True
+        })
+
+    try:
+        found = ensure_lyrics_for_song(song)
+
+        if found:
+            return jsonify({
+                "success": True,
+                "available": True
+            })
+
+        return jsonify({
+            "success": False,
+            "available": False,
+            "error": "Lyrics not found"
+        }), 404
 
     except Exception as e:
         return jsonify({

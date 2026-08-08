@@ -12,6 +12,8 @@ let deleteTarget = null;
 let swipeStartX = 0;
 let recent = [];
 let lastTime = 0;
+let currentSong = null;
+let lyricsSong = null;
 
 const audio = document.getElementById("audio");
 const fullPlayer = document.getElementById("fullPlayer");
@@ -105,13 +107,21 @@ fetch("/songs")
 // 3. PLAYBACK LOGIC
 function playSongByIndex(index) {
     currentIndex = index;
+
     const song = songs[currentIndex];
+
+    currentSong = song; // ← IMPORTANT
+
     audio.src = `/play/${song.file}`;
     audio.play();
+
     isPlaying = true;
-    
-    recent = [song, ...recent.filter(s => s.file !== song.file)].slice(0, 5);
-    
+
+    recent = [
+        song,
+        ...recent.filter(s => s.file !== song.file)
+    ].slice(0, 5);
+
     updateUI(song);
     saveState();
     renderHome();
@@ -404,22 +414,66 @@ function saveState() {
     }));
 }
 
+
 function loadState() {
-    const data = JSON.parse(localStorage.getItem("yocrrz_state"));
-    if (data) {
+    const saved = localStorage.getItem("yocrrz_state");
+
+    if (!saved) return;
+
+    try {
+        const data = JSON.parse(saved);
+
         recent = data.recent || [];
-        if (data.lastPlayed) {
-            const idx = songs.findIndex(s => s.file === data.lastPlayed.file);
-            if (idx !== -1) {
-                currentIndex = idx;
-                updateUI(songs[currentIndex]);
-                audio.src = `/play/${songs[currentIndex].file}`;
-                audio.currentTime = data.lastTime || 0;
-            }
+
+        if (!data.lastPlayed) return;
+
+        const idx = songs.findIndex(
+            s => s.file === data.lastPlayed.file
+        );
+
+        if (idx === -1) {
+            console.warn(
+                "Saved song no longer exists:",
+                data.lastPlayed.file
+            );
+            return;
         }
+
+        // Restore current song index
+        currentIndex = idx;
+
+        // IMPORTANT:
+        // Restore currentSong so openLyrics() can use it
+        currentSong = songs[currentIndex];
+
+        // Restore player UI
+        updateUI(currentSong);
+
+        // Restore audio source
+        audio.src = `/play/${currentSong.file}`;
+
+        // Restore playback position
+        audio.addEventListener(
+            "loadedmetadata",
+            () => {
+                if (
+                    data.lastTime &&
+                    !isNaN(data.lastTime) &&
+                    data.lastTime < audio.duration
+                ) {
+                    audio.currentTime = data.lastTime;
+                }
+            },
+            { once: true }
+        );
+
+    } catch (error) {
+        console.error("Failed to load saved player state:", error);
+
+        // Prevent corrupted localStorage from breaking the player
+        localStorage.removeItem("yocrrz_state");
     }
 }
-
 
 
 
@@ -1345,3 +1399,405 @@ async function confirmDelete() {
 
     }
 }
+// lyrics thingu
+function showLyricsDownloadButton() {
+
+    const container =
+        document.getElementById("lyricsContainer");
+
+    container.innerHTML = `
+        <div class="lyrics-empty">
+
+            <div class="lyric-line active">
+                Lyrics aren't downloaded
+            </div>
+
+            <button
+                class="lyrics-download-btn"
+                onclick="downloadLyrics()"
+            >
+                Download Lyrics
+            </button>
+
+        </div>
+    `;
+}
+async function downloadLyrics() {
+
+    if (!lyricsSong) return;
+
+    const container =
+        document.getElementById("lyricsContainer");
+
+    container.innerHTML = `
+        <div class="lyrics-empty">
+            <div class="lyric-line active">
+                Searching for lyrics...
+            </div>
+        </div>
+    `;
+
+    try {
+
+        const response = await fetch(
+            `/lyrics/ensure/${encodeURIComponent(lyricsSong.file)}`,
+            {
+                method: "POST"
+            }
+        );
+
+        const data = await response.json();
+
+        if (!response.ok || !data.available) {
+
+            container.innerHTML = `
+                <div class="lyrics-empty">
+
+                    <div class="lyric-line active">
+                        Lyrics not found
+                    </div>
+
+                    <button
+                        class="lyrics-download-btn"
+                        onclick="downloadLyrics()"
+                    >
+                        Try Again
+                    </button>
+
+                </div>
+            `;
+
+            return;
+        }
+
+        // Fetch the newly created LRC
+        const lrcResponse = await fetch(
+            `/lyrics/${encodeURIComponent(lyricsSong.file)}`
+        );
+
+        if (!lrcResponse.ok) {
+            throw new Error("LRC file unavailable");
+        }
+
+        const lrc = await lrcResponse.text();
+
+        renderLyrics(lrc);
+
+    } catch (error) {
+
+        console.error(
+            "Lyrics download error:",
+            error
+        );
+
+        container.innerHTML = `
+            <div class="lyrics-empty">
+
+                <div class="lyric-line active">
+                    Failed to download lyrics
+                </div>
+
+                <button
+                    class="lyrics-download-btn"
+                    onclick="downloadLyrics()"
+                >
+                    Retry
+                </button>
+
+            </div>
+        `;
+    }
+}
+function parseLRC(lrc) {
+    const lines = [];
+
+    for (const line of lrc.split("\n")) {
+
+        const match = line.match(
+            /^\[(\d+):(\d+(?:\.\d+)?)\]\s*(.*)$/
+        );
+
+        if (!match) continue;
+
+        const minutes = Number(match[1]);
+        const seconds = Number(match[2]);
+
+        lines.push({
+            time: minutes * 60 + seconds,
+            text: match[3].trim()
+        });
+    }
+
+    return lines.sort((a, b) => a.time - b.time);
+}
+function renderLyrics(lrc) {
+
+    const lines = parseLRC(lrc);
+
+    const container =
+        document.getElementById("lyricsContainer");
+
+    container.innerHTML = "";
+
+    lines.forEach((line, index) => {
+
+        const el = document.createElement("div");
+
+        el.className = "lyric-line";
+        el.textContent = line.text;
+
+        el.dataset.time = line.time;
+        el.dataset.index = index;
+
+        el.onclick = () => {
+            audio.currentTime = line.time;
+        };
+
+        container.appendChild(el);
+    });
+}
+function updateLyrics() {
+
+    const lines =
+        document.querySelectorAll(".lyric-line[data-time]");
+
+    if (!lines.length) return;
+
+    let activeIndex = -1;
+
+    for (let i = 0; i < lines.length; i++) {
+
+        const time = Number(lines[i].dataset.time);
+
+        if (audio.currentTime >= time) {
+            activeIndex = i;
+        } else {
+            break;
+        }
+    }
+
+    lines.forEach((line, i) => {
+
+        line.classList.toggle("active", i === activeIndex);
+        line.classList.toggle("passed", i < activeIndex);
+
+    });
+
+    if (activeIndex >= 0) {
+
+        lines[activeIndex].scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+    }
+}
+
+
+audio.addEventListener("timeupdate", () => {
+
+    updateLyrics();
+
+    const current = audio.currentTime || 0;
+    const duration = audio.duration || 0;
+
+    document.getElementById("lyricsCurrentTime")
+        .textContent = formatTime(current);
+
+    document.getElementById("lyricsDuration")
+        .textContent = formatTime(duration);
+
+    const percent = duration
+        ? (current / duration) * 100
+        : 0;
+
+    document.getElementById("lyricsProgressFill")
+        .style.width = `${percent}%`;
+});
+
+audio.addEventListener(
+    "timeupdate",
+    updateLyrics
+);
+async function openLyrics(song = currentSong) {
+    console.log("openLyrics called", song);
+    try {
+
+        if (!song) return;
+
+        lyricsSong = song;
+
+        const overlay =
+            document.getElementById("lyricsOverlay");
+
+        const container =
+            document.getElementById("lyricsContainer");
+
+        const title =
+            document.getElementById("lyricsTitle");
+
+        const artist =
+            document.getElementById("lyricsArtist");
+
+        if (!overlay || !container || !title || !artist) {
+            throw new Error("Lyrics elements missing from DOM");
+        }
+
+        title.textContent =
+            song.title || "Unknown Track";
+
+        artist.textContent =
+            song.artist || "Unknown Artist";
+
+        container.innerHTML = `
+            <div class="lyrics-empty">
+                <div class="lyric-line active">
+                    Loading lyrics...
+                </div>
+            </div>
+        `;
+
+        overlay.classList.add("active");
+
+        const response = await fetch(
+            `/lyrics/${encodeURIComponent(song.file)}`
+        );
+
+        if (!response.ok) {
+            showLyricsDownloadButton();
+            return;
+        }
+
+        const lrc = await response.text();
+
+        if (!lrc.trim()) {
+            showLyricsDownloadButton();
+            return;
+        }
+
+        renderLyrics(lrc);
+
+        overlay.classList.remove("expanded");
+        lyricsExpanded = false;
+
+    } catch (error) {
+
+        console.error("Lyrics error:", error);
+
+        const container =
+            document.getElementById("lyricsContainer");
+
+        if (container) {
+            container.innerHTML = `
+                <div class="lyrics-empty">
+
+                    <div class="lyric-line active">
+                        Unable to check lyrics
+                    </div>
+
+                    <button
+                        class="lyrics-download-btn"
+                        onclick="downloadLyrics()"
+                    >
+                        Try Again
+                    </button>
+
+                </div>
+            `;
+        }
+    }
+}
+let lyricsExpanded = false;
+
+function toggleLyrics() {
+
+    const overlay =
+        document.getElementById("lyricsOverlay");
+
+    if (overlay.classList.contains("active")) {
+
+        overlay.classList.remove("active");
+        overlay.classList.remove("expanded");
+
+        lyricsExpanded = false;
+
+        return;
+    }
+
+    overlay.classList.add("active");
+}
+function expandLyrics() {
+
+    const overlay =
+        document.getElementById("lyricsOverlay");
+
+    const button =
+        document.getElementById("lyricsExpand");
+
+    lyricsExpanded = !lyricsExpanded;
+
+    overlay.classList.toggle(
+        "expanded",
+        lyricsExpanded
+    );
+
+    if (lyricsExpanded) {
+
+        button.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="20"
+                 height="20"
+                 fill="none"
+                 viewBox="0 0 256 256">
+
+                <path
+                    d="M48 96V48h48M208 96V48h-48M48 160v48h48M208 160v48h-48"
+                    stroke="currentColor"
+                    stroke-width="16"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"/>
+            </svg>
+        `;
+
+    } else {
+
+        button.innerHTML = `
+            <svg xmlns="http://www.w3.org/2000/svg"
+                 width="20"
+                 height="20"
+                 fill="none"
+                 viewBox="0 0 256 256">
+
+                <path
+                    d="M40 96V56a16 16 0 0 1 16-16h40M216 96V56a16 16 0 0 0-16-16h-40M40 160v40a16 16 0 0 0 16 16h40M216 160v40a16 16 0 0 1-16 16h-40"
+                    stroke="currentColor"
+                    stroke-width="16"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"/>
+            </svg>
+        `;
+    }
+}
+audio.addEventListener("timeupdate", () => {
+
+    updateLyrics();
+
+    const current =
+        audio.currentTime || 0;
+
+    const duration =
+        audio.duration || 0;
+
+    document.getElementById("lyricsCurrentTime")
+        .textContent = formatTime(current);
+
+    document.getElementById("lyricsDuration")
+        .textContent = formatTime(duration);
+
+    const percent =
+        duration
+            ? (current / duration) * 100
+            : 0;
+
+    document.getElementById("lyricsProgressFill")
+        .style.width = `${percent}%`;
+});
