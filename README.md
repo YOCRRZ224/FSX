@@ -102,7 +102,20 @@ rm -rf assets
 this was the last step you could run main.py and go on web.
 
 ---
+<p align="center">
+  <a href="https://github.com/YOCRRZ224/FSX">
+    <img src="https://img.shields.io/badge/Star%20FSX-181717?style=for-the-badge&logo=github">
+  </a>
+  <a href="https://github.com/YOCRRZ224/FSX/issues">
+    <img src="https://img.shields.io/badge/Issues-181717?style=for-the-badge">
+  </a>
+  <a href="https://github.com/YOCRRZ224/FSX/pulls">
+    <img src="https://img.shields.io/badge/Contribute-181717?style=for-the-badge">
+  </a>
+</p>
+
 ### Tech stack
+
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white">
   <img src="https://img.shields.io/badge/Flask-000000?style=for-the-badge&logo=flask&logoColor=white">
@@ -125,6 +138,8 @@ this was the last step you could run main.py and go on web.
 ![Commit Activity](https://img.shields.io/github/commit-activity/m/YOCRRZ224/FSX?style=for-the-badge)
 ---
 
+![Alt](https://repobeats.axiom.co/api/embed/a6aa55937bb63028f7d631a2c7291b0a33809a1d.svg "Repobeats analytics image")
+
 there's a NCS song in the music folder for test so here's the attribution also thanks NCS 
 
 ```bash
@@ -134,13 +149,5 @@ Free Download/Stream: http://ncs.io/onandon
 Watch: http://youtu.be/K4DyBUG242c
 ```
 
-## Star History
 
-<a href="https://www.star-history.com/?repos=YOCRRZ224%2FFSX&type=date&legend=top-left">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=YOCRRZ224/FSX&type=date&theme=dark&legend=top-left&sealed_token=YIAGOyhmzHcsKKO6hyzLe3jR_d08FDO9N7e9-1tMQhjvu84bH7owMZX3nimAgkgawIhf9WqYTPCL1YjZROpR6j_RZ_yZ4OlbYJB4t2q-0lUDcZWY5E7Ubg" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=YOCRRZ224/FSX&type=date&legend=top-left&sealed_token=YIAGOyhmzHcsKKO6hyzLe3jR_d08FDO9N7e9-1tMQhjvu84bH7owMZX3nimAgkgawIhf9WqYTPCL1YjZROpR6j_RZ_yZ4OlbYJB4t2q-0lUDcZWY5E7Ubg" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=YOCRRZ224/FSX&type=date&legend=top-left&sealed_token=YIAGOyhmzHcsKKO6hyzLe3jR_d08FDO9N7e9-1tMQhjvu84bH7owMZX3nimAgkgawIhf9WqYTPCL1YjZROpR6j_RZ_yZ4OlbYJB4t2q-0lUDcZWY5E7Ubg" />
- </picture>
-</a>
 
