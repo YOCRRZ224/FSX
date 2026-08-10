@@ -122,3 +122,13 @@ Music provided by NoCopyrightSounds
 Free Download/Stream: http://ncs.io/onandon
 Watch: http://youtu.be/K4DyBUG242c
 ```
+
+## Star History
+
+<a href="https://www.star-history.com/?repos=YOCRRZ224%2FFSX&type=date&legend=top-left">
+ <picture>
+   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=YOCRRZ224/FSX&type=date&theme=dark&legend=top-left&sealed_token=YIAGOyhmzHcsKKO6hyzLe3jR_d08FDO9N7e9-1tMQhjvu84bH7owMZX3nimAgkgawIhf9WqYTPCL1YjZROpR6j_RZ_yZ4OlbYJB4t2q-0lUDcZWY5E7Ubg" />
+   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=YOCRRZ224/FSX&type=date&legend=top-left&sealed_token=YIAGOyhmzHcsKKO6hyzLe3jR_d08FDO9N7e9-1tMQhjvu84bH7owMZX3nimAgkgawIhf9WqYTPCL1YjZROpR6j_RZ_yZ4OlbYJB4t2q-0lUDcZWY5E7Ubg" />
+   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=YOCRRZ224/FSX&type=date&legend=top-left&sealed_token=YIAGOyhmzHcsKKO6hyzLe3jR_d08FDO9N7e9-1tMQhjvu84bH7owMZX3nimAgkgawIhf9WqYTPCL1YjZROpR6j_RZ_yZ4OlbYJB4t2q-0lUDcZWY5E7Ubg" />
+ </picture>
+</a>
