@@ -47,6 +47,9 @@ and more developed by
 ## Latest version (new feature)
 - lyrics support fk yeah
 - color thingy enhnaced
+- added health endpoints
+- "/api/raw"
+- "/api/health"
 
 ## Features
 
