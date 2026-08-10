@@ -1,0 +1,2101 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta
+    name="viewport"
+    content="width=device-width, initial-scale=1.0"
+>
+
+<title>FSX Server health</title>
+
+<style>
+
+* {
+    box-sizing: border-box;
+}
+
+:root {
+    --accent: #1db954;
+    --accent-light: #38f27a;
+
+    --background: #050505;
+
+    --card: rgba(255,255,255,.045);
+    --border: rgba(255,255,255,.08);
+
+    --text: #fff;
+    --muted: rgba(255,255,255,.48);
+}
+
+body {
+
+    margin: 0;
+
+    min-height: 100vh;
+
+    padding: 24px 14px;
+
+    color: var(--text);
+
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        sans-serif;
+
+    background:
+
+        radial-gradient(
+            circle at 50% -10%,
+            rgba(29,185,84,.16),
+            transparent 38%
+        ),
+
+        var(--background);
+}
+
+.container {
+
+    width: min(100%, 720px);
+
+    margin: auto;
+}
+
+
+/* HEADER */
+
+.header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    margin-bottom: 20px;
+}
+
+.brand {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+}
+
+.logo {
+
+    width: 44px;
+    height: 44px;
+
+    display: grid;
+
+    place-items: center;
+
+    border-radius: 13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            var(--accent),
+            var(--accent-light)
+        );
+
+    color: #000;
+
+    font-size: 15px;
+
+    font-weight: 1000;
+
+    box-shadow:
+        0 10px 35px
+        rgba(29,185,84,.25);
+}
+
+.title {
+
+    font-size: 19px;
+
+    font-weight: 900;
+}
+
+.subtitle {
+
+    margin-top: 2px;
+
+    color: var(--muted);
+
+    font-size: 11px;
+}
+
+
+/* STATUS */
+
+.status {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 7px;
+
+    padding: 7px 11px;
+
+    border-radius: 999px;
+
+    color: #55ff91;
+
+    background:
+        rgba(29,185,84,.09);
+
+    border:
+        1px solid
+        rgba(29,185,84,.2);
+
+    font-size: 11px;
+
+    font-weight: 800;
+}
+
+.status-dot {
+
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: #35f579;
+
+    box-shadow:
+        0 0 12px #35f579;
+}
+
+
+/* HERO */
+
+.hero {
+
+    position: relative;
+
+    overflow: hidden;
+
+    padding: 26px;
+
+    margin-bottom: 12px;
+
+    border-radius: 23px;
+
+    background:
+        linear-gradient(
+            145deg,
+            rgba(255,255,255,.07),
+            rgba(255,255,255,.025)
+        );
+
+    border:
+        1px solid var(--border);
+
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.hero::after {
+
+    content: "";
+
+    position: absolute;
+
+    width: 180px;
+    height: 180px;
+
+    right: -80px;
+    top: -90px;
+
+    background: var(--accent);
+
+    filter: blur(80px);
+
+    opacity: .12;
+}
+
+.hero h1 {
+
+    position: relative;
+
+    margin: 0;
+
+    font-size:
+        clamp(28px, 8vw, 42px);
+
+    letter-spacing: -1.5px;
+
+    z-index: 1;
+}
+
+.hero p {
+
+    position: relative;
+
+    margin: 7px 0 0;
+
+    color: var(--muted);
+
+    font-size: 13px;
+
+    z-index: 1;
+}
+
+
+/* GRID */
+
+.grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 12px;
+}
+
+.card {
+
+    padding: 17px;
+
+    border-radius: 18px;
+
+    background: var(--card);
+
+    border:
+        1px solid var(--border);
+
+    backdrop-filter: blur(18px);
+    -webkit-backdrop-filter: blur(18px);
+
+    transition:
+        transform .2s ease,
+        border-color .2s ease;
+}
+
+.card:hover {
+
+    transform:
+        translateY(-2px);
+
+    border-color:
+        rgba(255,255,255,.14);
+}
+
+.label {
+
+    margin-bottom: 7px;
+
+    color: var(--muted);
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: .08em;
+}
+
+.value {
+
+    font-size: 17px;
+
+    font-weight: 850;
+
+    word-break: break-word;
+}
+
+.full {
+
+    grid-column: 1 / -1;
+}
+
+
+/* STORAGE */
+
+.storage {
+
+    height: 7px;
+
+    margin-top: 12px;
+
+    overflow: hidden;
+
+    border-radius: 999px;
+
+    background:
+        rgba(255,255,255,.07);
+}
+
+.storage-fill {
+
+    width: 0%;
+
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--accent),
+            var(--accent-light)
+        );
+
+    box-shadow:
+        0 0 14px
+        rgba(29,185,84,.5);
+
+    transition:
+        width .8s ease;
+}
+
+
+/* FOOTER */
+
+.footer {
+
+    margin-top: 18px;
+
+    text-align: center;
+
+    color:
+        rgba(255,255,255,.25);
+
+    font-size: 10px;
+}
+
+/* ================================
+   HEARTBEAT
+================================ */
+
+.heartbeat {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 12px;
+
+    margin-top: 18px;
+
+    color: var(--muted);
+
+    font-size: 12px;
+}
+
+.heart {
+
+    font-size: 25px;
+
+    animation:
+        heartbeat 1.1s infinite;
+}
+
+@keyframes heartbeat {
+
+    0% {
+        transform: scale(1);
+    }
+
+    12% {
+        transform: scale(1.25);
+    }
+
+    24% {
+        transform: scale(1);
+    }
+
+    36% {
+        transform: scale(1.18);
+    }
+
+    50% {
+        transform: scale(1);
+    }
+
+    100% {
+        transform: scale(1);
+    }
+}
+
+
+/* ================================
+   LATENCY
+================================ */
+
+.latency-card {
+
+    padding: 18px;
+
+    border-radius: 18px;
+
+    background: var(--card);
+
+    border:
+        1px solid var(--border);
+
+    backdrop-filter: blur(18px);
+
+    -webkit-backdrop-filter: blur(18px);
+}
+
+.latency-header {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    align-items: center;
+
+    margin-bottom: 12px;
+}
+
+.latency-title {
+
+    font-size: 12px;
+
+    font-weight: 900;
+
+    text-transform: uppercase;
+
+    letter-spacing: .08em;
+}
+
+.latency-live {
+
+    font-size: 10px;
+
+    color: #55ff91;
+}
+
+#latencyCanvas {
+
+    display: block;
+
+    width: 100%;
+
+    height: 150px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(0,0,0,.18);
+}
+
+.latency-stats {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(3, 1fr);
+
+    gap: 8px;
+
+    margin-top: 12px;
+}
+
+.latency-stat {
+
+    padding: 10px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,.035);
+}
+
+.latency-stat-label {
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    text-transform: uppercase;
+
+    letter-spacing: .08em;
+}
+
+.latency-stat-value {
+
+    margin-top: 4px;
+
+    font-size: 16px;
+
+    font-weight: 900;
+}
+
+
+/* ================================
+   MUSIC LIBRARY
+================================ */
+
+.library-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(2, 1fr);
+
+    gap: 9px;
+
+    margin-top: 12px;
+}
+
+.library-stat {
+
+    padding: 13px;
+
+    border-radius: 14px;
+
+    background:
+        rgba(255,255,255,.035);
+}
+
+.library-stat .number {
+
+    font-size: 20px;
+
+    font-weight: 950;
+}
+
+.library-stat .name {
+
+    margin-top: 3px;
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    text-transform: uppercase;
+
+    letter-spacing: .07em;
+}
+
+
+/* ================================
+   STORAGE
+================================ */
+
+.storage-info {
+
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    color: var(--muted);
+
+    font-size: 10px;
+}
+
+.music-storage {
+
+    height: 6px;
+
+    margin-top: 10px;
+
+    overflow: hidden;
+
+    border-radius: 999px;
+
+    background:
+        rgba(255,255,255,.07);
+}
+
+.music-storage-fill {
+
+    width: 0%;
+
+    height: 100%;
+
+    border-radius: inherit;
+
+    background:
+        linear-gradient(
+            90deg,
+            var(--accent),
+            var(--accent-light)
+        );
+
+    transition:
+        width .8s ease;
+}
+/* MOBILE */
+
+@media (max-width: 480px) {
+
+    body {
+        padding: 18px 12px;
+    }
+
+    .grid {
+        grid-template-columns: 1fr;
+    }
+
+    .full {
+        grid-column: auto;
+    }
+
+    .hero {
+        padding: 22px;
+    }
+}
+/* ─────────────────────────────
+   CHARTS
+───────────────────────────── */
+
+.chart {
+
+    width: 100%;
+    height: 150px;
+
+    display: block;
+
+    margin-top: 12px;
+}
+
+
+.storage-chart {
+
+    width: 100%;
+    height: 18px;
+
+    display: block;
+
+    margin-top: 14px;
+
+    border-radius: 999px;
+}
+
+
+/* OFFLINE STATE */
+
+.status.offline {
+
+    color: #ff7070;
+
+    background:
+        rgba(255,70,70,.09);
+
+    border-color:
+        rgba(255,70,70,.2);
+}
+
+
+.status.offline .status-dot {
+
+    background: #ff5c5c;
+
+    box-shadow:
+        0 0 12px
+        rgba(255,92,92,.8);
+}
+
+
+/* subtle chart card */
+
+.card:has(canvas) {
+
+    overflow: hidden;
+
+}
+
+
+/* chart animation */
+
+canvas {
+
+    transition:
+        opacity .3s ease;
+}
+.logo img{
+      width: 40px;
+    height: 40px;
+    object-fit: contain;
+    display: block;
+    border-radius: 13px;
+}
+.go-to-pl {
+    font-size: 14px;
+    color: #888;
+}
+
+.go-to-pl a {
+     color: var( --accent-light);
+    text-decoration: none;
+    font-weight: 600;
+    margin-left: 4px;
+    transition: color 0.2s ease;
+}
+
+.go-to-pl a:hover {
+    color: var( --accent);
+}
+</style>
+
+</head>
+
+
+<body>
+
+<div class="container">
+
+
+    <header class="header">
+
+        <div class="brand">
+
+            <div class="logo">
+                <img src="../static/default.jpg" alt="" />
+            </div>
+
+            <div>
+
+                <div class="title">
+                    FSX Server
+                </div>
+
+                <div class="subtitle">
+                    Self-hosted music server
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="status">
+
+            <span class="status-dot"></span>
+
+            ONLINE
+
+        </div>
+
+    </header>
+
+
+<section class="hero">
+
+    <h1>
+        Server is running.
+    </h1>
+
+    <p>
+        Your FSX instance is healthy
+        and ready to serve music.
+    </p>
+
+    <div class="heartbeat">
+
+        <span class="heart">
+            ♥
+        </span>
+
+        <span>
+            FSX heartbeat
+            <strong id="heartbeatLatency">
+                —
+            </strong>
+            ms
+        </span>
+
+    </div>
+
+</section>
+
+
+    <main class="grid">
+
+
+        <div class="card">
+
+            <div class="label">
+                Version
+            </div>
+
+            <div
+                class="value"
+                id="version"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                Uptime
+            </div>
+
+            <div
+                class="value"
+                id="uptime"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                Platform
+            </div>
+
+            <div
+                class="value"
+                id="platform"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                Architecture
+            </div>
+
+            <div
+                class="value"
+                id="architecture"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                Python
+            </div>
+
+            <div
+                class="value"
+                id="python"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="card">
+
+            <div class="label">
+                Hostname
+            </div>
+
+            <div
+                class="value"
+                id="hostname"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="card full">
+
+            <div class="label">
+                Storage
+            </div>
+
+            <div
+                class="value"
+                id="storage"
+            >
+                —
+            </div>
+
+            <div class="storage">
+
+                <div
+                    class="storage-fill"
+                    id="storageFill"
+                ></div>
+
+            </div>
+
+        </div>
+<div class="card full">
+
+    <div class="label">
+        Storage Usage
+    </div>
+
+    <div
+        class="value"
+        id="storagePercent"
+    >
+        —
+    </div>
+
+    <canvas
+        id="storageChart"
+        class="storage-chart"
+    ></canvas>
+
+</div>
+<div class="card">
+
+    <div class="label">
+        Response
+    </div>
+
+    <div
+        class="value"
+        id="latency"
+    >
+        —
+    </div>
+
+</div>
+
+
+<div class="card">
+
+    <div class="label">
+        Last Update
+    </div>
+
+    <div
+        class="value"
+        id="lastUpdate"
+    >
+        —
+    </div>
+
+</div>
+
+
+<div class="card full">
+
+    <div class="label">
+        Response Latency
+    </div>
+
+    <canvas
+        id="latencyChart"
+        class="chart"
+    ></canvas>
+
+</div>
+
+<div class="card full">
+        <div class="label">
+        Music Library
+    </div>
+
+
+    <div class="library-grid">
+
+        <div class="library-stat">
+
+            <div
+                class="number"
+                id="songCount"
+            >
+                —
+            </div>
+
+            <div class="name">
+                Songs
+            </div>
+
+        </div>
+
+
+        <div class="library-stat">
+
+            <div
+                class="number"
+                id="artistCount"
+            >
+                —
+            </div>
+
+            <div class="name">
+                Artists
+            </div>
+
+        </div>
+
+
+        <div class="library-stat">
+
+            <div
+                class="number"
+                id="albumCount"
+            >
+                —
+            </div>
+
+            <div class="name">
+                Albums
+            </div>
+
+        </div>
+
+
+        <div class="library-stat">
+
+            <div
+                class="number"
+                id="musicSize"
+            >
+                —
+            </div>
+
+            <div class="name">
+                Music Storage
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <div
+        class="storage-info"
+        style="margin-top:15px"
+    >
+
+        <span>
+            Music folder
+        </span>
+
+        <span id="musicFolder">
+            music
+        </span>
+
+    </div>
+
+
+    <div class="music-storage">
+
+        <div
+            class="music-storage-fill"
+            id="musicStorageFill"
+        ></div>
+
+    </div>
+
+
+</div>
+<div class="card full">
+        <div class="latency-header">
+
+        <div class="latency-title">
+            Network latency
+        </div>
+
+
+
+    </div>
+
+
+
+
+    <div class="latency-stats">
+
+        <div class="latency-stat">
+
+            <div class="latency-stat-label">
+                Current
+            </div>
+
+            <div
+                class="latency-stat-value"
+                id="latencyCurrent"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="latency-stat">
+
+            <div class="latency-stat-label">
+                Average
+            </div>
+
+            <div
+                class="latency-stat-value"
+                id="latencyAverage"
+            >
+                —
+            </div>
+
+        </div>
+
+
+        <div class="latency-stat">
+
+            <div class="latency-stat-label">
+                Peak
+            </div>
+
+            <div
+                class="latency-stat-value"
+                id="latencyPeak"
+            >
+                —
+            </div>
+
+        </div>
+
+    </div>
+</div>
+<div class="card full">
+                <div class="go-to-pl">
+    GO TO <a href="/">player</a>
+</div>
+</div>
+    </main>
+
+
+
+
+    <footer class="footer">
+
+        FSX Music Player ·
+        Server Health
+
+    </footer>
+
+</div>
+
+
+<script>
+const uptimeHistory = [];
+const latencyHistory = [];
+
+const MAX_POINTS = 30;
+
+let currentLatency = 0;
+let musicLibrary = [];
+
+/* ─────────────────────────────
+   HEALTH POLLING
+───────────────────────────── */
+function updateLatencyStats() {
+
+    if (!latencyHistory.length)
+        return;
+
+    const current =
+        latencyHistory[
+            latencyHistory.length - 1
+        ];
+
+    const average =
+        latencyHistory.reduce(
+            (sum, value) => sum + value,
+            0
+        ) / latencyHistory.length;
+
+    const peak =
+        Math.max(...latencyHistory);
+
+
+    document.getElementById(
+        "latencyCurrent"
+    ).textContent =
+        `${current} ms`;
+
+
+    document.getElementById(
+        "latencyAverage"
+    ).textContent =
+        `${Math.round(average)} ms`;
+
+
+    document.getElementById(
+        "latencyPeak"
+    ).textContent =
+        `${peak} ms`;
+
+
+    /* Hero heartbeat */
+
+    document.getElementById(
+        "heartbeatLatency"
+    ).textContent =
+        current;
+
+}
+async function loadHealth() {
+
+    const start = performance.now();
+
+    try {
+
+        const response =
+            await fetch(
+                "/api/raw",
+                {
+                    cache: "no-store"
+                }
+            );
+
+        const latency =
+            Math.round(
+                performance.now() - start
+            );
+
+        if (!response.ok)
+            throw new Error(
+                "HTTP " + response.status
+            );
+
+        const data =
+            await response.json();
+
+
+        /* LATENCY */
+
+        latencyHistory.push(latency);
+        updateLatencyStats();
+        if (
+            latencyHistory.length >
+            MAX_POINTS
+        ) {
+            latencyHistory.shift();
+        }
+
+
+        /* UPTIME */
+
+        uptimeHistory.push(
+            data.server.uptime
+        );
+
+        if (
+            uptimeHistory.length >
+            MAX_POINTS
+        ) {
+            uptimeHistory.shift();
+        }
+
+
+        /* STATUS */
+
+        setOnline();
+
+
+        /* SERVER INFO */
+
+        document.getElementById(
+            "version"
+        ).textContent =
+            data.version;
+
+
+        document.getElementById(
+            "uptime"
+        ).textContent =
+            formatUptime(
+                data.server.uptime
+            );
+
+
+        document.getElementById(
+            "platform"
+        ).textContent =
+            data.server.platform +
+            " " +
+            data.server.platform_version;
+
+
+        document.getElementById(
+            "architecture"
+        ).textContent =
+            data.server.architecture;
+
+
+        document.getElementById(
+            "python"
+        ).textContent =
+            data.server.python;
+
+
+        document.getElementById(
+            "hostname"
+        ).textContent =
+            data.server.hostname;
+
+
+        /* STORAGE */
+
+        const storage =
+            data.storage;
+            window.currentDiskStorage = storage;
+/* MUSIC LIBRARY */
+
+const music =
+    data.music;
+
+
+document.getElementById(
+    "songCount"
+).textContent =
+    music.songs;
+
+
+document.getElementById(
+    "musicSize"
+).textContent =
+    formatBytes(
+        music.size
+    );
+
+
+document.getElementById(
+    "musicFolder"
+).textContent =
+    music.folder;
+        const percentage =
+            (
+                storage.used /
+                storage.total
+            ) * 100;
+
+
+        document.getElementById(
+            "storage"
+        ).textContent =
+            formatBytes(storage.used) +
+            " / " +
+            formatBytes(storage.total);
+
+
+        document.getElementById(
+            "storageFill"
+        ).style.width =
+            percentage + "%";
+
+
+        document.getElementById(
+            "storagePercent"
+        ).textContent =
+            percentage.toFixed(1) + "%";
+
+
+        document.getElementById(
+            "latency"
+        ).textContent =
+            latency + " ms";
+
+
+        document.getElementById(
+            "lastUpdate"
+        ).textContent =
+            new Date().toLocaleTimeString();
+
+
+        /* DRAW CHARTS */
+
+        drawLineChart(
+            "latencyChart",
+            latencyHistory,
+            "ms"
+        );
+
+
+        drawStorageChart(
+            storage.used,
+            storage.free
+        );
+
+
+    } catch (error) {
+
+        console.error(
+            "FSX health error:",
+            error
+        );
+
+        setOffline();
+
+    }
+
+}
+
+/* ─────────────────────────────
+   MUSIC LIBRARY
+───────────────────────────── */
+
+async function loadMusicLibrary() {
+
+    try {
+
+        const response =
+            await fetch(
+                "/songs",
+                {
+                    cache: "no-store"
+                }
+            );
+
+        if (!response.ok)
+            throw new Error(
+                "HTTP " + response.status
+            );
+
+        const songs =
+            await response.json();
+
+        musicLibrary = songs;
+
+
+        /* SONG COUNT */
+
+        const songCount =
+            songs.length;
+
+
+        /* UNIQUE ARTISTS */
+
+        const artists =
+            new Set(
+                songs
+                    .map(song => song.artist)
+                    .filter(Boolean)
+            );
+
+
+        /* UNIQUE ALBUMS */
+
+        const albums =
+            new Set(
+                songs
+                    .map(song => song.album)
+                    .filter(
+                        album =>
+                            album &&
+                            album.trim()
+                    )
+            );
+
+
+        /* TOTAL MUSIC SIZE */
+
+        const musicSize =
+            songs.reduce(
+                (total, song) =>
+                    total +
+                    Number(song.size || 0),
+                0
+            );
+
+
+        document.getElementById(
+            "songCount"
+        ).textContent =
+            songCount;
+
+
+        document.getElementById(
+            "artistCount"
+        ).textContent =
+            artists.size;
+
+
+        document.getElementById(
+            "albumCount"
+        ).textContent =
+            albums.size;
+
+
+        document.getElementById(
+            "musicSize"
+        ).textContent =
+            formatBytes(musicSize);
+
+
+        /*
+            MUSIC STORAGE
+
+            Compare music library size
+            against the actual server disk.
+        */
+
+        if (
+            window.currentDiskStorage &&
+            window.currentDiskStorage.total
+        ) {
+
+            const disk =
+                window.currentDiskStorage;
+
+
+            const percentage =
+                (
+                    musicSize /
+                    disk.total
+                ) * 100;
+
+
+            document.getElementById(
+                "musicStorageFill"
+            ).style.width =
+                Math.min(
+                    percentage,
+                    100
+                ) + "%";
+
+        }
+
+
+    } catch (error) {
+
+        console.error(
+            "FSX music library error:",
+            error
+        );
+
+    }
+
+}
+/* ─────────────────────────────
+   STATUS
+───────────────────────────── */
+
+function setOnline() {
+
+    const status =
+        document.querySelector(
+            ".status"
+        );
+
+    const dot =
+        document.querySelector(
+            ".status-dot"
+        );
+
+
+    status.classList.remove(
+        "offline"
+    );
+
+    status.innerHTML = `
+        <span class="status-dot"></span>
+        ONLINE
+    `;
+
+}
+
+
+function setOffline() {
+
+    const status =
+        document.querySelector(
+            ".status"
+        );
+
+    status.classList.add(
+        "offline"
+    );
+
+    status.innerHTML = `
+        <span class="status-dot"></span>
+        OFFLINE
+    `;
+
+}
+
+
+/* ─────────────────────────────
+   CANVAS SETUP
+───────────────────────────── */
+
+function setupCanvas(canvas) {
+
+    const rect =
+        canvas.getBoundingClientRect();
+
+    const dpr =
+        window.devicePixelRatio || 1;
+
+    canvas.width =
+        rect.width * dpr;
+
+    canvas.height =
+        rect.height * dpr;
+
+    const ctx =
+        canvas.getContext("2d");
+
+    ctx.scale(dpr, dpr);
+
+    return {
+        ctx,
+        width: rect.width,
+        height: rect.height
+    };
+
+}
+
+
+/* ─────────────────────────────
+   LINE CHART
+───────────────────────────── */
+
+function drawLineChart(
+    id,
+    values,
+    unit
+) {
+
+    const canvas =
+        document.getElementById(id);
+
+    if (!canvas)
+        return;
+
+
+    const {
+        ctx,
+        width,
+        height
+    } =
+        setupCanvas(canvas);
+
+
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    if (!values.length)
+        return;
+
+
+    const padding = 12;
+
+    const max =
+        Math.max(...values, 1);
+
+    const min =
+        Math.min(...values, 0);
+
+    const range =
+        Math.max(max - min, 1);
+
+
+    /* GRID */
+
+    ctx.strokeStyle =
+        "rgba(255,255,255,.06)";
+
+    ctx.lineWidth = 1;
+
+
+    for (
+        let i = 1;
+        i < 4;
+        i++
+    ) {
+
+        const y =
+            padding +
+            (
+                height -
+                padding * 2
+            ) *
+            (i / 4);
+
+        ctx.beginPath();
+
+        ctx.moveTo(
+            0,
+            y
+        );
+
+        ctx.lineTo(
+            width,
+            y
+        );
+
+        ctx.stroke();
+
+    }
+
+
+    /* LINE */
+
+    ctx.beginPath();
+
+
+    values.forEach(
+        (value, index) => {
+
+            const x =
+                values.length === 1
+                    ? width / 2
+                    :
+                    padding +
+                    (
+                        width -
+                        padding * 2
+                    ) *
+                    (
+                        index /
+                        (values.length - 1)
+                    );
+
+
+            const y =
+                height -
+                padding -
+                (
+                    (
+                        value -
+                        min
+                    ) /
+                    range
+                ) *
+                (
+                    height -
+                    padding * 2
+                );
+
+
+            if (index === 0)
+                ctx.moveTo(x, y);
+            else
+                ctx.lineTo(x, y);
+
+        }
+    );
+
+
+    ctx.strokeStyle =
+        getComputedStyle(
+            document.documentElement
+        )
+        .getPropertyValue(
+            "--accent"
+        );
+
+    ctx.lineWidth = 2;
+
+    ctx.lineJoin = "round";
+
+    ctx.stroke();
+
+
+    /* CURRENT DOT */
+
+    const last =
+        values[values.length - 1];
+
+
+    const x =
+        values.length === 1
+            ? width / 2
+            :
+            width - padding;
+
+
+    const y =
+        height -
+        padding -
+        (
+            (
+                last -
+                min
+            ) /
+            range
+        ) *
+        (
+            height -
+            padding * 2
+        );
+
+
+    ctx.beginPath();
+
+    ctx.arc(
+        x,
+        y,
+        3.5,
+        0,
+        Math.PI * 2
+    );
+
+    ctx.fillStyle =
+        getComputedStyle(
+            document.documentElement
+        )
+        .getPropertyValue(
+            "--accent-light"
+        );
+
+    ctx.fill();
+
+}
+
+
+/* ─────────────────────────────
+   STORAGE CHART
+───────────────────────────── */
+
+function drawStorageChart(
+    used,
+    free
+) {
+
+    const canvas =
+        document.getElementById(
+            "storageChart"
+        );
+
+    if (!canvas)
+        return;
+
+
+    const {
+        ctx,
+        width,
+        height
+    } =
+        setupCanvas(canvas);
+
+
+    ctx.clearRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    const total =
+        used + free;
+
+
+    if (!total)
+        return;
+
+
+    const usedWidth =
+        (
+            used /
+            total
+        ) *
+        width;
+
+
+    /* FREE */
+
+    ctx.fillStyle =
+        "rgba(255,255,255,.06)";
+
+    ctx.fillRect(
+        0,
+        0,
+        width,
+        height
+    );
+
+
+    /* USED */
+
+    const gradient =
+        ctx.createLinearGradient(
+            0,
+            0,
+            width,
+            0
+        );
+
+
+    gradient.addColorStop(
+        0,
+        getComputedStyle(
+            document.documentElement
+        )
+        .getPropertyValue(
+            "--accent"
+        )
+    );
+
+
+    gradient.addColorStop(
+        1,
+        getComputedStyle(
+            document.documentElement
+        )
+        .getPropertyValue(
+            "--accent-light"
+        )
+    );
+
+
+    ctx.fillStyle =
+        gradient;
+
+
+    ctx.fillRect(
+        0,
+        0,
+        usedWidth,
+        height
+    );
+
+}
+
+
+/* ─────────────────────────────
+   FORMATTERS
+───────────────────────────── */
+
+function formatBytes(bytes) {
+
+    if (!bytes)
+        return "0 B";
+
+
+    const units = [
+        "B",
+        "KB",
+        "MB",
+        "GB",
+        "TB"
+    ];
+
+
+    const index =
+        Math.floor(
+            Math.log(bytes) /
+            Math.log(1024)
+        );
+
+
+    return (
+        bytes /
+        Math.pow(
+            1024,
+            index
+        )
+    )
+    .toFixed(
+        index ? 2 : 0
+    )
+    + " "
+    + units[index];
+
+}
+
+
+function formatUptime(seconds) {
+
+    const days =
+        Math.floor(
+            seconds / 86400
+        );
+
+    seconds %= 86400;
+
+
+    const hours =
+        Math.floor(
+            seconds / 3600
+        );
+
+    seconds %= 3600;
+
+
+    const minutes =
+        Math.floor(
+            seconds / 60
+        );
+
+    seconds =
+        Math.floor(
+            seconds % 60
+        );
+
+
+    if (days)
+        return `${days}d ${hours}h`;
+
+
+    if (hours)
+        return `${hours}h ${minutes}m`;
+
+
+    if (minutes)
+        return `${minutes}m ${seconds}s`;
+
+
+    return `${seconds}s`;
+
+}
+
+
+/* ─────────────────────────────
+   START
+───────────────────────────── */
+
+loadHealth();
+loadMusicLibrary();
+
+
+setInterval(
+    loadHealth,
+    5000
+);
+
+setInterval(
+    loadMusicLibrary,
+    5000
+);
+
+/* Redraw on resize */
+
+window.addEventListener(
+    "resize",
+    () => {
+
+        drawLineChart(
+            "latencyChart",
+            latencyHistory,
+            "ms"
+        );
+
+    }
+);
+
+</script>
+</body>
+
+</html>

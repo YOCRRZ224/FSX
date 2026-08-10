@@ -9,9 +9,12 @@ import re
 from bs4 import BeautifulSoup
 import uuid
 from threading import Thread
-
+import time
+from datetime import datetime, timezone
+import platform
+import shutil
 app = Flask(__name__)
-
+SERVER_STARTED = time.time()
 MUSIC_FOLDER = "music"
 UPLOAD_TEMP_FOLDER = "temp"
 LRC_FOLDER = "lrc"
@@ -437,7 +440,6 @@ def lyrics(song):
 def home():
     return send_from_directory("static", "index.html")
 from mutagen import File
-
 @app.route("/songs")
 def songs():
     result = []
@@ -457,15 +459,22 @@ def songs():
             artist = "Unknown Artist"
             album = ""
 
+        try:
+            size = os.path.getsize(path)
+        except OSError:
+            size = 0
+
         result.append({
             "file": file,
             "title": title,
             "artist": artist,
-            "album": album
+            "album": album,
+            "size": size
         })
 
-
-    result.sort(key=lambda song: song["title"].lower())
+    result.sort(
+        key=lambda song: song["title"].lower()
+    )
 
     return jsonify(result)
 @app.route("/play/<song>")
@@ -744,5 +753,130 @@ def ensure_lyrics(song):
             "success": False,
             "error": str(e)
         }), 500
+def get_music_stats():
+
+    total_size = 0
+    song_count = 0
+
+    for root, dirs, files in os.walk(MUSIC_FOLDER):
+
+        for file in files:
+
+            path = os.path.join(root, file)
+
+            try:
+
+                total_size += os.path.getsize(path)
+
+                if file.lower().endswith((
+                    ".mp3",
+                    ".flac",
+                    ".m4a",
+                    ".ogg",
+                    ".opus"
+                )):
+                    song_count += 1
+
+            except OSError:
+                continue
+
+    return {
+        "size": total_size,
+        "songs": song_count
+    }
+@app.route("/api/raw")
+def health():
+
+    uptime = int(time.time() - SERVER_STARTED)
+
+    try:
+
+        disk = shutil.disk_usage("/")
+
+        storage = {
+            "total": disk.total,
+            "used": disk.used,
+            "free": disk.free
+        }
+
+    except Exception:
+
+        storage = {
+            "total": None,
+            "used": None,
+            "free": None
+        }
+
+
+    music = get_music_stats()
+
+
+    return jsonify({
+
+        "status": "online",
+
+        "service": "FSX",
+
+        "version": "2.1.0",
+
+
+        "server": {
+
+            "uptime": uptime,
+
+            "started_at":
+                datetime.fromtimestamp(
+                    SERVER_STARTED,
+                    timezone.utc
+                ).isoformat(),
+
+            "hostname":
+                platform.node(),
+
+            "platform":
+                platform.system(),
+
+            "platform_version":
+                platform.release(),
+
+            "architecture":
+                platform.machine(),
+
+            "python":
+                platform.python_version()
+
+        },
+
+
+        "storage": storage,
+
+
+        "music": {
+
+            "folder":
+                MUSIC_FOLDER,
+
+            "size":
+                music["size"],
+
+            "songs":
+                music["songs"]
+
+        },
+
+
+        "timestamp":
+            datetime.now(
+                timezone.utc
+            ).isoformat()
+
+    })
+@app.route("/api/health")
+def health_page():
+
+    return send_from_directory(
+        "static",
+        "health.html"
+    )
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
