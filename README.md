@@ -5,6 +5,15 @@ and more developed by
 
 **abduhamid** and **yocrrz** <333
 
+<p align="center">
+  <a href="https://github.com/YOCRRZ224">
+    <img src="https://github.com/YOCRRZ224.png?size=64" width="64" height="64" style="border-radius:50%;" alt="YOCRRZ224"/>
+  </a>
+  &nbsp;&nbsp;&nbsp;&nbsp;
+  <a href="https://github.com/abduhamidabdukomilov3-creator">
+    <img src="https://github.com/abduhamidabdukomilov3-creator.png?size=64" width="64" height="64" style="border-radius:50%;" alt="abduhamid"/>
+  </a>
+</p>
 
 ---
 
@@ -79,7 +88,7 @@ python main.py
 - Step 4
 - copy and paste in web use your local address or wlan address given
 ```bash
-http://127.0.0.1/5000
+http://127.0.0.1:5000
 ```
 
 - Step 5 (optional)
@@ -105,13 +114,15 @@ this was the last step you could run main.py and go on web.
 ---
 
 ### Stats
-![Visitors](https://visitor-badge.laobi.icu/badge?page_id=YOCRRZ224.FSX)
-![Stars](https://img.shields.io/github/stars/YOCRRZ224/FSX?style=for-the-badge)
-![Forks](https://img.shields.io/github/forks/YOCRRZ224/FSX?style=for-the-badge)
-![Issues](https://img.shields.io/github/issues/YOCRRZ224/FSX?style=for-the-badge)
-![Last Commit](https://img.shields.io/github/last-commit/YOCRRZ224/FSX?style=for-the-badge)
-
-
+[![Visitors](https://visitor-badge.laobi.icu/badge?page_id=YOCRRZ224.FSX)](https://github.com/YOCRRZ224/FSX)
+[![Stars](https://img.shields.io/github/stars/YOCRRZ224/FSX?style=for-the-badge)](https://github.com/YOCRRZ224/FSX/stargazers)
+[![Forks](https://img.shields.io/github/forks/YOCRRZ224/FSX?style=for-the-badge)](https://github.com/YOCRRZ224/FSX/network/members)
+[![Issues](https://img.shields.io/github/issues/YOCRRZ224/FSX?style=for-the-badge)](https://github.com/YOCRRZ224/FSX/issues)
+[![Last Commit](https://img.shields.io/github/last-commit/YOCRRZ224/FSX?style=for-the-badge)](https://github.com/YOCRRZ224/FSX/commits)
+[![Latest Release](https://img.shields.io/github/v/release/YOCRRZ224/FSX?style=for-the-badge)](https://github.com/YOCRRZ224/FSX/releases/latest)
+[![License](https://img.shields.io/github/license/YOCRRZ224/FSX?style=for-the-badge)](https://github.com/YOCRRZ224/FSX/blob/main/LICENSE)
+[![Contributors](https://img.shields.io/github/contributors/YOCRRZ224/FSX?style=for-the-badge)](https://github.com/YOCRRZ224/FSX/graphs/contributors)
+![Commit Activity](https://img.shields.io/github/commit-activity/m/YOCRRZ224/FSX?style=for-the-badge)
 ---
 
 there's a NCS song in the music folder for test so here's the attribution also thanks NCS 
@@ -132,3 +143,4 @@ Watch: http://youtu.be/K4DyBUG242c
    <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=YOCRRZ224/FSX&type=date&legend=top-left&sealed_token=YIAGOyhmzHcsKKO6hyzLe3jR_d08FDO9N7e9-1tMQhjvu84bH7owMZX3nimAgkgawIhf9WqYTPCL1YjZROpR6j_RZ_yZ4OlbYJB4t2q-0lUDcZWY5E7Ubg" />
  </picture>
 </a>
+
