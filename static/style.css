@@ -1908,3 +1908,1099 @@ transform:scale(0.98);
 .lyrics-overlay.expanded .lyric-line {
     font-size: clamp(25px, 5vw, 48px);
 }
+/* ========================================================= */
+/* FSX HOME — NEW VISUAL SYSTEM */
+/* ========================================================= */
+
+.fsx-home {
+    --fsx-accent: #c8ff3d;
+    --fsx-accent-soft: rgba(200,255,61,.12);
+    --fsx-bg: #080909;
+    --fsx-panel: #111313;
+    --fsx-panel-2: #171919;
+    --fsx-line: rgba(255,255,255,.08);
+    --fsx-muted: rgba(255,255,255,.48);
+
+    min-height: 100%;
+    padding: 26px;
+    box-sizing: border-box;
+
+    color: #fff;
+
+    font-family:
+        Inter,
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        sans-serif;
+}
+
+
+/* ========================================================= */
+/* HEADER */
+/* ========================================================= */
+
+.fsx-home-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+
+    margin-bottom: 28px;
+}
+
+.fsx-eyebrow {
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 2.5px;
+
+    color: var(--fsx-accent);
+
+    margin-bottom: 10px;
+}
+
+.fsx-home-header h1 {
+    margin: 0;
+
+    font-size: clamp(34px, 7vw, 58px);
+    line-height: .9;
+
+    letter-spacing: -3px;
+    font-weight: 800;
+}
+
+.fsx-home-header h1 span {
+    color: rgba(255,255,255,.32);
+}
+
+.fsx-library-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+
+    padding: 10px 14px;
+
+    border: 1px solid var(--fsx-line);
+    border-radius: 12px;
+
+    background: rgba(255,255,255,.025);
+}
+
+.fsx-library-meta strong {
+    display: block;
+
+    font-size: 13px;
+}
+
+.fsx-library-meta span {
+    display: block;
+
+    font-size: 8px;
+    letter-spacing: 1px;
+
+    color: var(--fsx-muted);
+}
+
+.fsx-live-dot {
+    width: 7px;
+    height: 7px;
+
+    border-radius: 50%;
+
+    background: var(--fsx-accent);
+
+    box-shadow:
+        0 0 0 4px var(--fsx-accent-soft),
+        0 0 15px var(--fsx-accent);
+}
+
+
+/* ========================================================= */
+/* NOW PLAYING */
+/* ========================================================= */
+
+.fsx-now {
+    display: grid;
+    grid-template-columns: minmax(240px, 38%) 1fr;
+
+    min-height: 330px;
+
+    overflow: hidden;
+
+    background:
+        linear-gradient(
+            120deg,
+            #141616,
+            #0d0e0e
+        );
+
+    border: 1px solid var(--fsx-line);
+
+    border-radius: 26px;
+
+    box-shadow:
+        0 30px 80px rgba(0,0,0,.35);
+}
+
+.fsx-now-art {
+    position: relative;
+
+    min-height: 330px;
+
+    overflow: hidden;
+}
+
+.fsx-now-art img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+
+    transition:
+        transform .8s cubic-bezier(.2,.8,.2,1);
+}
+
+.fsx-now:hover .fsx-now-art img {
+    transform: scale(1.045);
+}
+
+.fsx-art-overlay {
+    position: absolute;
+    inset: 0;
+
+    background:
+        linear-gradient(
+            135deg,
+            transparent 20%,
+            rgba(0,0,0,.75)
+        );
+}
+
+.fsx-art-index {
+    position: absolute;
+
+    top: 18px;
+    left: 18px;
+
+    font-family: monospace;
+    font-size: 10px;
+
+    padding: 6px 8px;
+
+    background: rgba(0,0,0,.5);
+
+    border: 1px solid rgba(255,255,255,.15);
+
+    border-radius: 7px;
+
+    backdrop-filter: blur(12px);
+}
+
+.fsx-art-status {
+    position: absolute;
+
+    bottom: 18px;
+    left: 18px;
+
+    font-size: 8px;
+    font-weight: 800;
+
+    letter-spacing: 2px;
+
+    color: var(--fsx-accent);
+}
+
+.fsx-now-info {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    padding: 42px;
+}
+
+.fsx-section-label,
+.fsx-section-kicker {
+    color: var(--fsx-accent);
+
+    font-size: 9px;
+    font-weight: 800;
+
+    letter-spacing: 2px;
+}
+
+.fsx-now-info h2 {
+    margin: 10px 0 6px;
+
+    font-size: clamp(25px, 5vw, 42px);
+    line-height: 1;
+
+    letter-spacing: -1.8px;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.fsx-now-info > p {
+    margin: 0;
+
+    color: var(--fsx-muted);
+
+    font-size: 13px;
+}
+
+
+/* ========================================================= */
+/* TIMELINE */
+/* ========================================================= */
+
+.fsx-timeline {
+    margin-top: 42px;
+}
+
+.fsx-timeline-track {
+    position: relative;
+
+    height: 4px;
+
+    background: rgba(255,255,255,.1);
+
+    border-radius: 20px;
+
+    cursor: pointer;
+}
+
+.fsx-timeline-fill {
+    height: 100%;
+
+    background: var(--fsx-accent);
+
+    border-radius: inherit;
+}
+
+.fsx-timeline-thumb {
+    position: absolute;
+
+    top: 50%;
+
+    width: 10px;
+    height: 10px;
+
+    border-radius: 50%;
+
+    background: var(--fsx-accent);
+
+    transform: translate(-50%, -50%);
+
+    box-shadow:
+        0 0 0 4px rgba(200,255,61,.12);
+}
+
+.fsx-time-row {
+    display: flex;
+    justify-content: space-between;
+
+    margin-top: 8px;
+
+    color: rgba(255,255,255,.35);
+
+    font-family: monospace;
+    font-size: 9px;
+}
+
+
+/* ========================================================= */
+/* CONTROLS */
+/* ========================================================= */
+
+.fsx-main-controls {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    margin-top: 25px;
+}
+
+.fsx-control,
+.fsx-play-button {
+    border: 0;
+
+    cursor: pointer;
+
+    color: #fff;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    transition:
+        transform .2s ease,
+        background .2s ease;
+}
+
+.fsx-control {
+    width: 40px;
+    height: 40px;
+
+    border-radius: 50%;
+
+    background: rgba(255,255,255,.06);
+
+    font-size: 17px;
+}
+
+.fsx-control:hover {
+    background: rgba(255,255,255,.12);
+
+    transform: translateY(-2px);
+}
+
+.fsx-control.active {
+    color: var(--fsx-accent);
+}
+
+.fsx-play-button {
+    width: 54px;
+    height: 54px;
+
+    margin: 0 5px;
+
+    border-radius: 50%;
+
+    background: var(--fsx-accent);
+
+    color: #090909;
+
+    font-size: 20px;
+
+    box-shadow:
+        0 10px 30px rgba(200,255,61,.18);
+}
+
+.fsx-play-button:hover {
+    transform: scale(1.07);
+}
+
+
+/* ========================================================= */
+/* STATS */
+/* ========================================================= */
+
+.fsx-stats {
+    display: grid;
+
+    grid-template-columns: repeat(3, 1fr);
+
+    gap: 10px;
+
+    margin: 14px 0 34px;
+}
+
+.fsx-stat {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 15px;
+
+    border: 1px solid var(--fsx-line);
+
+    background: rgba(255,255,255,.025);
+
+    border-radius: 14px;
+}
+
+.fsx-stat-icon {
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 9px;
+
+    background: var(--fsx-accent-soft);
+
+    color: var(--fsx-accent);
+
+    font-size: 16px;
+}
+
+.fsx-stat strong {
+    display: block;
+
+    font-size: 15px;
+}
+
+.fsx-stat small {
+    display: block;
+
+    margin-top: 2px;
+
+    color: var(--fsx-muted);
+
+    font-size: 7px;
+    font-weight: 800;
+
+    letter-spacing: 1.5px;
+}
+
+
+/* ========================================================= */
+/* SECTION HEADERS */
+/* ========================================================= */
+
+.fsx-section {
+    margin-top: 34px;
+}
+
+.fsx-section-header {
+    display: flex;
+
+    justify-content: space-between;
+    align-items: flex-end;
+
+    margin-bottom: 15px;
+}
+
+.fsx-section-header h3 {
+    margin: 5px 0 0;
+
+    font-size: 21px;
+
+    letter-spacing: -.7px;
+}
+
+.fsx-text-button {
+    border: 0;
+
+    background: none;
+
+    color: rgba(255,255,255,.45);
+
+    font-size: 8px;
+    font-weight: 800;
+
+    letter-spacing: 1px;
+
+    cursor: pointer;
+}
+
+.fsx-text-button:hover {
+    color: var(--fsx-accent);
+}
+
+.fsx-text-button i {
+    margin-left: 3px;
+}
+
+.fsx-count {
+    color: rgba(255,255,255,.3);
+
+    font-size: 8px;
+    font-weight: 800;
+
+    letter-spacing: 1px;
+}
+
+
+/* ========================================================= */
+/* CONTINUE */
+/* ========================================================= */
+
+.fsx-continue {
+    display: flex;
+    align-items: center;
+
+    gap: 18px;
+
+    padding: 13px;
+
+    background: #111313;
+
+    border: 1px solid var(--fsx-line);
+
+    border-radius: 18px;
+
+    cursor: pointer;
+
+    transition:
+        transform .25s ease,
+        border-color .25s ease;
+}
+
+.fsx-continue:hover {
+    transform: translateY(-3px);
+
+    border-color: rgba(200,255,61,.3);
+}
+
+.fsx-continue-cover {
+    position: relative;
+
+    width: 76px;
+    height: 76px;
+
+    flex-shrink: 0;
+}
+
+.fsx-continue-cover img {
+    width: 100%;
+    height: 100%;
+
+    object-fit: cover;
+
+    border-radius: 12px;
+}
+
+.fsx-continue-play {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0;
+
+    background: rgba(0,0,0,.5);
+
+    border-radius: 12px;
+
+    transition: opacity .2s;
+}
+
+.fsx-continue:hover .fsx-continue-play {
+    opacity: 1;
+}
+
+.fsx-continue-info {
+    flex: 1;
+
+    min-width: 0;
+}
+
+.fsx-continue-top {
+    display: flex;
+
+    justify-content: space-between;
+
+    gap: 20px;
+}
+
+.fsx-continue-top strong,
+.fsx-continue-top span {
+    display: block;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fsx-continue-top strong {
+    font-size: 13px;
+}
+
+.fsx-continue-top span {
+    margin-top: 3px;
+
+    color: var(--fsx-muted);
+
+    font-size: 10px;
+}
+
+.fsx-continue-top b {
+    color: var(--fsx-accent);
+
+    font-size: 10px;
+}
+
+.fsx-continue-progress {
+    height: 3px;
+
+    margin-top: 15px;
+
+    background: rgba(255,255,255,.08);
+
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+.fsx-continue-progress span {
+    display: block;
+
+    height: 100%;
+
+    background: var(--fsx-accent);
+}
+
+.fsx-continue-bottom {
+    display: flex;
+    justify-content: space-between;
+
+    margin-top: 7px;
+
+    color: rgba(255,255,255,.3);
+
+    font-family: monospace;
+    font-size: 8px;
+}
+
+
+/* ========================================================= */
+/* QUEUE */
+/* ========================================================= */
+
+.fsx-queue {
+    border-top: 1px solid var(--fsx-line);
+}
+
+.fsx-queue-item {
+    display: flex;
+    align-items: center;
+
+    gap: 13px;
+
+    padding: 10px 4px;
+
+    border-bottom: 1px solid var(--fsx-line);
+}
+
+.fsx-queue-number {
+    width: 22px;
+
+    color: rgba(255,255,255,.22);
+
+    font-family: monospace;
+    font-size: 9px;
+}
+
+.fsx-queue-item img {
+    width: 44px;
+    height: 44px;
+
+    object-fit: cover;
+
+    border-radius: 9px;
+}
+
+.fsx-queue-info {
+    flex: 1;
+
+    min-width: 0;
+}
+
+.fsx-queue-info strong,
+.fsx-queue-info span {
+    display: block;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.fsx-queue-info strong {
+    font-size: 12px;
+}
+
+.fsx-queue-info span {
+    margin-top: 3px;
+
+    color: var(--fsx-muted);
+
+    font-size: 9px;
+}
+
+.fsx-queue-play {
+    width: 32px;
+    height: 32px;
+
+    border: 0;
+
+    border-radius: 50%;
+
+    color: #fff;
+
+    background: rgba(255,255,255,.06);
+
+    cursor: pointer;
+}
+
+.fsx-queue-play:hover {
+    background: var(--fsx-accent);
+
+    color: #000;
+}
+
+
+/* ========================================================= */
+/* ALBUM GRID */
+/* ========================================================= */
+
+.fsx-album-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(125px, 1fr)
+        );
+
+    gap: 18px;
+}
+
+.fsx-album {
+    min-width: 0;
+
+    cursor: pointer;
+}
+
+.fsx-album-art {
+    position: relative;
+
+    aspect-ratio: 1;
+
+    overflow: hidden;
+
+    border-radius: 14px;
+
+    background: #151717;
+}
+
+.fsx-album-art img {
+    width: 100%;
+    height: 100%;
+
+    display: block;
+
+    object-fit: cover;
+
+    transition: transform .45s ease;
+}
+
+.fsx-album:hover img {
+    transform: scale(1.06);
+}
+
+.fsx-album-art > span {
+    position: absolute;
+
+    top: 8px;
+    left: 8px;
+
+    padding: 4px 6px;
+
+    border-radius: 5px;
+
+    background: rgba(0,0,0,.55);
+
+    backdrop-filter: blur(8px);
+
+    font-family: monospace;
+    font-size: 8px;
+}
+
+.fsx-album-overlay {
+    position: absolute;
+    inset: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    opacity: 0;
+
+    background: rgba(0,0,0,.42);
+
+    font-size: 25px;
+
+    transition: opacity .25s;
+}
+
+.fsx-album:hover .fsx-album-overlay {
+    opacity: 1;
+}
+
+.fsx-album > strong,
+.fsx-album > small {
+    display: block;
+
+    overflow: hidden;
+
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.fsx-album > strong {
+    margin-top: 9px;
+
+    font-size: 11px;
+}
+
+.fsx-album > small {
+    margin-top: 3px;
+
+    color: var(--fsx-muted);
+
+    font-size: 9px;
+}
+
+
+/* ========================================================= */
+/* RECENTLY ADDED */
+/* ========================================================= */
+
+.fsx-added-grid {
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fill,
+            minmax(220px, 1fr)
+        );
+
+    gap: 8px;
+}
+
+.fsx-added {
+    display: flex;
+    align-items: center;
+
+    gap: 12px;
+
+    padding: 9px;
+
+    border: 1px solid transparent;
+
+    border-radius: 12px;
+
+    cursor: pointer;
+
+    transition:
+        background .2s,
+        border-color .2s;
+}
+
+.fsx-added:hover {
+    background: rgba(255,255,255,.035);
+
+    border-color: var(--fsx-line);
+}
+
+.fsx-added img {
+    width: 48px;
+    height: 48px;
+
+    flex-shrink: 0;
+
+    border-radius: 9px;
+
+    object-fit: cover;
+}
+
+.fsx-added div {
+    flex: 1;
+
+    min-width: 0;
+}
+
+.fsx-added strong,
+.fsx-added span {
+    display: block;
+
+    overflow: hidden;
+
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.fsx-added strong {
+    font-size: 11px;
+}
+
+.fsx-added span {
+    margin-top: 3px;
+
+    color: var(--fsx-muted);
+
+    font-size: 9px;
+}
+
+.fsx-added > i {
+    color: rgba(255,255,255,.25);
+
+    font-size: 15px;
+}
+
+.fsx-added:hover > i {
+    color: var(--fsx-accent);
+}
+
+
+/* ========================================================= */
+/* EMPTY */
+/* ========================================================= */
+
+.fsx-empty {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    padding: 55px 20px;
+
+    border: 1px dashed rgba(255,255,255,.1);
+
+    border-radius: 18px;
+
+    text-align: center;
+}
+
+.fsx-empty i {
+    margin-bottom: 12px;
+
+    color: rgba(255,255,255,.2);
+
+    font-size: 30px;
+}
+
+.fsx-empty strong {
+    font-size: 13px;
+}
+
+.fsx-empty span {
+    margin-top: 5px;
+
+    color: var(--fsx-muted);
+
+    font-size: 10px;
+}
+
+
+/* ========================================================= */
+/* FOOTER */
+/* ========================================================= */
+
+.fsx-home-footer {
+    display: flex;
+    justify-content: space-between;
+
+    margin-top: 55px;
+    padding: 20px 4px 35px;
+
+    border-top: 1px solid var(--fsx-line);
+
+    color: rgba(255,255,255,.2);
+
+    font-family: monospace;
+    font-size: 8px;
+
+    letter-spacing: 1px;
+}
+
+
+/* ========================================================= */
+/* MOBILE */
+/* ========================================================= */
+
+@media (max-width: 650px) {
+
+    .fsx-home {
+        padding: 16px;
+    }
+
+    .fsx-home-header {
+        align-items: flex-start;
+    }
+
+    .fsx-home-header h1 {
+        font-size: 38px;
+    }
+
+    .fsx-library-meta {
+        padding: 8px;
+    }
+
+    .fsx-library-meta div {
+        display: none;
+    }
+
+    .fsx-now {
+        display: flex;
+        flex-direction: column;
+
+        min-height: auto;
+    }
+
+    .fsx-now-art {
+        width: 100%;
+        aspect-ratio: 1 / .72;
+
+        min-height: 0;
+    }
+
+    .fsx-now-info {
+        padding: 24px 20px 25px;
+    }
+
+    .fsx-now-info h2 {
+        font-size: 28px;
+    }
+
+    .fsx-timeline {
+        margin-top: 28px;
+    }
+
+    .fsx-main-controls {
+        justify-content: center;
+    }
+
+    .fsx-stats {
+        gap: 6px;
+    }
+
+    .fsx-stat {
+        padding: 11px;
+
+        gap: 7px;
+    }
+
+    .fsx-stat-icon {
+        width: 28px;
+        height: 28px;
+
+        font-size: 13px;
+    }
+
+    .fsx-stat strong {
+        font-size: 12px;
+    }
+
+    .fsx-stat small {
+        font-size: 6px;
+    }
+
+    .fsx-album-grid {
+        grid-template-columns:
+            repeat(2, minmax(0, 1fr));
+
+        gap: 14px;
+    }
+
+    .fsx-added-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .fsx-home-footer {
+        flex-direction: column;
+
+        gap: 5px;
+    }
+}

@@ -527,114 +527,623 @@ function updateFileLabel() {
     const input = document.getElementById('fileInput');
     document.getElementById('fileLabel').textContent = input.files[0].name;
 }
-function renderHome() {
-    const home = document.getElementById("home");
-    const hour = new Date().getHours();
-    const greeting = hour < 12 ? "Good Morning" : hour < 18 ? "Good Afternoon" : "Good Evening";
-    
+function getContinueSong() {
     const song = songs[currentIndex];
-    const progressPct = (lastTime / audio.duration) * 100 || 0;
 
-    // Build UI layout exactly matching the sketch
-    home.innerHTML = `
-        <div class="home-container" style="display: flex; flex-direction: column; gap: 20px; padding: 15px; font-family: sans-serif; color: #fff;">
-            
-            <div class="home-anim hero-banner" style="
-                position: relative; 
-                border-radius: 20px; 
-                overflow: hidden; 
-                height: 160px; 
-                background: url('${song ? `/cover/${song.file}` : '/cover/default.jpg'}') center/cover no-repeat;
-                box-shadow: 0 8px 24px rgba(0,0,0,0.3);
-            ">
-                <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(0,0,0,0.8), rgba(0,0,0,0.2));"></div>
-                <div style="position: absolute; bottom: 20px; left: 20px;">
-                    <h1 style="margin: 0; font-size: 24px; font-weight: 700; letter-spacing: -0.5px; text-transform: none;">
-                        Hi, yocrrz
-                    </h1>
-                    <span style="font-size: 13px; opacity: 0.7;">${greeting}</span>
-                </div>
-            </div>
-            <div class="card glass-card home-anim" style="
-                display: flex; 
-                align-items: center; 
-                gap: 20px; 
-                padding: 20px; 
-                border-radius: 24px; 
-                background: rgba(255, 255, 255, 0.05); 
-                backdrop-filter: blur(10px);
-                border: 1px solid rgba(255, 255, 255, 0.1);
-            ">
-                <div id="home-control-wheel" class="control-wheel" style="
-                    position: relative; 
-                    width: 90px; 
-                    height: 90px; 
-                    border-radius: 50%; 
-                    border: 2px dashed rgba(255, 255, 255, 0.3); 
-                    display: flex; 
-                    align-items: center; 
-                    justify-content: center;
-                    cursor: pointer;
-                    flex-shrink: 0;
-                    animation: ${isPlaying ? 'spin 12s linear infinite' : 'none'};
-                " onclick="togglePlay()">
-                    
-                    <div id="home-play-icon" style="width: 40px; height: 40px; border-radius: 50%; background: #1db954; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 12px rgba(29, 185, 84, 0.4);">
-                        ${isPlaying ? 
-                            `<svg width="14" height="14" fill="#fff" viewBox="0 0 256 256"><path d="M216,48V208a16,16,0,0,1-16,16H160a16,16,0,0,1-16-16V48a16,16,0,0,1,16-16h40A16,16,0,0,1,216,48ZM96,32H56A16,16,0,0,0,40,48V208a16,16,0,0,0,16,16H96a16,16,0,0,0,16-16V48A16,16,0,0,0,96,32Z"></path></svg>` : 
-                            `<svg width="14" height="14" fill="#fff" viewBox="0 0 256 256" style="transform: translateX(1px);"><path d="M240,128a15.74,15.74,0,0,1-7.6,13.51L88.32,229.75a16,16,0,0,1-24.26-13.51V39.76a16,16,0,0,1,24.26-13.51L232.4,114.49A15.74,15.74,0,0,1,240,128Z"></path></svg>`
-                        }
-                    </div>
-                    
-                    <svg style="position: absolute;  transform: rotate(-90deg);" width="94" height="94" viewBox="0 0 100 100">
-                        <circle id="home-progress-circle" cx="50" cy="50" r="40" stroke="#1db954" stroke-width="2" fill="transparent" stroke-dasharray="289" stroke-dashoffset="${289 - (289 * progressPct) / 100}" stroke-linecap="round" />
-                    </svg>
-                </div>
+    // Only show Continue Listening when there is meaningful progress
+    if (!song || lastTime <= 5 || !audio.duration || lastTime >= audio.duration - 5) {
+        return null;
+    }
 
-                <div style="flex: 1; min-width: 0;">
-                    <span style="font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #1db954; font-weight: bold; display: block; margin-bottom: 4px;">Current Playing</span>
-                    <h2 style="margin: 0 0 4px 0; font-size: 18px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${song ? song.title : 'No Track Loaded'}</h2>
-                    <p style="margin: 0; font-size: 13px; opacity: 0.6; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${song ? song.artist : 'Select a song'}</p>
-                    
-                    <div id="home-time-text" style="margin-top: 10px; font-family: monospace; font-size: 11px; opacity: 0.5;">
-                        ${formatTime(lastTime)} / ${audio.duration ? formatTime(audio.duration) : "00:00"}
-                    </div>
-                </div>
-            </div>
-
-            <div class="home-anim" style="margin-top: 10px;">
-                <h3 style="margin: 0 0 15px 5px; font-size: 16px; font-weight: 600; opacity: 0.9;">History Cards</h3>
-                
-                ${recent.length ? `
-                    <div class="recent-scroll-container" style="display: flex; gap: 14px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none;">
-                        ${recent.map(s => {
-                            const index = songs.findIndex(x => x.file === s.file);
-                            return `
-                            <div class="recent-item floating" style="flex: 0 0 110px; background: rgba(255,255,255,0.03); padding: 10px; border-radius: 16px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.05);" onclick="playSongByIndex(${index})">
-                                <img src="/cover/${s.file}" style="width: 90px; height: 90px; border-radius: 12px; object-fit: cover; box-shadow: 0 6px 12px rgba(0,0,0,0.3);">
-                                <div style="font-size: 11px; font-weight: 500; margin-top: 8px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.title}</div>
-                                <div style="font-size: 9px; opacity: 0.5; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${s.artist}</div>
-                            </div>`;
-                        }).join('')}
-                    </div>
-                ` : `
-                    <div style="background: rgba(255,255,255,0.02); border-radius: 16px; padding: 30px; text-align: center; border: 1px dashed rgba(255,255,255,0.1); opacity: 0.5; font-size: 13px;">
-                        No items in your playback history yet.
-                    </div>
-                `}
-            </div>
-            
-        </div>
-    `;
-
-    // 4. Enhanced GSAP Timeline Animation Execution
-    const tl = gsap.timeline();
-    tl.fromTo(".home-anim", 
-        { y: 30, opacity: 0, scale: 0.97 }, 
-        { y: 0, opacity: 1, scale: 1, duration: 0.5, stagger: 0.08, ease: "power3.out" }
-    );
+    return {
+        song,
+        position: lastTime,
+        duration: audio.duration
+    };
 }
 
+function getRecentlyAdded() {
+    // Assumes songs have a `dateAdded` field.
+    // Falls back to the existing order if they don't.
+    return [...songs]
+        .filter(song => song.dateAdded)
+        .sort((a, b) => new Date(b.dateAdded) - new Date(a.dateAdded))
+        .slice(0, 8);
+}
+function renderHome() {
+    const home = document.getElementById("home");
+
+    const hour = new Date().getHours();
+
+    const greeting =
+        hour < 12 ? "GOOD MORNING" :
+        hour < 18 ? "GOOD AFTERNOON" :
+        "GOOD EVENING";
+
+    const song = songs[currentIndex];
+
+    const duration = Number.isFinite(audio.duration)
+        ? audio.duration
+        : 0;
+
+    const currentTime = Number.isFinite(lastTime)
+        ? lastTime
+        : 0;
+
+    const progressPct = duration > 0
+        ? Math.min(100, Math.max(0, (currentTime / duration) * 100))
+        : 0;
+
+    const queue = Array.isArray(playQueue)
+        ? playQueue
+        : [];
+
+    const continueSong =
+        song &&
+        duration > 0 &&
+        currentTime > 5 &&
+        currentTime < duration - 5;
+
+    const recentlyAdded = songs
+        .slice()
+        .reverse()
+        .slice(0, 8);
+
+    const recentSongs = Array.isArray(recent)
+        ? recent.slice(0, 8)
+        : [];
+
+    const formatArtist = value =>
+        value || "Unknown Artist";
+
+    const cover = s =>
+        s ? `/cover/${encodeURIComponent(s.file)}` : "/cover/default.jpg";
+
+    const songIndex = s =>
+        songs.findIndex(x => x.file === s.file);
+
+    home.innerHTML = `
+        <div class="fsx-home">
+
+            <!-- ============================================== -->
+            <!-- HEADER -->
+            <!-- ============================================== -->
+
+            <header class="fsx-home-header home-anim">
+
+                <div>
+              
+
+                    <h1>
+                        ${greeting}<br>
+                        
+                    </h1>
+                </div>
+
+                <div class="fsx-library-meta">
+                    <div class="fsx-live-dot"></div>
+
+                    <div>
+                        <strong>${songs.length}</strong>
+                        <span>tracks in library</span>
+                    </div>
+                </div>
+
+            </header>
+
+
+
+            <section class="fsx-now home-anim">
+
+                <div class="fsx-now-art">
+
+                    <img
+                        src="${cover(song)}"
+                        alt=""
+                    >
+
+                    <div class="fsx-art-overlay"></div>
+
+                    <div class="fsx-art-index">
+                        ${song ? String(currentIndex + 1).padStart(2, "0") : "--"}
+                    </div>
+
+
+                </div>
+
+
+                <div class="fsx-now-info">
+
+                    <div class="fsx-section-label">
+                        NOW PLAYING
+                    </div>
+
+                    <h2>
+                        ${song ? song.title : "Nothing playing"}
+                    </h2>
+
+                    <p>
+                        ${song ? formatArtist(song.artist) : "Choose something from your library"}
+                    </p>
+
+
+                    <!-- TIMELINE -->
+
+                    <div class="fsx-timeline">
+
+                 
+
+                        <div class="fsx-time-row">
+                            <span id="home-time-text">
+                                ${formatTime(currentTime)}
+                            </span>
+
+                      
+                        </div>
+
+                    </div>
+
+
+
+            </section>
+
+
+            <section class="fsx-stats home-anim">
+
+                <div class="fsx-stat">
+                    <span class="fsx-stat-icon">
+                     <svg width="256" height="256" viewBox="0 0 256 256" fill="none"
+     xmlns="http://www.w3.org/2000/svg">
+
+    <rect width="256" height="256" rx="64" fill="#0B0D0D"/>
+
+    <path
+        d="M70 151V105"
+        stroke="#C8FF3D"
+        stroke-width="18"
+        stroke-linecap="round"
+    />
+
+    <path
+        d="M103 177V79"
+        stroke="#C8FF3D"
+        stroke-width="18"
+        stroke-linecap="round"
+    />
+
+    <path
+        d="M136 194V62"
+        stroke="#C8FF3D"
+        stroke-width="18"
+        stroke-linecap="round"
+    />
+
+    <path
+        d="M169 169V87"
+        stroke="#C8FF3D"
+        stroke-width="18"
+        stroke-linecap="round"
+    />
+
+    <path
+        d="M202 145V111"
+        stroke="#C8FF3D"
+        stroke-width="18"
+        stroke-linecap="round"
+    />
+
+</svg>
+                    </span>
+
+                    <div onclick="switchTab('songs')" >
+                        <strong>${songs.length}</strong>
+                        <small>LIBRARY</small>
+                    </div>
+                </div>
+
+
+
+            </section>
+
+
+            <!-- ============================================== -->
+            <!-- CONTINUE LISTENING -->
+            <!-- ============================================== -->
+
+            ${
+                continueSong
+                    ? `
+                        <section class="fsx-section home-anim">
+
+                            <div class="fsx-section-header">
+                                <div>
+                                    <span class="fsx-section-kicker">
+                                        PICK UP WHERE YOU LEFT OFF
+                                    </span>
+
+                                    <h3>Continue Listening</h3>
+                                </div>
+                            </div>
+
+
+                            <div
+                                class="fsx-continue"
+                                onclick="playSongByIndex(${currentIndex})"
+                            >
+
+                                <div class="fsx-continue-cover">
+
+                                    <img src="${cover(song)}">
+
+                                    <div class="fsx-continue-play">
+                                        <i class="ph ph-play"></i>
+                                    </div>
+
+                                </div>
+
+
+                                <div class="fsx-continue-info">
+
+                                    <div class="fsx-continue-top">
+
+                                        <div>
+                                            <strong>
+                                                ${song.title}
+                                            </strong>
+
+                                            <span>
+                                                ${formatArtist(song.artist)}
+                                            </span>
+                                        </div>
+
+                                        <b>
+                                            ${Math.round(progressPct)}%
+                                        </b>
+
+                                    </div>
+
+
+                                    <div class="fsx-continue-progress">
+                                        <span
+                                            style="width:${progressPct}%"
+                                        ></span>
+                                    </div>
+
+
+                                    <div class="fsx-continue-bottom">
+
+                                        <span>
+                                            ${formatTime(currentTime)} listened
+                                        </span>
+
+                                        <span>
+                                            ${formatTime(Math.max(
+                                                0,
+                                                duration - currentTime
+                                            ))} remaining
+                                        </span>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                        </section>
+                    `
+                    : ""
+            }
+
+
+            <!-- ============================================== -->
+            <!-- UP NEXT -->
+            <!-- ============================================== -->
+
+            ${
+                queue.length
+                    ? `
+                        <section class="fsx-section home-anim">
+
+                            <div class="fsx-section-header">
+
+                                <div>
+                                    <span class="fsx-section-kicker">
+                                        PLAYBACK
+                                    </span>
+
+                                    <h3>Up Next</h3>
+                                </div>
+
+                                <button
+                                    class="fsx-text-button"
+                                    onclick="typeof openQueue === 'function' && openQueue()"
+                                >
+                                    VIEW QUEUE
+                                    <i class="ph ph-arrow-up-right"></i>
+                                </button>
+
+                            </div>
+
+
+                            <div class="fsx-queue">
+
+                                ${queue.slice(0, 5).map((item, i) => {
+
+                                    const q =
+                                        typeof item === "number"
+                                            ? songs[item]
+                                            : item;
+
+                                    if (!q) return "";
+
+                                    return `
+                                        <div class="fsx-queue-item">
+
+                                            <span class="fsx-queue-number">
+                                                ${String(i + 1).padStart(2, "0")}
+                                            </span>
+
+                                            <img
+                                                src="${cover(q)}"
+                                                alt=""
+                                            >
+
+                                            <div class="fsx-queue-info">
+
+                                                <strong>
+                                                    ${q.title}
+                                                </strong>
+
+                                                <span>
+                                                    ${formatArtist(q.artist)}
+                                                </span>
+
+                                            </div>
+
+                                            <button
+                                                onclick="playSongByIndex(${songIndex(q)})"
+                                                class="fsx-queue-play"
+                                            >
+                                                <i class="ph ph-play"></i>
+                                            </button>
+
+                                        </div>
+                                    `;
+
+                                }).join("")}
+
+                            </div>
+
+                        </section>
+                    `
+                    : ""
+            }
+
+
+            <!-- ============================================== -->
+            <!-- RECENTLY PLAYED -->
+            <!-- ============================================== -->
+
+            <section class="fsx-section home-anim">
+
+                <div class="fsx-section-header">
+
+                    <div>
+                        <span class="fsx-section-kicker">
+                            YOUR ACTIVITY
+                        </span>
+
+                        <h3>Recently Played</h3>
+                    </div>
+
+                </div>
+
+
+                ${
+                    recentSongs.length
+                        ? `
+                            <div class="fsx-album-grid">
+
+                                ${recentSongs.map((s, i) => {
+
+                                    const index = songIndex(s);
+
+                                    return `
+                                        <article
+                                            class="fsx-album"
+                                            onclick="playSongByIndex(${index})"
+                                        >
+
+                                            <div class="fsx-album-art">
+
+                                                <img
+                                                    src="${cover(s)}"
+                                                    alt=""
+                                                >
+
+                                                <div class="fsx-album-overlay">
+                                                    <i class="ph ph-play"></i>
+                                                </div>
+
+                                                <span>
+                                                    ${String(i + 1).padStart(2, "0")}
+                                                </span>
+
+                                            </div>
+
+                                            <strong>
+                                                ${s.title}
+                                            </strong>
+
+                                            <small>
+                                                ${formatArtist(s.artist)}
+                                            </small>
+
+                                        </article>
+                                    `;
+
+                                }).join("")}
+
+                            </div>
+                        `
+                        : `
+                            <div class="fsx-empty">
+                                <i class="ph ph-headphones"></i>
+
+                                <strong>
+                                    Nothing here yet
+                                </strong>
+
+                                <span>
+                                    Start listening and your history will appear here.
+                                </span>
+                            </div>
+                        `
+                }
+
+            </section>
+
+
+            <!-- ============================================== -->
+            <!-- RECENTLY ADDED -->
+            <!-- ============================================== -->
+
+            ${
+                recentlyAdded.length
+                    ? `
+                        <section class="fsx-section home-anim">
+
+                            <div class="fsx-section-header">
+
+                                <div>
+                                    <span class="fsx-section-kicker">
+                                        LIBRARY
+                                    </span>
+
+                                    <h3>Recently Added</h3>
+                                </div>
+
+                                <span class="fsx-count">
+                                    ${recentlyAdded.length} NEWEST
+                                </span>
+
+                            </div>
+
+
+                            <div class="fsx-added-grid">
+
+                                ${recentlyAdded.map(s => {
+
+                                    const index = songIndex(s);
+
+                                    return `
+                                        <article
+                                            class="fsx-added"
+                                            onclick="playSongByIndex(${index})"
+                                        >
+
+                                            <img
+                                                src="${cover(s)}"
+                                                alt=""
+                                            >
+
+                                            <div>
+
+                                                <strong>
+                                                    ${s.title}
+                                                </strong>
+
+                                                <span>
+                                                    ${formatArtist(s.artist)}
+                                                </span>
+
+                                            </div>
+
+                                            <i class="ph ph-arrow-up-right"></i>
+
+                                        </article>
+                                    `;
+
+                                }).join("")}
+
+                            </div>
+
+                        </section>
+                    `
+                    : ""
+            }
+
+
+    `;
+
+
+    /* ========================================================= */
+    /* HOME-SPECIFIC INTERACTION */
+    /* ========================================================= */
+
+    window.seekFromHome = function (event) {
+
+        if (!duration || !audio) return;
+
+        const rect =
+            event.currentTarget.getBoundingClientRect();
+
+        const ratio =
+            Math.min(
+                1,
+                Math.max(
+                    0,
+                    (event.clientX - rect.left) / rect.width
+                )
+            );
+
+        audio.currentTime = ratio * duration;
+
+        lastTime = audio.currentTime;
+
+        renderHome();
+    };
+
+
+    /* ========================================================= */
+    /* GSAP */
+    /* ========================================================= */
+
+    if (typeof gsap !== "undefined") {
+
+        gsap.fromTo(
+            ".home-anim",
+            {
+                opacity: 0,
+                y: 24
+            },
+            {
+                opacity: 1,
+                y: 0,
+                duration: 0.55,
+                stagger: 0.055,
+                ease: "power3.out"
+            }
+        );
+
+
+        gsap.fromTo(
+            ".fsx-now-art",
+            {
+                opacity: 0,
+                scale: 0.94
+            },
+            {
+                opacity: 1,
+                scale: 1,
+                duration: 0.8,
+                delay: 0.1,
+                ease: "power3.out"
+            }
+        );
+
+    }
+}
 async function startUpload() {
     const fileInput = document.getElementById('fileInput');
     const progress = document.getElementById('uploadProgress');
