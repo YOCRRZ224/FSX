@@ -956,10 +956,7 @@ function renderHome() {
             }
 
 
-            <!-- ============================================== -->
-            <!-- RECENTLY PLAYED -->
-            <!-- ============================================== -->
-
+ 
             <section class="fsx-section home-anim">
 
                 <div class="fsx-section-header">
@@ -1113,9 +1110,6 @@ function renderHome() {
     `;
 
 
-    /* ========================================================= */
-    /* HOME-SPECIFIC INTERACTION */
-    /* ========================================================= */
 
     window.seekFromHome = function (event) {
 
@@ -1141,9 +1135,6 @@ function renderHome() {
     };
 
 
-    /* ========================================================= */
-    /* GSAP */
-    /* ========================================================= */
 
     if (typeof gsap !== "undefined") {
 
@@ -1226,10 +1217,7 @@ async function startUpload() {
     fetch("/songs").then(res => res.json()).then(data => {
         songs = data;
         renderSongs(songs);
-    fsxNotify("Upload complete", {
-    body: `${file.name} is now in your FSX library.`,
-    tag: "fsx-upload-complete"
-});
+   
 });
 }
 function sortSongs(criteria) {
