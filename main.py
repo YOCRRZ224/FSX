@@ -29,7 +29,39 @@ HEADERS = {
     "Referer": "https://spotidown.app/en3"
 }
 import time
+def get_song_metadata(path, filename=None):
+    audio = File(path, easy=True)
 
+    if audio is None:
+        raise Exception("Unsupported audio format")
+
+    title = audio.get(
+        "title",
+        [os.path.splitext(filename or os.path.basename(path))[0]]
+    )[0]
+
+    artist = audio.get(
+        "artist",
+        ["Unknown Artist"]
+    )[0]
+
+    album = audio.get(
+        "album",
+        [""]
+    )[0]
+
+    try:
+        size = os.path.getsize(path)
+    except OSError:
+        size = 0
+
+    return {
+        "file": filename or os.path.basename(path),
+        "title": title,
+        "artist": artist,
+        "album": album,
+        "size": size
+    }
 def download_file(url, filename, job_id=None):
     with requests.get(url, headers=HEADERS, stream=True) as r:
         r.raise_for_status()
@@ -646,30 +678,113 @@ def ensure_lyrics_for_song(song):
     ) as f:
         f.write(lyrics)
 
-    print(f"✅ Lyrics saved: {lrc_name}")
+    print(f"lyrics saved: {lrc_name}")
 
     return True
 @app.route("/upload", methods=["POST"])
 def upload():
-    file_data = request.files['file']
-    filename = request.form['filename']
-    chunk_index = int(request.form['chunkIndex'])
-    total_chunks = int(request.form['totalChunks'])
-    
-    # Use a temp directory for specific files to avoid collisions
-    temp_path = os.path.join(UPLOAD_TEMP_FOLDER, filename)
-    
-    # Write the chunk to the file (append mode)
-    with open(temp_path, "ab") as f:
-        f.write(file_data.read())
-    
-    # If this is the last chunk, move it to the main music folder
-    if chunk_index == total_chunks - 1:
-        final_destination = os.path.join(MUSIC_FOLDER, filename)
-        os.rename(temp_path, final_destination)
-        return jsonify({"status": "complete", "message": f"{filename} uploaded successfully!"})
-    
-    return jsonify({"status": "progress", "chunk": chunk_index})
+
+    try:
+        file_data = request.files.get("file")
+
+        if not file_data:
+            return jsonify({
+                "status": "error",
+                "error": "No file provided"
+            }), 400
+
+        filename = request.form.get("filename")
+
+        if not filename:
+            filename = file_data.filename
+
+        if not filename:
+            return jsonify({
+                "status": "error",
+                "error": "Filename missing"
+            }), 400
+
+        chunk_index = int(
+            request.form.get("chunkIndex", 0)
+        )
+
+        total_chunks = int(
+            request.form.get("totalChunks", 1)
+        )
+
+        # Prevent accidental path traversal
+        filename = os.path.basename(filename)
+
+        temp_path = os.path.join(
+            UPLOAD_TEMP_FOLDER,
+            filename
+        )
+
+        # Write chunk
+        with open(temp_path, "ab") as f:
+            f.write(file_data.read())
+
+        
+        if chunk_index < total_chunks - 1:
+
+            return jsonify({
+                "status": "progress",
+                "chunk": chunk_index,
+                "totalChunks": total_chunks
+            })
+
+
+        final_destination = os.path.join(
+            MUSIC_FOLDER,
+            filename
+        )
+
+       
+        if os.path.exists(final_destination):
+
+            base, ext = os.path.splitext(filename)
+
+            counter = 1
+
+            while os.path.exists(final_destination):
+
+                new_filename = (
+                    f"{base} ({counter}){ext}"
+                )
+
+                final_destination = os.path.join(
+                    MUSIC_FOLDER,
+                    new_filename
+                )
+
+                counter += 1
+
+            filename = new_filename
+
+        os.replace(
+            temp_path,
+            final_destination
+        )
+
+        # Extract metadata
+        song = get_song_metadata(
+            final_destination,
+            filename
+        )
+
+        return jsonify({
+            "status": "complete",
+            "song": song
+        })
+
+    except Exception as e:
+
+        print("Upload error:", e)
+
+        return jsonify({
+            "status": "error",
+            "error": str(e)
+        }), 500
 @app.route("/spotify-download", methods=["POST"])
 def spotify_download():
     data = request.json
