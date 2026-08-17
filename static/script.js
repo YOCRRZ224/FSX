@@ -605,9 +605,6 @@ function renderHome() {
     home.innerHTML = `
         <div class="fsx-home">
 
-            <!-- ============================================== -->
-            <!-- HEADER -->
-            <!-- ============================================== -->
 
             <header class="fsx-home-header home-anim">
 
@@ -740,15 +737,54 @@ function renderHome() {
                         <small>LIBRARY</small>
                     </div>
                 </div>
+                
+                <div class="fsx-stat">
+                    <span class="fsx-stat-icon">
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none"
+     xmlns="http://www.w3.org/2000/svg">
+
+  <rect width="256" height="256" rx="64" fill="#0B0D0D"/>
+
+  <!-- Search lens -->
+  <path
+    d="M112 52
+       C78.86 52 52 78.86 52 112
+       C52 145.14 78.86 172 112 172
+       C145.14 172 172 145.14 172 112
+       C172 78.86 145.14 52 112 52Z"
+    stroke="#C8FF3D"
+    stroke-width="18"
+  />
+
+  <!-- Offset search handle -->
+  <path
+    d="M155 155L204 204"
+    stroke="#C8FF3D"
+    stroke-width="18"
+    stroke-linecap="round"
+  />
+
+  <!-- FSX signature cut -->
+  <path
+    d="M91 112H133"
+    stroke="#0B0D0D"
+    stroke-width="10"
+    stroke-linecap="round"
+  />
+
+</svg>
+                    </span>
+
+                    <div onclick="switchTab('search')" >
+                      
+                        <small>SEARCH</small>
+                    </div>
+                </div>
 
 
 
             </section>
 
-
-            <!-- ============================================== -->
-            <!-- CONTINUE LISTENING -->
-            <!-- ============================================== -->
 
             ${
                 continueSong
