@@ -1185,12 +1185,16 @@ async function startUpload() {
     btn.disabled = false;
     btn.style.opacity = "1";
     progress.style.width = "0%";
-    
+
     // Refresh library immediately
     fetch("/songs").then(res => res.json()).then(data => {
         songs = data;
         renderSongs(songs);
-    });
+    fsxNotify("Upload complete", {
+    body: `${file.name} is now in your FSX library.`,
+    tag: "fsx-upload-complete"
+});
+});
 }
 function sortSongs(criteria) {
     const sorted = [...songs].sort((a, b) => a[criteria].localeCompare(b[criteria]));
@@ -2310,3 +2314,25 @@ audio.addEventListener("timeupdate", () => {
     document.getElementById("lyricsProgressFill")
         .style.width = `${percent}%`;
 });
+async function requestFSXNotifications() {
+    if (!("Notification" in window)) return false;
+
+    if (Notification.permission === "granted") return true;
+    if (Notification.permission === "denied") return false;
+
+    return (
+        await Notification.requestPermission()
+    ) === "granted";
+}
+
+function fsxNotify(title, options = {}) {
+    if (!("Notification" in window)) return;
+    if (Notification.permission !== "granted") return;
+
+    new Notification(title, {
+        icon: "/static/default.jpg",
+        badge: "/static/default.jpg",
+        tag: "fsx",
+        ...options
+    });
+}
