@@ -780,6 +780,50 @@ function renderHome() {
                         <small>SEARCH</small>
                     </div>
                 </div>
+                                <div class="fsx-stat">
+                    <span class="fsx-stat-icon">
+<svg width="256" height="256" viewBox="0 0 256 256" fill="none"
+     xmlns="http://www.w3.org/2000/svg">
+
+    <rect width="256" height="256" rx="64" fill="#0B0D0D"/>
+
+    <circle
+        cx="128"
+        cy="128"
+        r="78"
+        stroke="#C8FF3D"
+        stroke-width="16"
+    />
+
+    <path
+        d="M82 108C113 96 154 99 180 111"
+        stroke="#C8FF3D"
+        stroke-width="15"
+        stroke-linecap="round"
+    />
+
+    <path
+        d="M88 132C113 123 145 125 169 136"
+        stroke="#C8FF3D"
+        stroke-width="15"
+        stroke-linecap="round"
+    />
+
+    <path
+        d="M96 155C116 149 138 151 156 159"
+        stroke="#C8FF3D"
+        stroke-width="14"
+        stroke-linecap="round"
+    />
+
+</svg>
+                    </span>
+
+                    <div onclick="toggleSpotifyModal(true)" >
+                      
+                        <small>SPOTIFY</small>
+                    </div>
+                </div>
 
 
 
@@ -1419,7 +1463,7 @@ async function trackDownload(jobId) {
     const statusBox = document.getElementById("spotifyStatusBox");
     const loaderFrame = document.getElementById("spotifyLoader");
     const cursor = document.getElementById("terminalCursor");
-    const execBtn = document.getElementById("spotifyDownloadBtn");
+    const execBtn = document.getElementById("SPOTIFYDownloadBtn");
 
     const poll = setInterval(async () => {
 
