@@ -915,9 +915,6 @@ function renderHome() {
             }
 
 
-            <!-- ============================================== -->
-            <!-- UP NEXT -->
-            <!-- ============================================== -->
 
             ${
                 queue.length
@@ -1081,9 +1078,6 @@ function renderHome() {
             </section>
 
 
-            <!-- ============================================== -->
-            <!-- RECENTLY ADDED -->
-            <!-- ============================================== -->
 
             ${
                 recentlyAdded.length
@@ -1307,55 +1301,114 @@ const observer = new IntersectionObserver((entries) => {
 }, {
   rootMargin: "300px"
 });
-
 function renderSongs(list) {
   const container = document.getElementById("songList");
 
-  container.innerHTML = list.map((song) => `
-    <div class="song swipe-song"
-         data-file="${song.file}"
-         onclick="playSongByIndex(${songs.indexOf(song)})">
+  container.innerHTML = list.map((song) => {
+    const index = songs.indexOf(song);
 
-      <div class="delete-bg">
-         
-      </div>
+    return `
+      <div
+        class="song swipe-song"
+        data-file="${song.file}"
+        data-index="${index}"
+      >
 
-      <div class="song-content">
+        <!-- Swipe action -->
+        <div class="delete-bg">
+          <div class="delete-icon">
+           <svg
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  fill="none"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <path
+    d="M5 7H19"
+    stroke="currentColor"
+    stroke-width="1.7"
+    stroke-linecap="round"
+  />
 
-        <img
-          class="cover lazy-cover"
-          data-src="/cover/${song.file}"
-          src="data:image/svg+xml;base64,PHN2Zy..."
-        >
+  <path
+    d="M9 7V5.5C9 4.67 9.67 4 10.5 4H13.5C14.33 4 15 4.67 15 5.5V7"
+    stroke="currentColor"
+    stroke-width="1.7"
+    stroke-linecap="round"
+  />
 
-        <div style="min-width:0;">
-          <div style="
-            font-weight:bold;
-            white-space:nowrap;
-            overflow:hidden;
-            text-overflow:ellipsis;
-          ">
-            ${song.title}
+  <path
+    d="M7 7L7.7 18.2C7.76 19.22 8.61 20 9.63 20H14.37C15.39 20 16.24 19.22 16.3 18.2L17 7"
+    stroke="currentColor"
+    stroke-width="1.7"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+
+  <path
+    d="M10 10.5V16.5M14 10.5V16.5"
+    stroke="currentColor"
+    stroke-width="1.5"
+    stroke-linecap="round"
+  />
+</svg>
           </div>
-
-          <div style="
-            font-size:12px;
-            opacity:0.7;
-            white-space:nowrap;
-            overflow:hidden;
-            text-overflow:ellipsis;
-          ">
-            ${song.artist}
-          </div>
+          <span>Delete</span>
         </div>
 
-      </div>
+        <!-- Actual song card -->
+        <div
+          class="song-content"
+          onclick="playSongByIndex(${index})"
+        >
 
-    </div>
-  `).join("");
+          <div class="song-cover-wrap">
+            <img
+              class="cover lazy-cover"
+              data-src="/cover/${song.file}"
+              src="data:image/svg+xml;base64,PHN2Zy..."
+              loading="lazy"
+              draggable="false"
+            />
+
+            <div class="cover-shine"></div>
+          </div>
+
+          <div class="song-info">
+
+            <div class="song-title">
+              ${escapeHtml(song.title)}
+            </div>
+
+            <div class="song-artist">
+              ${escapeHtml(song.artist || "Unknown artist")}
+            </div>
+
+          </div>
+
+          <div class="song-meta">
+
+            <span class="song-duration">
+              ${song.duration || ""}
+            </span>
+
+            <button
+              class="song-more"
+              onclick="event.stopPropagation(); openSongMenu('${escapeAttr(song.file)}')"
+              aria-label="More options"
+            >
+              <i class="ph ph-dots-three-vertical"></i>
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+    `;
+  }).join("");
 
   requestAnimationFrame(() => {
-
     document
       .querySelectorAll(".lazy-cover")
       .forEach(img => observer.observe(img));
@@ -1363,52 +1416,110 @@ function renderSongs(list) {
     setupSwipeDelete();
   });
 }
+
+
 function setupSwipeDelete() {
 
-    document.querySelectorAll(".swipe-song")
-    .forEach(song => {
+  document.querySelectorAll(".swipe-song").forEach(song => {
 
-        const content =
-            song.querySelector(".song-content");
+    const content = song.querySelector(".song-content");
 
-        song.addEventListener("touchstart", e => {
+    let startX = 0;
+    let currentX = 0;
+    let dragging = false;
 
-            swipeStartX =
-                e.touches[0].clientX;
+    song.addEventListener(
+      "touchstart",
+      e => {
 
-        });
+        startX = e.touches[0].clientX;
+        currentX = 0;
+        dragging = false;
 
-        song.addEventListener("touchmove", e => {
+        content.style.transition = "none";
 
-            const diff =
-                e.touches[0].clientX -
-                swipeStartX;
+      },
+      { passive: true }
+    );
 
-            if (diff < 0) {
 
-                content.style.transform =
-                    `translateX(${Math.max(diff,-100)}px)`;
-            }
-        });
+    song.addEventListener(
+      "touchmove",
+      e => {
 
-        song.addEventListener("touchend", () => {
+        const diff =
+          e.touches[0].clientX - startX;
 
-            const transform =
-                content.style.transform;
+        /*
+         * Only activate when swiping left.
+         * Small movements are ignored so normal
+         * vertical scrolling stays smooth.
+         */
 
-            if (transform.includes("-100")) {
+        if (Math.abs(diff) < 8) return;
 
-                deleteTarget =
-                    song.dataset.file;
+        if (diff < 0) {
 
-                showDeleteModal(deleteTarget);
-            }
+          dragging = true;
 
-            content.style.transform =
-                "translateX(0)";
-        });
+          currentX = Math.max(diff, -110);
+
+          content.style.transform =
+            `translate3d(${currentX}px, 0, 0)`;
+
+          song.classList.toggle(
+            "swiping",
+            currentX <= -40
+          );
+        }
+
+      },
+      { passive: true }
+    );
+
+
+    song.addEventListener("touchend", () => {
+
+      content.style.transition =
+        "transform .28s cubic-bezier(.22,1,.36,1)";
+
+      if (currentX <= -85) {
+
+        deleteTarget = song.dataset.file;
+
+        showDeleteModal(deleteTarget);
+
+      }
+
+      content.style.transform =
+        "translate3d(0, 0, 0)";
+
+      song.classList.remove("swiping");
+
+      setTimeout(() => {
+        content.style.transition = "";
+      }, 300);
 
     });
+
+  });
+}
+
+
+function escapeHtml(value = "") {
+  return String(value)
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+
+function escapeAttr(value = "") {
+  return String(value)
+    .replaceAll("\\", "\\\\")
+    .replaceAll("'", "\\'");
 }
 function showDeleteModal(file){
 
@@ -2404,3 +2515,12 @@ function fsxNotify(title, options = {}) {
         ...options
     });
 }
+const miniCover = document.getElementById("miniCover");
+
+miniCover.addEventListener("error", () => {
+    miniCover.classList.add("image-error");
+});
+
+miniCover.addEventListener("load", () => {
+    miniCover.classList.remove("image-error");
+});

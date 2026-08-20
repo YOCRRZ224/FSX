@@ -1298,8 +1298,12 @@ button {
     width: 42px;
     height: 42px;
     display: block;
-    object-fit: contain;
     flex-shrink: 0;
+
+    background: #C8FF3D;
+
+    mask: url("/static/logo.png") center / contain no-repeat;
+    -webkit-mask: url("/static/logo.png") center / contain no-repeat;
 }
 @keyframes popIn {
 from { transform: scale(0.9); opacity: 0; }
@@ -3000,4 +3004,583 @@ transform:scale(0.98);
 
         gap: 5px;
     }
+}
+.fsx-library {
+    padding: 24px 0 120px;
+}
+
+
+/* HEADER */
+
+.library-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding: 0 4px 22px;
+
+    border-bottom: 1px solid rgba(255,255,255,.08);
+}
+
+.library-title {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+}
+
+.library-title h1 {
+    margin: 0;
+
+    font-size: 34px;
+    line-height: 1;
+
+    font-weight: 800;
+    letter-spacing: -1.5px;
+}
+
+.library-title span {
+    color: rgba(255,255,255,.35);
+
+    font-size: 12px;
+}
+
+
+/* CONTROLS */
+
+.library-controls {
+    display: flex;
+    gap: 6px;
+}
+
+.library-icon {
+    width: 38px;
+    height: 38px;
+
+    display: grid;
+    place-items: center;
+
+    border: 0;
+    border-radius: 50%;
+
+    background: transparent;
+    color: rgba(255,255,255,.6);
+
+    cursor: pointer;
+
+    transition:
+        color .15s ease,
+        background .15s ease;
+}
+
+.library-icon svg {
+    width: 20px;
+    height: 20px;
+
+    fill: currentColor;
+}
+
+.library-icon:hover {
+    color: #fff;
+    background: rgba(255,255,255,.08);
+}
+
+
+/* TABS */
+
+.library-tabs {
+    display: flex;
+    gap: 24px;
+
+    padding: 18px 4px;
+
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.library-tabs::-webkit-scrollbar {
+    display: none;
+}
+
+.library-tab {
+    position: relative;
+
+    padding: 0;
+
+    border: 0;
+
+    background: none;
+
+    color: rgba(255,255,255,.38);
+
+    font: inherit;
+    font-size: 13px;
+    font-weight: 650;
+
+    cursor: pointer;
+}
+
+.library-tab:hover {
+    color: rgba(255,255,255,.75);
+}
+
+.library-tab.active {
+    color: #fff;
+}
+
+.library-tab.active::after {
+    content: "";
+
+    position: absolute;
+
+    left: 0;
+    right: 0;
+    bottom: -19px;
+
+    height: 2px;
+
+    background: #1db954;
+}
+
+
+/* LIST HEADER */
+
+.library-list-header {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        180px
+        70px;
+
+    padding: 9px 16px;
+
+    color: rgba(255,255,255,.25);
+
+    font-size: 10px;
+    font-weight: 700;
+
+    text-transform: uppercase;
+    letter-spacing: 1px;
+
+    border-bottom: 1px solid rgba(255,255,255,.05);
+}
+
+
+@media (max-width: 650px) {
+
+    .fsx-library {
+        padding-top: 18px;
+    }
+
+    .library-title h1 {
+        font-size: 30px;
+    }
+
+    .library-list-header {
+        display: none;
+    }
+
+    .library-tabs {
+        gap: 20px;
+    }
+}
+/* ================================
+   FSX SONG LIST
+================================ */
+
+#songList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 12px 120px;
+}
+
+
+/* ================================
+   SONG
+================================ */
+
+.song {
+  position: relative;
+  width: 100%;
+  height: 72px;
+
+  border-radius: 18px;
+
+  overflow: hidden;
+
+  isolation: isolate;
+}
+
+
+/* ================================
+   MAIN CONTENT
+================================ */
+
+.song-content {
+  position: relative;
+  z-index: 2;
+
+  display: flex;
+  align-items: center;
+
+  width: 100%;
+  height: 72px;
+
+  padding: 8px;
+
+  gap: 12px;
+
+  border: 1px solid rgba(255,255,255,.055);
+
+  border-radius: 18px;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.075),
+      rgba(255,255,255,.025)
+    );
+
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.035),
+    0 5px 20px rgba(0,0,0,.12);
+
+  transform: translate3d(0,0,0);
+
+  will-change: transform;
+
+  transition:
+    transform .28s cubic-bezier(.22,1,.36,1),
+    background .2s ease,
+    border-color .2s ease;
+}
+
+
+
+.song-content:active {
+  transform: scale(.985);
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.11),
+      rgba(255,255,255,.035)
+    );
+}
+
+
+
+.song-cover-wrap {
+  position: relative;
+
+  width: 56px;
+  height: 56px;
+
+  flex: 0 0 56px;
+
+  border-radius: 13px;
+
+  overflow: hidden;
+
+  background: #111;
+
+  box-shadow:
+    0 5px 15px rgba(0,0,0,.3);
+}
+
+
+.cover {
+  width: 100%;
+  height: 100%;
+
+  display: block;
+
+  object-fit: cover;
+
+  user-select: none;
+
+  transition:
+    transform .4s cubic-bezier(.22,1,.36,1);
+}
+
+
+.song-content:hover .cover {
+  transform: scale(1.05);
+}
+
+
+/* subtle artwork shine */
+
+.cover-shine {
+  position: absolute;
+  inset: 0;
+
+  pointer-events: none;
+
+  background:
+    linear-gradient(
+      135deg,
+      rgba(255,255,255,.14),
+      transparent 35%
+    );
+
+  opacity: .35;
+}
+
+.song-info {
+  min-width: 0;
+  flex: 1;
+
+  display: flex;
+  flex-direction: column;
+
+  justify-content: center;
+
+  gap: 5px;
+}
+
+
+.song-title {
+  min-width: 0;
+
+  font-size: 14px;
+  font-weight: 650;
+
+  line-height: 1.1;
+
+  color: rgba(255,255,255,.94);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.song-artist {
+  min-width: 0;
+
+  font-size: 11.5px;
+
+  line-height: 1;
+
+  color: rgba(255,255,255,.48);
+
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+
+.song-meta {
+  display: flex;
+  align-items: center;
+
+  gap: 4px;
+
+  flex-shrink: 0;
+}
+
+
+.song-duration {
+  font-size: 10px;
+
+  color: rgba(255,255,255,.35);
+
+  font-variant-numeric: tabular-nums;
+}
+
+
+.song-more {
+  width: 32px;
+  height: 36px;
+
+  display: grid;
+  place-items: center;
+
+  border: 0;
+  outline: 0;
+
+  color: rgba(255,255,255,.45);
+
+  background: transparent;
+
+  border-radius: 10px;
+
+  font-size: 19px;
+
+  transition:
+    color .2s ease,
+    background .2s ease;
+}
+
+
+.song-more:active {
+  background: rgba(255,255,255,.08);
+  color: white;
+}
+
+
+.delete-bg {
+  position: absolute;
+  z-index: 1;
+
+  inset: 0;
+
+  display: flex;
+
+  align-items: center;
+  justify-content: flex-end;
+
+  gap: 7px;
+
+  padding-right: 20px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent 20%,
+      rgba(255,55,70,.12),
+      rgba(255,55,70,.8)
+    );
+
+  color: white;
+
+  font-size: 11px;
+  font-weight: 600;
+
+  opacity: 0;
+
+  transition: opacity .2s ease;
+}
+
+
+.song.swiping .delete-bg {
+  opacity: 1;
+}
+
+
+.delete-icon {
+  width: 32px;
+  height: 32px;
+
+  display: grid;
+  place-items: center;
+
+  border-radius: 10px;
+
+  background: rgba(255,255,255,.12);
+
+  backdrop-filter: blur(8px);
+
+  font-size: 17px;
+}
+
+
+.song.is-playing .song-content {
+
+  border-color:
+    color-mix(
+      in srgb,
+      var(--accent, #c8ff3d) 35%,
+      transparent
+    );
+
+  background:
+    linear-gradient(
+      135deg,
+      color-mix(
+        in srgb,
+        var(--accent, #c8ff3d) 10%,
+        rgba(255,255,255,.045)
+      ),
+      rgba(255,255,255,.02)
+    );
+
+}
+
+
+.song.is-playing .song-title {
+  color: var(--accent, #c8ff3d);
+}
+
+
+.song.is-playing .song-cover-wrap {
+  box-shadow:
+    0 0 0 1px
+      color-mix(
+        in srgb,
+        var(--accent, #c8ff3d) 25%,
+        transparent
+      ),
+    0 6px 20px
+      color-mix(
+        in srgb,
+        var(--accent, #c8ff3d) 18%,
+        transparent
+      );
+}
+
+
+@media (max-width: 500px) {
+
+  #songList {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+
+  .song-content {
+    gap: 10px;
+  }
+
+  .song-cover-wrap {
+    width: 54px;
+    height: 54px;
+    flex-basis: 54px;
+  }
+
+  .song-duration {
+    display: none;
+  }
+
+}
+
+#miniCover {
+    width: 48px;
+    height: 48px;
+
+    min-width: 48px;
+    min-height: 48px;
+
+    max-width: 48px;
+    max-height: 48px;
+
+    flex: 0 0 48px;
+
+    object-fit: cover;
+    border-radius: 10px;
+
+    display: block;
+}
+.delete-icon {
+    width: 34px;
+    height: 34px;
+
+    display: grid;
+    place-items: center;
+
+    border-radius: 11px;
+
+    color: rgba(255,255,255,.9);
+    background: rgba(255,255,255,.10);
+}
+#miniCover {
+    display: block;
+    object-fit: cover;
+}
+
+#miniCover.image-error {
+    display: none;
 }
