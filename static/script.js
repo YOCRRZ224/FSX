@@ -2493,28 +2493,6 @@ audio.addEventListener("timeupdate", () => {
     document.getElementById("lyricsProgressFill")
         .style.width = `${percent}%`;
 });
-async function requestFSXNotifications() {
-    if (!("Notification" in window)) return false;
-
-    if (Notification.permission === "granted") return true;
-    if (Notification.permission === "denied") return false;
-
-    return (
-        await Notification.requestPermission()
-    ) === "granted";
-}
-
-function fsxNotify(title, options = {}) {
-    if (!("Notification" in window)) return;
-    if (Notification.permission !== "granted") return;
-
-    new Notification(title, {
-        icon: "/static/default.jpg",
-        badge: "/static/default.jpg",
-        tag: "fsx",
-        ...options
-    });
-}
 const miniCover = document.getElementById("miniCover");
 
 miniCover.addEventListener("error", () => {
