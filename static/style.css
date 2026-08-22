@@ -3690,3 +3690,17 @@ transform:scale(0.98);
 .player.compact:hover {
     transform: translateY(-1px);
 }
+.search-item {
+    display: flex !important;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    height: auto !important;
+}
+
+.search-item .cover {
+    width: 48px !important;
+    height: 48px !important;
+    flex-shrink: 0;
+    border-radius: 10px;
+}
