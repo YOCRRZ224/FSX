@@ -125,6 +125,11 @@ this was the last step you could run main.py and go on web.
 </p>
 
 ---
+## NEXT STOP
+
+- Optimization -> v2.2.0
+
+---
 
 ### Stats
 [![Visitors](https://visitor-badge.laobi.icu/badge?page_id=YOCRRZ224.FSX)](https://github.com/YOCRRZ224/FSX)
