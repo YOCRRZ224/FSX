@@ -1,14 +1,15 @@
         
         * { box-sizing: border-box; }
         body { margin: 0; background: #000; color: white; font-family: sans-serif; overflow-x: hidden; }
-  .header {
+.header {
     position: fixed;
-    top: 14px;
-    left: 50%;
-    transform: translateX(-50%);
 
-    width: calc(100% - 24px);
-    max-width: 520px;
+    top: 14px;
+    left: 18px;
+    right: 18px;
+
+    height: 46px;
+    padding: 0 14px;
 
     z-index: 500;
 
@@ -16,102 +17,70 @@
     align-items: center;
     justify-content: space-between;
 
-    padding: 10px 14px;
+    box-sizing: border-box;
 
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 0.4px;
+    pointer-events: none;
 
-    border-radius: 18px;
+    /* Glass capsule */
+    background: rgba(18, 18, 22, 0.62);
 
-    background: rgba(10,10,10,0.72);
+    backdrop-filter: blur(18px) saturate(140%);
+    -webkit-backdrop-filter: blur(18px) saturate(140%);
 
-    backdrop-filter: blur(18px) saturate(180%);
-    -webkit-backdrop-filter: blur(18px) saturate(180%);
-
-    border: 1px solid rgba(255,255,255,0.05);
+    border: 1px solid rgba(255, 255, 255, 0.075);
+    border-radius: 16px;
 
     box-shadow:
-        0 8px 30px rgba(0,0,0,0.35);
-
-    overflow: hidden;
+        0 8px 30px rgba(0, 0, 0, 0.25),
+        inset 0 1px 0 rgba(255, 255, 255, 0.045);
 }
 
-/* subtle top highlight */
-.header::before {
-    content: "";
 
-    position: absolute;
-    top: 0;
-    left: 12px;
-
-    width: 40%;
-    height: 1px;
-
-    background:
-        linear-gradient(
-            90deg,
-            rgba(255,255,255,0.22),
-            transparent
-        );
-}
-
-/* logo text */
-.header span {
-    font-size: 13px;
-    font-weight: 900;
-    letter-spacing: 1.6px;
-
-    color: rgba(255,255,255,0.92);
-
-    text-transform: uppercase;
-}
-
-/* action button */
-.header button {
-    width: 34px;
-    height: 34px;
-
-    border-radius: 12px;
-
-    background:
-        rgba(255,255,255,0.03) !important;
-
-    border:
-        1px solid rgba(255,255,255,0.04);
-
+/* Logo */
+.header > span:first-child {
     display: flex;
     align-items: center;
     justify-content: center;
+}
+
+#logo {
+    width: 34px;
+    height: 34px;
+
+    display: block;
+
+    object-fit: contain;
+
+    filter: drop-shadow(
+        0 3px 10px rgba(0, 0, 0, 0.35)
+    );
+}
+
+
+/* Dynamic title */
+#headerTitle {
+    font-size: 12px;
+    font-weight: 800;
+
+    letter-spacing: 2.2px;
+    line-height: 1;
+
+    color: rgba(255, 255, 255, 0.9);
+
+    text-transform: uppercase;
+    white-space: nowrap;
+
+    text-shadow:
+        0 2px 10px rgba(0, 0, 0, 0.3);
+
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
 
     transition:
-        transform 0.2s ease,
-        background 0.2s ease,
-        border-color 0.2s ease;
-}
-
-/* hover */
-.header button:hover {
-    transform: scale(1.04);
-
-    background:
-        rgba(255,255,255,0.06) !important;
-
-    border-color:
-        rgba(255,255,255,0.08);
-}
-
-/* active press */
-.header button:active {
-    transform: scale(0.95);
-}
-
-/* icon sizing */
-.header button svg {
-    width: 15px;
-    height: 15px;
-
-    opacity: 0.9;
+        opacity 0.2s ease,
+        transform 0.35s cubic-bezier(.22, 1, .36, 1),
+        filter 0.25s ease;
 }
         .tab { display: none; padding: 15px; padding-bottom: 150px; }
         .active { display: block; }
@@ -3583,4 +3552,141 @@ transform:scale(0.98);
 
 #miniCover.image-error {
     display: none;
+}
+/* =========================================================
+   MINI PLAYER — PREMIUM MORPH
+   ========================================================= */
+
+.player {
+    transform-origin: center bottom;
+
+    transition:
+        width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        max-width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        padding 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        gap 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        border-radius 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        box-shadow 0.45s ease,
+        background 0.45s ease;
+}
+
+/* Compact shell */
+.player.compact {
+    width: auto;
+    max-width: 330px;
+
+    padding: 6px 8px;
+    gap: 8px;
+
+    border-radius: 999px;
+
+    background: rgba(18, 18, 18, 0.88);
+
+    box-shadow:
+        0 10px 35px rgba(0, 0, 0, 0.65);
+}
+
+/* Artwork morph */
+#miniCover {
+    transition:
+        width 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        height 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        border-radius 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.player.compact #miniCover {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+/* Metadata morph */
+.text-meta {
+    transition:
+        margin 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        opacity 0.25s ease;
+}
+
+.player.compact .text-meta {
+    margin-left: 6px;
+}
+
+/* Artist fades away instead of instantly disappearing */
+.mini-artist {
+    transition:
+        opacity 0.2s ease,
+        transform 0.3s cubic-bezier(0.22, 1, 0.36, 1),
+        max-height 0.3s ease;
+}
+
+.player.compact .mini-artist {
+    opacity: 0;
+    transform: translateY(-4px);
+    max-height: 0;
+    margin: 0;
+    overflow: hidden;
+}
+
+/* Title gets slightly smaller */
+#now {
+    transition:
+        font-size 0.35s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.player.compact #now {
+    font-size: 12px;
+}
+
+/* Controls */
+.mini-controls {
+    transition:
+        gap 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.player.compact .mini-controls {
+    gap: 3px;
+}
+
+/* Secondary controls smoothly disappear */
+.player.compact .mini-controls button:not(.play-btn) {
+    opacity: 0;
+    transform: scale(0.7);
+    width: 0;
+    padding: 0;
+    margin: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+/* Play button morph */
+.mini-controls .play-btn {
+    transition:
+        width 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        height 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        transform 0.4s cubic-bezier(0.22, 1, 0.36, 1),
+        border-radius 0.4s ease;
+}
+
+.player.compact .mini-controls .play-btn {
+    width: 30px;
+    height: 30px;
+}
+
+/* Progress */
+.mini-progress-container {
+    transition:
+        height 0.3s ease,
+        opacity 0.3s ease;
+}
+
+.player.compact .mini-progress-container {
+    height: 1px;
+}
+
+/* Kill the old hover scale while compact */
+.player.compact:hover {
+    transform: translateY(-1px);
 }

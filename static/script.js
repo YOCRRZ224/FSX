@@ -158,7 +158,8 @@ function toggleShuffle() {
         shuffleQueue = Array.from(Array(songs.length).keys()).sort(() => Math.random() - 0.5);
     }
     const color = shuffleMode ? "#1db954" : "white";
-    document.getElementById("headerShuffle").style.color = color;
+    
+    
     document.getElementById("fpShuffleBtn").classList.toggle('active', shuffleMode);
 }
 
@@ -317,25 +318,79 @@ audio.addEventListener("ended", () => {
 
 // 7. TABS & SEARCH
 function switchTab(tabId) {
-    // 1. Manage Active Tab Content
-    document.querySelectorAll(".tab").forEach(t => t.classList.remove("active"));
-    const activeTab = document.getElementById(tabId);
-    activeTab.classList.add("active");
-    
-    // 2. Manage Active Nav Button
-    document.querySelectorAll(".nav-btn").forEach(btn => btn.classList.remove("active"));
-    document.getElementById('nav-' + tabId).classList.add("active");
 
-    // 3. GSAP Transition for the Content
-    gsap.fromTo(activeTab, 
-        { opacity: 0, y: 20, scale: 0.98 }, 
-        { opacity: 1, y: 0, scale: 1, duration: 0.4, ease: "expo.out" }
+    // 1. Dynamic Header Title
+    const headerTitle = document.getElementById("headerTitle");
+
+    const titles = {
+        home: "HOME",
+        songs: "LIBRARY",
+        search: "SEARCH"
+    };
+
+    if (headerTitle && titles[tabId]) {
+        headerTitle.style.opacity = "0";
+        headerTitle.style.transform = "translateY(-6px)";
+        headerTitle.style.filter = "blur(4px)";
+
+        setTimeout(() => {
+            headerTitle.textContent = titles[tabId];
+
+            headerTitle.style.opacity = "1";
+            headerTitle.style.transform = "translateY(0)";
+            headerTitle.style.filter = "blur(0)";
+        }, 120);
+    }
+
+
+    // 2. Manage Active Tab Content
+    document.querySelectorAll(".tab").forEach(t =>
+        t.classList.remove("active")
     );
 
-    // 4. Icon "Pop" Feedback
-    gsap.fromTo('#nav-' + tabId + ' span:first-child', 
-        { scale: 0.8 }, 
-        { scale: 1.2, duration: 0.3, yoyo: true, repeat: 1, ease: "back.out(2)" }
+    const activeTab = document.getElementById(tabId);
+    activeTab.classList.add("active");
+
+
+    // 3. Manage Active Nav Button
+    document.querySelectorAll(".nav-btn").forEach(btn =>
+        btn.classList.remove("active")
+    );
+
+    document.getElementById("nav-" + tabId).classList.add("active");
+
+
+    // 4. GSAP Transition for Content
+    gsap.fromTo(
+        activeTab,
+        {
+            opacity: 0,
+            y: 20,
+            scale: 0.98
+        },
+        {
+            opacity: 1,
+            y: 0,
+            scale: 1,
+            duration: 0.4,
+            ease: "expo.out"
+        }
+    );
+
+
+    // 5. Icon "Pop" Feedback
+    gsap.fromTo(
+        "#nav-" + tabId + " span:first-child",
+        {
+            scale: 0.8
+        },
+        {
+            scale: 1.2,
+            duration: 0.3,
+            yoyo: true,
+            repeat: 1,
+            ease: "back.out(2)"
+        }
     );
 }
 let fuse = new Fuse(songs, {
@@ -2502,3 +2557,54 @@ miniCover.addEventListener("error", () => {
 miniCover.addEventListener("load", () => {
     miniCover.classList.remove("image-error");
 });
+/* =========================================================
+   MINI PLAYER — SCROLL COMPRESSION
+   ========================================================= */
+
+const miniPlayer = document.querySelector(".player");
+
+let lastScrollY = window.scrollY;
+let compacted = false;
+
+const DOWN_THRESHOLD = 120;
+const UP_THRESHOLD = 25;
+
+let accumulatedDown = 0;
+let accumulatedUp = 0;
+
+window.addEventListener("scroll", () => {
+    if (!miniPlayer) return;
+
+    const currentScrollY = window.scrollY;
+    const delta = currentScrollY - lastScrollY;
+
+    if (delta > 0) {
+        // Scrolling down
+        accumulatedDown += delta;
+        accumulatedUp = 0;
+
+        if (
+            accumulatedDown >= DOWN_THRESHOLD &&
+            !compacted
+        ) {
+            miniPlayer.classList.add("compact");
+            compacted = true;
+        }
+    }
+
+    else if (delta < 0) {
+        // Scrolling up
+        accumulatedUp += Math.abs(delta);
+        accumulatedDown = 0;
+
+        if (
+            accumulatedUp >= UP_THRESHOLD &&
+            compacted
+        ) {
+            miniPlayer.classList.remove("compact");
+            compacted = false;
+        }
+    }
+
+    lastScrollY = currentScrollY;
+}, { passive: true });
