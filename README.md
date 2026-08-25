@@ -126,9 +126,8 @@ this was the last step you could run main.py and go on web.
 
 ---
 ## NEXT STOP
-
-- Optimization -> v2.2.0
-
+- Playlist -> v2.2.0
+- Optimization -> v2.2.1
 ---
 
 ### Stats
