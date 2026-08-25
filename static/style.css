@@ -3553,9 +3553,6 @@ transform:scale(0.98);
 #miniCover.image-error {
     display: none;
 }
-/* =========================================================
-   MINI PLAYER — PREMIUM MORPH
-   ========================================================= */
 
 .player {
     transform-origin: center bottom;
@@ -3579,8 +3576,6 @@ transform:scale(0.98);
     gap: 8px;
 
     border-radius: 999px;
-
-    background: rgba(18, 18, 18, 0.88);
 
     box-shadow:
         0 10px 35px rgba(0, 0, 0, 0.65);

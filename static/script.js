@@ -2340,31 +2340,6 @@ function updateLyrics() {
 }
 
 
-audio.addEventListener("timeupdate", () => {
-
-    updateLyrics();
-
-    const current = audio.currentTime || 0;
-    const duration = audio.duration || 0;
-
-    document.getElementById("lyricsCurrentTime")
-        .textContent = formatTime(current);
-
-    document.getElementById("lyricsDuration")
-        .textContent = formatTime(duration);
-
-    const percent = duration
-        ? (current / duration) * 100
-        : 0;
-
-    document.getElementById("lyricsProgressFill")
-        .style.width = `${percent}%`;
-});
-
-audio.addEventListener(
-    "timeupdate",
-    updateLyrics
-);
 async function openLyrics(song = currentSong) {
     console.log("openLyrics called", song);
     try {
@@ -2557,9 +2532,6 @@ miniCover.addEventListener("error", () => {
 miniCover.addEventListener("load", () => {
     miniCover.classList.remove("image-error");
 });
-/* =========================================================
-   MINI PLAYER — SCROLL COMPRESSION
-   ========================================================= */
 
 const miniPlayer = document.querySelector(".player");
 
