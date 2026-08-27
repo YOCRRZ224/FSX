@@ -1665,6 +1665,7 @@ async function trackDownload(jobId) {
                 cursor.style.display = "none";
 
                 await refreshSongs();
+                refreshSongs()
 
                 urlInput.value = "";
 
@@ -1790,7 +1791,8 @@ async function downloadSpotify() {
 
             execBtn.disabled = false;
             execBtn.style.opacity = "1";
-            execBtn.style.cursor = "pointer";
+            execBtn.style.cursor = "popointer
+            refreshSongs()
 
             return;
         }
