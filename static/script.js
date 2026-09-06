@@ -280,9 +280,24 @@ audio.addEventListener("timeupdate", () => {
     if (isNaN(audio.duration)) return;
     const pct = (audio.currentTime / audio.duration) * 100;
     document.getElementById("miniProgress").style.width = pct + "%";
+    const progressWrap = document.querySelector(".progress-wrap");
+    if (progressWrap) progressWrap.style.setProperty("--progress", pct + "%");
     document.getElementById("fpProgress").value = pct;
     document.getElementById("timeCurrent").textContent = formatTime(audio.currentTime);
     document.getElementById("timeTotal").textContent = formatTime(audio.duration);
+    updateLyrics();
+    document.getElementById("lyricsCurrentTime").textContent = formatTime(audio.currentTime);
+    document.getElementById("lyricsDuration").textContent = formatTime(audio.duration);
+    document.getElementById("lyricsProgressFill").style.width = `${pct}%`;
+
+    const homeTimeText = document.getElementById("home-time-text");
+    const homeProgressCircle = document.getElementById("home-progress-circle");
+    if (homeTimeText) {
+        homeTimeText.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
+    }
+    if (homeProgressCircle) {
+        homeProgressCircle.setAttribute("stroke-dashoffset", 289 - (289 * pct) / 100);
+    }
     lastTime = audio.currentTime;
 });
 
@@ -558,25 +573,6 @@ function updateHomePlayState() {
 audio.addEventListener('play', updateHomePlayState);
 audio.addEventListener('pause', updateHomePlayState);
 
-
-// 2. Update the time text and SVG progress circle on every tick
-audio.addEventListener('timeupdate', () => {
-    const timeText = document.getElementById('home-time-text');
-    const progressCircle = document.getElementById('home-progress-circle');
-
-    if (timeText) {
-        // Ensure duration is a valid number before formatting to avoid NaN issues
-        const durationStr = (audio.duration && !isNaN(audio.duration)) ? formatTime(audio.duration) : "00:00";
-        timeText.innerText = `${formatTime(audio.currentTime)} / ${durationStr}`;
-    }
-
-    if (progressCircle && audio.duration) {
-        const pct = (audio.currentTime / audio.duration) * 100 || 0;
-        // 289 is the total stroke-dasharray value of the SVG circle
-        const offset = 289 - (289 * pct) / 100;
-        progressCircle.setAttribute('stroke-dashoffset', offset);
-    }
-});
 
 function updateFileLabel() {
     const input = document.getElementById('fileInput');
@@ -1306,12 +1302,9 @@ async function startUpload() {
     btn.style.opacity = "1";
     progress.style.width = "0%";
 
-    // Refresh library immediately
-    fetch("/songs").then(res => res.json()).then(data => {
-        songs = data;
-        renderSongs(songs);
-   
-});
+    // Refresh library immediately and keep search/home state in sync.
+    await refreshSongs();
+    renderHome();
 }
 function sortSongs(criteria) {
     const sorted = [...songs].sort((a, b) => a[criteria].localeCompare(b[criteria]));
@@ -1326,19 +1319,6 @@ function sortSongs(criteria) {
     });
 }
 
-audio.addEventListener("timeupdate", () => {
-  if (!audio.duration) return;
-
-  const pct = (audio.currentTime / audio.duration) * 100;
-
-  const wrap = document.querySelector(".progress-wrap");
-  wrap.style.setProperty("--progress", pct + "%");
-
-  document.getElementById("fpProgress").value = pct;
-
-  document.getElementById("timeCurrent").textContent = formatTime(audio.currentTime);
-  document.getElementById("timeTotal").textContent = formatTime(audio.duration);
-});
 /* SMART COVER LOADER */
 const observer = new IntersectionObserver((entries) => {
   entries.forEach(entry => {
@@ -1618,6 +1598,7 @@ async function refreshSongs() {
 
     songs = list;
     originalSongs = [...list];
+    rebuildFuse();
 
     renderSongs(songs);
 }
@@ -1629,16 +1610,19 @@ async function trackDownload(jobId) {
     const statusBox = document.getElementById("spotifyStatusBox");
     const loaderFrame = document.getElementById("spotifyLoader");
     const cursor = document.getElementById("terminalCursor");
-    const execBtn = document.getElementById("SPOTIFYDownloadBtn");
+    const execBtn = document.getElementById("spotifyDownloadBtn");
 
+    let requestInFlight = false;
     const poll = setInterval(async () => {
+        if (requestInFlight) return;
+        requestInFlight = true;
 
         try {
 
             const res = await fetch(`/job/${jobId}`);
             const job = await res.json();
 
-            const progress = Math.max(0, job.progress || 0);
+            const progress = Number(job.progress || 0);
 
             loaderFrame.textContent = `${progress}%`;
 
@@ -1665,7 +1649,7 @@ async function trackDownload(jobId) {
                 cursor.style.display = "none";
 
                 await refreshSongs();
-                refreshSongs()
+                renderHome();
 
                 urlInput.value = "";
 
@@ -1724,6 +1708,8 @@ async function trackDownload(jobId) {
             execBtn.disabled = false;
             execBtn.style.opacity = "1";
             execBtn.style.cursor = "pointer";
+        } finally {
+            requestInFlight = false;
         }
 
     }, 500);
@@ -1791,8 +1777,7 @@ async function downloadSpotify() {
 
             execBtn.disabled = false;
             execBtn.style.opacity = "1";
-            execBtn.style.cursor = "popointer
-            refreshSongs()
+            execBtn.style.cursor = "pointer";
 
             return;
         }
@@ -1823,6 +1808,7 @@ let analyser = null;
 let source = null;
 let freqData = null;
 let visualizerStarted = false;
+let visualizerFrame = null;
 let bassMovingAverage = 0;
 let dynamicCoverColor = "rgba(255, 255, 255, "; // Default fallback
 
@@ -1844,7 +1830,6 @@ function initAudioVisualizer() {
         freqData = new Uint8Array(analyser.frequencyBinCount);
         visualizerStarted = true;
         
-        renderAudioBorderTick();
     } catch (e) {
         console.log("Web Audio Context bypassed: ", e);
     }
@@ -1855,6 +1840,13 @@ audio.addEventListener('play', () => {
     initAudioVisualizer();
     if (audioCtx && audioCtx.state === 'suspended') {
         audioCtx.resume();
+    }
+    if (!visualizerFrame) renderAudioBorderTick();
+});
+audio.addEventListener('pause', () => {
+    if (visualizerFrame) {
+        cancelAnimationFrame(visualizerFrame);
+        visualizerFrame = null;
     }
 });
 function extractDominantColor(imgElement) {
@@ -1982,7 +1974,7 @@ let currentBass = 0;
 
 function renderAudioBorderTick() {
     if (!visualizerStarted || !isPlaying) {
-        requestAnimationFrame(renderAudioBorderTick);
+        visualizerFrame = null;
         return;
     }
 
@@ -2089,7 +2081,7 @@ function renderAudioBorderTick() {
         `${dynamicCoverColor} 1)`
     );
 
-    requestAnimationFrame(renderAudioBorderTick);
+    visualizerFrame = requestAnimationFrame(renderAudioBorderTick);
 }
 async function confirmDelete() {
 
@@ -2287,6 +2279,7 @@ function renderLyrics(lrc) {
         document.getElementById("lyricsContainer");
 
     container.innerHTML = "";
+    lastLyricsActiveIndex = -1;
 
     lines.forEach((line, index) => {
 
@@ -2305,6 +2298,7 @@ function renderLyrics(lrc) {
         container.appendChild(el);
     });
 }
+let lastLyricsActiveIndex = -1;
 function updateLyrics() {
 
     const lines =
@@ -2332,13 +2326,15 @@ function updateLyrics() {
 
     });
 
-    if (activeIndex >= 0) {
+    if (activeIndex >= 0 && activeIndex !== lastLyricsActiveIndex) {
 
         lines[activeIndex].scrollIntoView({
             behavior: "smooth",
             block: "center"
         });
     }
+
+    lastLyricsActiveIndex = activeIndex;
 }
 
 
@@ -2501,30 +2497,6 @@ function expandLyrics() {
         `;
     }
 }
-audio.addEventListener("timeupdate", () => {
-
-    updateLyrics();
-
-    const current =
-        audio.currentTime || 0;
-
-    const duration =
-        audio.duration || 0;
-
-    document.getElementById("lyricsCurrentTime")
-        .textContent = formatTime(current);
-
-    document.getElementById("lyricsDuration")
-        .textContent = formatTime(duration);
-
-    const percent =
-        duration
-            ? (current / duration) * 100
-            : 0;
-
-    document.getElementById("lyricsProgressFill")
-        .style.width = `${percent}%`;
-});
 const miniCover = document.getElementById("miniCover");
 
 miniCover.addEventListener("error", () => {

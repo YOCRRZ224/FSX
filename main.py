@@ -8,7 +8,7 @@ import requests
 import re
 from bs4 import BeautifulSoup
 import uuid
-from threading import Thread
+from threading import Thread, Lock
 import time
 from datetime import datetime, timezone
 import platform
@@ -22,6 +22,8 @@ os.makedirs(MUSIC_FOLDER, exist_ok=True)
 os.makedirs(UPLOAD_TEMP_FOLDER, exist_ok=True)
 os.makedirs(LRC_FOLDER, exist_ok=True)
 jobs = {}
+metadata_cache = {}
+metadata_cache_lock = Lock()
 
 HEADERS = {
     "User-Agent": "Mozilla/5.0",
@@ -62,6 +64,35 @@ def get_song_metadata(path, filename=None):
         "album": album,
         "size": size
     }
+
+
+def resolve_inside(folder, name):
+    root = os.path.realpath(folder)
+    path = os.path.realpath(os.path.join(folder, name))
+
+    if os.path.commonpath((root, path)) != root:
+        raise ValueError("Invalid path")
+
+    return path
+
+
+def get_cached_song_metadata(path, filename):
+    try:
+        stat = os.stat(path)
+    except OSError:
+        return get_song_metadata(path, filename)
+
+    cache_key = (stat.st_mtime_ns, stat.st_size)
+    with metadata_cache_lock:
+        cached = metadata_cache.get(path)
+        if cached and cached[0] == cache_key:
+            return cached[1].copy()
+
+    metadata = get_song_metadata(path, filename)
+    with metadata_cache_lock:
+        metadata_cache[path] = (cache_key, metadata)
+
+    return metadata.copy()
 def download_file(url, filename, job_id=None):
     with requests.get(url, headers=HEADERS, stream=True) as r:
         r.raise_for_status()
@@ -455,7 +486,10 @@ def lyrics_scan():
 def lyrics(song):
 
     lrc_name = get_lrc_filename(song)
-    lrc_path = os.path.join(LRC_FOLDER, lrc_name)
+    try:
+        lrc_path = resolve_inside(LRC_FOLDER, lrc_name)
+    except ValueError:
+        return jsonify({"success": False, "error": "Invalid path"}), 400
 
     if not os.path.exists(lrc_path):
         return jsonify({
@@ -477,32 +511,12 @@ def songs():
     result = []
 
     for file in os.listdir(MUSIC_FOLDER):
-        path = os.path.join(MUSIC_FOLDER, file)
+        path = resolve_inside(MUSIC_FOLDER, file)
 
         try:
-            audio = File(path, easy=True)
-
-            title = audio.get("title", [file])[0]
-            artist = audio.get("artist", ["Unknown Artist"])[0]
-            album = audio.get("album", [""])[0]
-
-        except:
-            title = file
-            artist = "Unknown Artist"
-            album = ""
-
-        try:
-            size = os.path.getsize(path)
-        except OSError:
-            size = 0
-
-        result.append({
-            "file": file,
-            "title": title,
-            "artist": artist,
-            "album": album,
-            "size": size
-        })
+            result.append(get_cached_song_metadata(path, file))
+        except (OSError, ValueError):
+            continue
 
     result.sort(
         key=lambda song: song["title"].lower()
@@ -524,7 +538,10 @@ import base64
 
 @app.route("/cover/<path:song>")
 def cover(song):
-    path = os.path.join(MUSIC_FOLDER, song)
+    try:
+        path = resolve_inside(MUSIC_FOLDER, song)
+    except ValueError:
+        return jsonify({"success": False, "error": "Invalid path"}), 400
 
     try:
         audio = File(path)
@@ -622,7 +639,7 @@ def cover(song):
     )
 def ensure_lyrics_for_song(song):
 
-    music_path = os.path.join(MUSIC_FOLDER, song)
+    music_path = resolve_inside(MUSIC_FOLDER, song)
 
     if not os.path.exists(music_path):
         raise FileNotFoundError(f"Song not found: {song}")
@@ -815,7 +832,7 @@ def spotify_download():
 @app.route("/delete/<song>", methods=["DELETE"])
 def delete_song(song):
     try:
-        path = os.path.join(MUSIC_FOLDER, song)
+        path = resolve_inside(MUSIC_FOLDER, song)
 
         if not os.path.exists(path):
             return jsonify({
@@ -824,6 +841,12 @@ def delete_song(song):
             }), 404
 
         os.remove(path)
+
+        metadata_cache.pop(path, None)
+
+        lrc_path = resolve_inside(LRC_FOLDER, get_lrc_filename(song))
+        if os.path.exists(lrc_path):
+            os.remove(lrc_path)
 
         return jsonify({
             "success": True,
