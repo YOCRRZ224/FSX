@@ -68,7 +68,7 @@ and more developed by
 - Upload ur own songs
 - Metadata awesome extractions
 - Web
-- Python/flask (llightweight
+- Python/flask (lightweight)
 - Album arts
 - Smooth and responsive
 
@@ -125,9 +125,17 @@ this was the last step you could run main.py and go on web.
 </p>
 
 ---
+
 ## NEXT STOP
-- Playlist -> v2.2.0
-- Optimization -> v2.2.1
+- Playlist -> v2.3.0
+- Optimization -> v2.2.2 (v2)
+
+## Ongoing
+- Optimization -> v2.2.1 (v1)
+
+## Done
+- Lyrics -> v2.1.0
+
 ---
 
 ### Stats
@@ -152,6 +160,8 @@ Music provided by NoCopyrightSounds
 Free Download/Stream: http://ncs.io/onandon
 Watch: http://youtu.be/K4DyBUG242c
 ```
-plz star if u liked 
 
-
+## Final 
+- plz star if u liked
+- if you got any problem feel free to open a issue or contatct me -> help@yocrrz.is-a.dev
+- request a feature and i will definately add it.
