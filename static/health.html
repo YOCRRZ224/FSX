@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+
 <html lang="en">
 
 <head>
@@ -6,29 +7,60 @@
 <meta charset="UTF-8">
 
 <meta
-    name="viewport"
-    content="width=device-width, initial-scale=1.0"
+name="viewport"
+content="width=device-width, initial-scale=1.0"
+
 >
 
-<title>FSX Server health</title>
+<meta
+name="theme-color"
+content="#050505"
+id="themeColor"
+
+>
+
+<title>FSX · Server Health</title>
 
 <style>
+
+/* =========================================================
+   BASE
+========================================================= */
 
 * {
     box-sizing: border-box;
 }
 
 :root {
+
     --accent: #1db954;
-    --accent-light: #38f27a;
+    --accent-light: #45f27d;
 
     --background: #050505;
 
-    --card: rgba(255,255,255,.045);
-    --border: rgba(255,255,255,.08);
+    --danger: #ff4d4d;
+    --danger-light: #ff7777;
 
-    --text: #fff;
+    --warning: #ffb84d;
+    --warning-light: #ffd27a;
+
+    --card: rgba(255,255,255,.045);
+    --card-hover: rgba(255,255,255,.065);
+
+    --border: rgba(255,255,255,.075);
+
+    --text: #ffffff;
     --muted: rgba(255,255,255,.48);
+    --faint: rgba(255,255,255,.25);
+
+    --radius: 18px;
+
+    --transition:
+        .25s cubic-bezier(.4,0,.2,1);
+}
+
+html {
+    background: var(--background);
 }
 
 body {
@@ -37,7 +69,7 @@ body {
 
     min-height: 100vh;
 
-    padding: 24px 14px;
+    padding: 20px 14px 30px;
 
     color: var(--text);
 
@@ -46,28 +78,75 @@ body {
         system-ui,
         -apple-system,
         BlinkMacSystemFont,
+        "Segoe UI",
         sans-serif;
 
     background:
 
         radial-gradient(
-            circle at 50% -10%,
-            rgba(29,185,84,.16),
-            transparent 38%
+            circle at 50% -15%,
+            rgba(29,185,84,.13),
+            transparent 40%
+        ),
+
+        var(--background);
+
+    transition:
+        background .45s ease;
+}
+
+
+/* =========================================================
+   OFFLINE THEME
+========================================================= */
+
+body.offline {
+
+    background:
+
+        radial-gradient(
+            circle at 50% -15%,
+            rgba(255,77,77,.15),
+            transparent 40%
         ),
 
         var(--background);
 }
 
+
+/* =========================================================
+   WARNING THEME
+========================================================= */
+
+body.degraded {
+
+    background:
+
+        radial-gradient(
+            circle at 50% -15%,
+            rgba(255,184,77,.13),
+            transparent 40%
+        ),
+
+        var(--background);
+}
+
+
+/* =========================================================
+   CONTAINER
+========================================================= */
+
 .container {
 
-    width: min(100%, 720px);
+    width: min(100%, 760px);
 
     margin: auto;
 }
 
 
-/* HEADER */
+/* =========================================================
+   HEADER
+========================================================= */
 
 .header {
 
@@ -77,7 +156,9 @@ body {
 
     justify-content: space-between;
 
-    margin-bottom: 20px;
+    gap: 15px;
+
+    margin-bottom: 15px;
 }
 
 .brand {
@@ -86,43 +167,48 @@ body {
 
     align-items: center;
 
-    gap: 12px;
+    gap: 11px;
+
+    min-width: 0;
 }
 
 .logo {
 
-    width: 44px;
-    height: 44px;
+    width: 42px;
+    height: 42px;
+
+    flex-shrink: 0;
 
     display: grid;
 
     place-items: center;
 
-    border-radius: 13px;
+    overflow: hidden;
+
+    border-radius: 12px;
 
     background:
-        linear-gradient(
-            135deg,
-            var(--accent),
-            var(--accent-light)
-        );
+        rgba(255,255,255,.06);
 
-    color: #000;
+    border:
+        1px solid var(--border);
+}
 
-    font-size: 15px;
+.logo img {
 
-    font-weight: 1000;
+    width: 100%;
+    height: 100%;
 
-    box-shadow:
-        0 10px 35px
-        rgba(29,185,84,.25);
+    object-fit: cover;
 }
 
 .title {
 
-    font-size: 19px;
+    font-size: 17px;
 
-    font-weight: 900;
+    font-weight: 850;
+
+    letter-spacing: -.3px;
 }
 
 .subtitle {
@@ -131,11 +217,13 @@ body {
 
     color: var(--muted);
 
-    font-size: 11px;
+    font-size: 10px;
 }
 
 
-/* STATUS */
+/* =========================================================
+   STATUS
+========================================================= */
 
 .status {
 
@@ -145,39 +233,102 @@ body {
 
     gap: 7px;
 
-    padding: 7px 11px;
+    padding: 7px 10px;
+
+    flex-shrink: 0;
 
     border-radius: 999px;
 
-    color: #55ff91;
+    color: var(--accent-light);
 
     background:
-        rgba(29,185,84,.09);
+        rgba(29,185,84,.08);
 
     border:
         1px solid
-        rgba(29,185,84,.2);
+        rgba(29,185,84,.18);
 
-    font-size: 11px;
+    font-size: 9px;
 
-    font-weight: 800;
+    font-weight: 850;
+
+    letter-spacing: .06em;
+
+    transition:
+        var(--transition);
 }
 
 .status-dot {
 
-    width: 7px;
-    height: 7px;
+    width: 6px;
+    height: 6px;
 
     border-radius: 50%;
 
-    background: #35f579;
+    background: var(--accent-light);
 
     box-shadow:
-        0 0 12px #35f579;
+        0 0 10px var(--accent-light);
+
+    transition:
+        var(--transition);
+}
+
+.status.checking {
+
+    color: var(--warning-light);
+
+    background:
+        rgba(255,184,77,.08);
+
+    border-color:
+        rgba(255,184,77,.18);
+}
+
+.status.checking .status-dot {
+
+    background: var(--warning);
+
+    box-shadow:
+        0 0 10px var(--warning);
+
+    animation:
+        pulse 1s infinite;
+}
+
+.status.offline {
+
+    color: var(--danger-light);
+
+    background:
+        rgba(255,77,77,.08);
+
+    border-color:
+        rgba(255,77,77,.2);
+}
+
+.status.offline .status-dot {
+
+    background: var(--danger);
+
+    box-shadow:
+        0 0 12px var(--danger);
+
+    animation: none;
+}
+
+@keyframes pulse {
+
+    50% {
+        opacity: .35;
+        transform: scale(.7);
+    }
 }
 
 
-/* HERO */
+/* =========================================================
+   HERO
+========================================================= */
 
 .hero {
 
@@ -185,16 +336,16 @@ body {
 
     overflow: hidden;
 
-    padding: 26px;
+    padding: 25px;
 
-    margin-bottom: 12px;
+    margin-bottom: 11px;
 
-    border-radius: 23px;
+    border-radius: 22px;
 
     background:
         linear-gradient(
             145deg,
-            rgba(255,255,255,.07),
+            rgba(255,255,255,.065),
             rgba(255,255,255,.025)
         );
 
@@ -203,6 +354,10 @@ body {
 
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+
+    transition:
+        border-color .4s ease,
+        background .4s ease;
 }
 
 .hero::after {
@@ -211,64 +366,263 @@ body {
 
     position: absolute;
 
-    width: 180px;
-    height: 180px;
+    width: 190px;
+    height: 190px;
 
-    right: -80px;
-    top: -90px;
+    right: -90px;
+    top: -100px;
 
     background: var(--accent);
 
     filter: blur(80px);
 
-    opacity: .12;
+    opacity: .10;
+
+    transition:
+        background .45s ease;
+}
+
+body.offline .hero::after {
+    background: var(--danger);
+}
+
+body.degraded .hero::after {
+    background: var(--warning);
+}
+
+.hero-content {
+    position: relative;
+    z-index: 1;
 }
 
 .hero h1 {
 
-    position: relative;
-
     margin: 0;
 
     font-size:
-        clamp(28px, 8vw, 42px);
+        clamp(27px, 7vw, 40px);
 
-    letter-spacing: -1.5px;
+    line-height: 1.05;
 
-    z-index: 1;
+    letter-spacing: -1.8px;
 }
 
 .hero p {
 
-    position: relative;
+    margin: 8px 0 0;
 
-    margin: 7px 0 0;
+    max-width: 520px;
 
     color: var(--muted);
 
-    font-size: 13px;
+    font-size: 12px;
 
-    z-index: 1;
+    line-height: 1.5;
 }
 
 
-/* GRID */
+/* =========================================================
+   HERO META
+========================================================= */
+
+.hero-meta {
+
+    display: flex;
+
+    align-items: center;
+
+    flex-wrap: wrap;
+
+    gap: 9px;
+
+    margin-top: 19px;
+}
+
+.meta {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 6px;
+
+    padding: 6px 9px;
+
+    border-radius: 9px;
+
+    background:
+        rgba(255,255,255,.045);
+
+    border:
+        1px solid
+        rgba(255,255,255,.055);
+
+    color: var(--muted);
+
+    font-size: 9px;
+}
+
+.meta strong {
+
+    color: var(--text);
+
+    font-weight: 750;
+}
+
+
+/* =========================================================
+   REFRESH BUTTON
+========================================================= */
+
+.refresh {
+
+    margin-left: auto;
+
+    width: 32px;
+    height: 32px;
+
+    display: grid;
+
+    place-items: center;
+
+    border: 1px solid var(--border);
+
+    border-radius: 10px;
+
+    color: var(--muted);
+
+    background:
+        rgba(255,255,255,.045);
+
+    cursor: pointer;
+
+    transition:
+        var(--transition);
+}
+
+.refresh:hover {
+
+    color: var(--text);
+
+    background:
+        rgba(255,255,255,.09);
+
+    transform:
+        translateY(-1px);
+}
+
+.refresh:active {
+    transform: scale(.94);
+}
+
+.refresh.spinning span {
+
+    animation:
+        spin .65s linear infinite;
+}
+
+@keyframes spin {
+
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+
+/* =========================================================
+   HEARTBEAT
+========================================================= */
+
+.heartbeat {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 9px;
+
+    margin-top: 16px;
+
+    color: var(--muted);
+
+    font-size: 10px;
+}
+
+.heart {
+
+    color: var(--accent);
+
+    font-size: 17px;
+
+    transition:
+        color .35s ease;
+}
+
+body.offline .heart {
+    color: var(--danger);
+}
+
+body.degraded .heart {
+    color: var(--warning);
+}
+
+.heartbeat.active .heart {
+
+    animation:
+        heartbeat 1.1s infinite;
+}
+
+@keyframes heartbeat {
+
+    0%,
+    100% {
+        transform: scale(1);
+    }
+
+    12% {
+        transform: scale(1.22);
+    }
+
+    24% {
+        transform: scale(1);
+    }
+
+    36% {
+        transform: scale(1.14);
+    }
+
+    50% {
+        transform: scale(1);
+    }
+}
+
+
+/* =========================================================
+   GRID
+========================================================= */
 
 .grid {
 
     display: grid;
 
     grid-template-columns:
-        repeat(2, 1fr);
+        repeat(2, minmax(0, 1fr));
 
-    gap: 12px;
+    gap: 10px;
 }
+
+
+/* =========================================================
+   CARDS
+========================================================= */
 
 .card {
 
-    padding: 17px;
+    min-width: 0;
 
-    border-radius: 18px;
+    padding: 15px;
+
+    border-radius: var(--radius);
 
     background: var(--card);
 
@@ -280,53 +634,96 @@ body {
 
     transition:
         transform .2s ease,
-        border-color .2s ease;
+        border-color .25s ease,
+        opacity .35s ease,
+        background .25s ease;
 }
 
 .card:hover {
 
     transform:
-        translateY(-2px);
+        translateY(-1px);
+
+    background:
+        var(--card-hover);
 
     border-color:
-        rgba(255,255,255,.14);
+        rgba(255,255,255,.12);
 }
 
-.label {
-
-    margin-bottom: 7px;
-
-    color: var(--muted);
-
-    font-size: 10px;
-
-    font-weight: 800;
-
-    text-transform: uppercase;
-
-    letter-spacing: .08em;
-}
-
-.value {
-
-    font-size: 17px;
-
-    font-weight: 850;
-
-    word-break: break-word;
-}
-
-.full {
+.card.full {
 
     grid-column: 1 / -1;
 }
 
 
-/* STORAGE */
+/* =========================================================
+   SERVER INFO DIMMING WHEN OFFLINE
+========================================================= */
+
+body.offline .server-info {
+
+    opacity: .42;
+}
+
+body.offline .server-info:hover {
+
+    opacity: .65;
+}
+
+
+/* =========================================================
+   LABELS
+========================================================= */
+
+.label {
+
+    margin-bottom: 6px;
+
+    color: var(--muted);
+
+    font-size: 9px;
+
+    font-weight: 800;
+
+    text-transform: uppercase;
+
+    letter-spacing: .09em;
+}
+
+.value {
+
+    overflow: hidden;
+
+    font-size: 16px;
+
+    font-weight: 850;
+
+    text-overflow: ellipsis;
+
+    white-space: nowrap;
+}
+
+
+/* =========================================================
+   LARGE VALUE
+========================================================= */
+
+.big-value {
+
+    font-size: 23px;
+
+    letter-spacing: -.5px;
+}
+
+
+/* =========================================================
+   STORAGE
+========================================================= */
 
 .storage {
 
-    height: 7px;
+    height: 6px;
 
     margin-top: 12px;
 
@@ -335,7 +732,7 @@ body {
     border-radius: 999px;
 
     background:
-        rgba(255,255,255,.07);
+        rgba(255,255,255,.06);
 }
 
 .storage-fill {
@@ -354,239 +751,12 @@ body {
         );
 
     box-shadow:
-        0 0 14px
-        rgba(29,185,84,.5);
+        0 0 13px
+        rgba(29,185,84,.45);
 
     transition:
-        width .8s ease;
+        width .7s ease;
 }
-
-
-/* FOOTER */
-
-.footer {
-
-    margin-top: 18px;
-
-    text-align: center;
-
-    color:
-        rgba(255,255,255,.25);
-
-    font-size: 10px;
-}
-
-/* ================================
-   HEARTBEAT
-================================ */
-
-.heartbeat {
-
-    display: flex;
-
-    align-items: center;
-
-    gap: 12px;
-
-    margin-top: 18px;
-
-    color: var(--muted);
-
-    font-size: 12px;
-}
-
-.heart {
-
-    font-size: 25px;
-
-    animation:
-        heartbeat 1.1s infinite;
-}
-
-@keyframes heartbeat {
-
-    0% {
-        transform: scale(1);
-    }
-
-    12% {
-        transform: scale(1.25);
-    }
-
-    24% {
-        transform: scale(1);
-    }
-
-    36% {
-        transform: scale(1.18);
-    }
-
-    50% {
-        transform: scale(1);
-    }
-
-    100% {
-        transform: scale(1);
-    }
-}
-
-
-/* ================================
-   LATENCY
-================================ */
-
-.latency-card {
-
-    padding: 18px;
-
-    border-radius: 18px;
-
-    background: var(--card);
-
-    border:
-        1px solid var(--border);
-
-    backdrop-filter: blur(18px);
-
-    -webkit-backdrop-filter: blur(18px);
-}
-
-.latency-header {
-
-    display: flex;
-
-    justify-content: space-between;
-
-    align-items: center;
-
-    margin-bottom: 12px;
-}
-
-.latency-title {
-
-    font-size: 12px;
-
-    font-weight: 900;
-
-    text-transform: uppercase;
-
-    letter-spacing: .08em;
-}
-
-.latency-live {
-
-    font-size: 10px;
-
-    color: #55ff91;
-}
-
-#latencyCanvas {
-
-    display: block;
-
-    width: 100%;
-
-    height: 150px;
-
-    border-radius: 12px;
-
-    background:
-        rgba(0,0,0,.18);
-}
-
-.latency-stats {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(3, 1fr);
-
-    gap: 8px;
-
-    margin-top: 12px;
-}
-
-.latency-stat {
-
-    padding: 10px;
-
-    border-radius: 12px;
-
-    background:
-        rgba(255,255,255,.035);
-}
-
-.latency-stat-label {
-
-    color: var(--muted);
-
-    font-size: 9px;
-
-    text-transform: uppercase;
-
-    letter-spacing: .08em;
-}
-
-.latency-stat-value {
-
-    margin-top: 4px;
-
-    font-size: 16px;
-
-    font-weight: 900;
-}
-
-
-/* ================================
-   MUSIC LIBRARY
-================================ */
-
-.library-grid {
-
-    display: grid;
-
-    grid-template-columns:
-        repeat(2, 1fr);
-
-    gap: 9px;
-
-    margin-top: 12px;
-}
-
-.library-stat {
-
-    padding: 13px;
-
-    border-radius: 14px;
-
-    background:
-        rgba(255,255,255,.035);
-}
-
-.library-stat .number {
-
-    font-size: 20px;
-
-    font-weight: 950;
-}
-
-.library-stat .name {
-
-    margin-top: 3px;
-
-    color: var(--muted);
-
-    font-size: 9px;
-
-    text-transform: uppercase;
-
-    letter-spacing: .07em;
-}
-
-
-/* ================================
-   STORAGE
-================================ */
 
 .storage-info {
 
@@ -596,14 +766,185 @@ body {
 
     gap: 10px;
 
+    margin-top: 7px;
+
     color: var(--muted);
 
-    font-size: 10px;
+    font-size: 9px;
+}
+
+
+/* =========================================================
+   CHART
+========================================================= */
+
+.chart-wrap {
+
+    position: relative;
+
+    margin-top: 8px;
+}
+
+.chart {
+
+    width: 100%;
+    height: 135px;
+
+    display: block;
+
+    border-radius: 12px;
+}
+
+
+/* =========================================================
+   CHART HEADER
+========================================================= */
+
+.chart-header {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+}
+
+.chart-title {
+
+    font-size: 11px;
+
+    font-weight: 850;
+
+    text-transform: uppercase;
+
+    letter-spacing: .08em;
+}
+
+.chart-live {
+
+    display: flex;
+
+    align-items: center;
+
+    gap: 5px;
+
+    color: var(--accent-light);
+
+    font-size: 9px;
+}
+
+.chart-live::before {
+
+    content: "";
+
+    width: 5px;
+    height: 5px;
+
+    border-radius: 50%;
+
+    background: currentColor;
+
+    box-shadow:
+        0 0 8px currentColor;
+}
+
+
+/* =========================================================
+   STATS
+========================================================= */
+
+.stats {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 7px;
+
+    margin-top: 10px;
+}
+
+.stat {
+
+    padding: 10px;
+
+    border-radius: 11px;
+
+    background:
+        rgba(255,255,255,.035);
+}
+
+.stat-label {
+
+    color: var(--muted);
+
+    font-size: 8px;
+
+    text-transform: uppercase;
+
+    letter-spacing: .07em;
+}
+
+.stat-value {
+
+    margin-top: 4px;
+
+    font-size: 14px;
+
+    font-weight: 850;
+}
+
+
+/* =========================================================
+   MUSIC LIBRARY
+========================================================= */
+
+.library-grid {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(4, 1fr);
+
+    gap: 7px;
+}
+
+.library-stat {
+
+    padding: 12px;
+
+    border-radius: 12px;
+
+    background:
+        rgba(255,255,255,.035);
+}
+
+.library-stat .number {
+
+    font-size: 19px;
+
+    font-weight: 900;
+}
+
+.library-stat .name {
+
+    margin-top: 2px;
+
+    color: var(--muted);
+
+    font-size: 8px;
+
+    text-transform: uppercase;
+
+    letter-spacing: .07em;
 }
 
 .music-storage {
 
-    height: 6px;
+    height: 5px;
 
     margin-top: 10px;
 
@@ -612,7 +953,7 @@ body {
     border-radius: 999px;
 
     background:
-        rgba(255,255,255,.07);
+        rgba(255,255,255,.06);
 }
 
 .music-storage-fill {
@@ -631,371 +972,591 @@ body {
         );
 
     transition:
-        width .8s ease;
+        width .7s ease;
 }
-/* MOBILE */
 
-@media (max-width: 480px) {
+
+/* =========================================================
+   ERROR PANEL
+========================================================= */
+
+.error-panel {
+
+    display: none;
+
+    padding: 12px 14px;
+
+    margin-bottom: 10px;
+
+    border-radius: 14px;
+
+    background:
+        rgba(255,77,77,.07);
+
+    border:
+        1px solid
+        rgba(255,77,77,.15);
+}
+
+body.offline .error-panel {
+    display: block;
+}
+
+.error-title {
+
+    color: var(--danger-light);
+
+    font-size: 10px;
+
+    font-weight: 850;
+
+    text-transform: uppercase;
+
+    letter-spacing: .07em;
+}
+
+.error-message {
+
+    margin-top: 4px;
+
+    color: var(--muted);
+
+    font-size: 10px;
+
+    line-height: 1.45;
+}
+
+
+/* =========================================================
+   OFFLINE DETAIL
+========================================================= */
+
+.offline-detail {
+
+    display: none;
+
+    margin-top: 7px;
+
+    color: var(--danger-light);
+
+    font-size: 9px;
+}
+
+body.offline .offline-detail {
+    display: block;
+}
+
+
+/* =========================================================
+   PLAYER LINK
+========================================================= */
+
+.player-link {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: space-between;
+
+    gap: 10px;
+
+    text-decoration: none;
+
+    color: var(--text);
+}
+
+.player-link span:first-child {
+
+    color: var(--muted);
+
+    font-size: 10px;
+
+    font-weight: 700;
+}
+
+.player-link span:last-child {
+
+    color: var(--accent-light);
+
+    font-size: 10px;
+
+    font-weight: 800;
+
+    transition:
+        color .2s ease;
+}
+
+.player-link:hover span:last-child {
+    color: var(--accent);
+}
+
+
+/* =========================================================
+   FOOTER
+========================================================= */
+
+.footer {
+
+    display: flex;
+
+    align-items: center;
+
+    justify-content: center;
+
+    gap: 7px;
+
+    margin-top: 17px;
+
+    color:
+        rgba(255,255,255,.22);
+
+    font-size: 9px;
+}
+
+.footer-dot {
+
+    width: 3px;
+    height: 3px;
+
+    border-radius: 50%;
+
+    background:
+        rgba(255,255,255,.25);
+}
+
+
+/* =========================================================
+   RESPONSIVE
+========================================================= */
+
+@media (max-width: 600px) {
 
     body {
-        padding: 18px 12px;
+        padding: 15px 11px 25px;
+    }
+
+    .hero {
+        padding: 21px;
     }
 
     .grid {
         grid-template-columns: 1fr;
     }
 
-    .full {
+    .card.full {
         grid-column: auto;
     }
 
-    .hero {
-        padding: 22px;
+    .library-grid {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .stats {
+        grid-template-columns:
+            repeat(2, 1fr);
+    }
+
+    .refresh {
+        margin-left: 0;
     }
 }
-/* ─────────────────────────────
-   CHARTS
-───────────────────────────── */
 
-.chart {
+@media (max-width: 390px) {
 
-    width: 100%;
-    height: 150px;
+    .header {
+        align-items: flex-start;
+    }
 
-    display: block;
+    .subtitle {
+        display: none;
+    }
 
-    margin-top: 12px;
+    .hero h1 {
+        font-size: 28px;
+    }
 }
 
-
-.storage-chart {
-
-    width: 100%;
-    height: 18px;
-
-    display: block;
-
-    margin-top: 14px;
-
-    border-radius: 999px;
-}
-
-
-/* OFFLINE STATE */
-
-.status.offline {
-
-    color: #ff7070;
-
-    background:
-        rgba(255,70,70,.09);
-
-    border-color:
-        rgba(255,70,70,.2);
-}
-
-
-.status.offline .status-dot {
-
-    background: #ff5c5c;
-
-    box-shadow:
-        0 0 12px
-        rgba(255,92,92,.8);
-}
-
-
-/* subtle chart card */
-
-.card:has(canvas) {
-
-    overflow: hidden;
-
-}
-
-
-/* chart animation */
-
-canvas {
-
-    transition:
-        opacity .3s ease;
-}
-.logo img{
-      width: 40px;
-    height: 40px;
-    object-fit: contain;
-    display: block;
-    border-radius: 13px;
-}
-.go-to-pl {
-    font-size: 14px;
-    color: #888;
-}
-
-.go-to-pl a {
-     color: var( --accent-light);
-    text-decoration: none;
-    font-weight: 600;
-    margin-left: 4px;
-    transition: color 0.2s ease;
-}
-
-.go-to-pl a:hover {
-    color: var( --accent);
-}
 </style>
 
 </head>
-
 
 <body>
 
 <div class="container">
 
+<!-- =====================================================
+     HEADER
+===================================================== -->
 
-    <header class="header">
+<header class="header">
 
-        <div class="brand">
+<div class="brand">
 
-            <div class="logo">
-                <img src="../static/default.jpg" alt="" />
-            </div>
+    <div class="logo">
+        <img
+            src="../static/default.jpg"
+            alt="FSX"
+        >
+    </div>
 
-            <div>
+    <div>
 
-                <div class="title">
-                    FSX Server
-                </div>
-
-                <div class="subtitle">
-                    Self-hosted music server
-                </div>
-
-            </div>
-
+        <div class="title">
+            FSX Server
         </div>
 
-
-        <div class="status">
-
-            <span class="status-dot"></span>
-
-            ONLINE
-
+        <div class="subtitle">
+            Self-hosted music server
         </div>
 
-    </header>
+    </div>
 
+</div>
+
+
+<div
+    class="status checking"
+    id="status"
+>
+
+    <span class="status-dot"></span>
+
+    CHECKING
+
+</div>
+
+
+</header>
+
+<!-- =====================================================
+     HERO
+===================================================== -->
 
 <section class="hero">
 
-    <h1>
-        Server is running.
+
+<div class="hero-content">
+
+    <h1 id="heroTitle">
+        Checking server...
     </h1>
 
-    <p>
-        Your FSX instance is healthy
-        and ready to serve music.
+    <p id="heroMessage">
+        Connecting to your FSX instance.
     </p>
 
-    <div class="heartbeat">
+
+    <div class="hero-meta">
+
+        <div class="meta">
+
+            Last check
+
+            <strong id="lastUpdate">
+                —
+            </strong>
+
+        </div>
+
+
+        <div class="meta">
+
+            Next check
+
+            <strong id="nextCheck">
+                —
+            </strong>
+
+        </div>
+
+
+        <button
+            class="refresh"
+            id="refreshButton"
+            type="button"
+            title="Refresh server status"
+            aria-label="Refresh server status"
+        >
+
+            <span>↻</span>
+
+        </button>
+
+    </div>
+
+
+    <div class="heartbeat" id="heartbeat">
 
         <span class="heart">
             ♥
         </span>
 
         <span>
+
             FSX heartbeat
+
             <strong id="heartbeatLatency">
                 —
             </strong>
+
             ms
+
         </span>
 
     </div>
 
+
+    <div
+        class="offline-detail"
+        id="offlineDetail"
+    >
+        Waiting for the server to respond...
+    </div>
+
+</div>
+
 </section>
 
+<!-- =====================================================
+     ERROR
+===================================================== -->
 
-    <main class="grid">
+<div class="error-panel">
 
-
-        <div class="card">
-
-            <div class="label">
-                Version
-            </div>
-
-            <div
-                class="value"
-                id="version"
-            >
-                —
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <div class="label">
-                Uptime
-            </div>
-
-            <div
-                class="value"
-                id="uptime"
-            >
-                —
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <div class="label">
-                Platform
-            </div>
-
-            <div
-                class="value"
-                id="platform"
-            >
-                —
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <div class="label">
-                Architecture
-            </div>
-
-            <div
-                class="value"
-                id="architecture"
-            >
-                —
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <div class="label">
-                Python
-            </div>
-
-            <div
-                class="value"
-                id="python"
-            >
-                —
-            </div>
-
-        </div>
-
-
-        <div class="card">
-
-            <div class="label">
-                Hostname
-            </div>
-
-            <div
-                class="value"
-                id="hostname"
-            >
-                —
-            </div>
-
-        </div>
-
-
-        <div class="card full">
-
-            <div class="label">
-                Storage
-            </div>
-
-            <div
-                class="value"
-                id="storage"
-            >
-                —
-            </div>
-
-            <div class="storage">
-
-                <div
-                    class="storage-fill"
-                    id="storageFill"
-                ></div>
-
-            </div>
-
-        </div>
-<div class="card full">
-
-    <div class="label">
-        Storage Usage
-    </div>
-
-    <div
-        class="value"
-        id="storagePercent"
-    >
-        —
-    </div>
-
-    <canvas
-        id="storageChart"
-        class="storage-chart"
-    ></canvas>
-
+<div class="error-title">
+    Connection problem
 </div>
-<div class="card">
 
-    <div class="label">
-        Response
-    </div>
-
-    <div
-        class="value"
-        id="latency"
-    >
-        —
-    </div>
+<div
+    class="error-message"
+    id="errorMessage"
+>
+    The FSX server could not be reached.
+</div>
 
 </div>
 
+<!-- =====================================================
+     MAIN
+===================================================== -->
+
+<main class="grid">
+
+<!-- SERVER INFO -->
+
+<div class="card server-info">
+
+
+<div class="label">
+    Version
+</div>
+
+<div
+    class="value"
+    id="version"
+>
+    —
+</div>
+
+
+</div>
+
+<div class="card server-info">
+
+
+<div class="label">
+    Uptime
+</div>
+
+<div
+    class="value"
+    id="uptime"
+>
+    —
+</div>
+
+
+</div>
+
+<div class="card server-info">
+
+
+<div class="label">
+    Platform
+</div>
+
+<div
+    class="value"
+    id="platform"
+>
+    —
+</div>
+
+
+</div>
+
+<div class="card server-info">
+
+
+<div class="label">
+    Architecture
+</div>
+
+<div
+    class="value"
+    id="architecture"
+>
+    —
+</div>
+
+
+</div>
+
+<div class="card server-info">
+
+
+<div class="label">
+    Python
+</div>
+
+<div
+    class="value"
+    id="python"
+>
+    —
+</div>
+
+
+</div>
+
+<div class="card server-info">
+
+
+<div class="label">
+    Hostname
+</div>
+
+<div
+    class="value"
+    id="hostname"
+>
+    —
+</div>
+
+
+</div>
+
+<!-- RESPONSE -->
 
 <div class="card">
 
-    <div class="label">
-        Last Update
-    </div>
+
+<div class="label">
+    Response
+</div>
+
+<div
+    class="value big-value"
+    id="latency"
+>
+    —
+</div>
+
+
+</div>
+
+<!-- FAILURES -->
+
+<div class="card">
+
+
+<div class="label">
+    Failed checks
+</div>
+
+<div
+    class="value big-value"
+    id="failures"
+>
+    0
+</div>
+
+
+</div>
+
+<!-- STORAGE -->
+
+<div class="card full">
+
+
+<div class="label">
+    Disk Storage
+</div>
+
+<div
+    class="value"
+    id="storage"
+>
+    —
+</div>
+
+<div class="storage">
 
     <div
-        class="value"
-        id="lastUpdate"
-    >
-        —
+        class="storage-fill"
+        id="storageFill"
+    ></div>
+
+</div>
+
+<div class="storage-info">
+
+    <span>
+        Used
+        <strong id="storageUsed">
+            —
+        </strong>
+    </span>
+
+    <span>
+        Free
+        <strong id="storageFree">
+            —
+        </strong>
+    </span>
+
+    <span>
+        <strong id="storagePercent">
+            —
+        </strong>
+    </span>
+
+</div>
+
+
+</div>
+
+<!-- LATENCY -->
+
+<div class="card full">
+
+
+<div class="chart-header">
+
+    <div class="chart-title">
+        Response latency
+    </div>
+
+    <div class="chart-live">
+        LIVE
     </div>
 
 </div>
 
 
-<div class="card full">
-
-    <div class="label">
-        Response Latency
-    </div>
+<div class="chart-wrap">
 
     <canvas
         id="latencyChart"
@@ -1004,576 +1565,775 @@ canvas {
 
 </div>
 
-<div class="card full">
-        <div class="label">
-        Music Library
-    </div>
 
+<div class="stats">
 
-    <div class="library-grid">
+    <div class="stat">
 
-        <div class="library-stat">
-
-            <div
-                class="number"
-                id="songCount"
-            >
-                —
-            </div>
-
-            <div class="name">
-                Songs
-            </div>
-
+        <div class="stat-label">
+            Current
         </div>
-
-
-        <div class="library-stat">
-
-            <div
-                class="number"
-                id="artistCount"
-            >
-                —
-            </div>
-
-            <div class="name">
-                Artists
-            </div>
-
-        </div>
-
-
-        <div class="library-stat">
-
-            <div
-                class="number"
-                id="albumCount"
-            >
-                —
-            </div>
-
-            <div class="name">
-                Albums
-            </div>
-
-        </div>
-
-
-        <div class="library-stat">
-
-            <div
-                class="number"
-                id="musicSize"
-            >
-                —
-            </div>
-
-            <div class="name">
-                Music Storage
-            </div>
-
-        </div>
-
-    </div>
-
-
-    <div
-        class="storage-info"
-        style="margin-top:15px"
-    >
-
-        <span>
-            Music folder
-        </span>
-
-        <span id="musicFolder">
-            music
-        </span>
-
-    </div>
-
-
-    <div class="music-storage">
 
         <div
-            class="music-storage-fill"
-            id="musicStorageFill"
-        ></div>
+            class="stat-value"
+            id="latencyCurrent"
+        >
+            —
+        </div>
 
     </div>
 
 
+    <div class="stat">
+
+        <div class="stat-label">
+            Average
+        </div>
+
+        <div
+            class="stat-value"
+            id="latencyAverage"
+        >
+            —
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <div class="stat-label">
+            Peak
+        </div>
+
+        <div
+            class="stat-value"
+            id="latencyPeak"
+        >
+            —
+        </div>
+
+    </div>
+
+
+    <div class="stat">
+
+        <div class="stat-label">
+            Samples
+        </div>
+
+        <div
+            class="stat-value"
+            id="latencySamples"
+        >
+            0
+        </div>
+
+    </div>
+
 </div>
+
+
+</div>
+
+<!-- MUSIC -->
+
 <div class="card full">
-        <div class="latency-header">
-
-        <div class="latency-title">
-            Network latency
-        </div>
 
 
-
-    </div>
-
-
-
-
-    <div class="latency-stats">
-
-        <div class="latency-stat">
-
-            <div class="latency-stat-label">
-                Current
-            </div>
-
-            <div
-                class="latency-stat-value"
-                id="latencyCurrent"
-            >
-                —
-            </div>
-
-        </div>
-
-
-        <div class="latency-stat">
-
-            <div class="latency-stat-label">
-                Average
-            </div>
-
-            <div
-                class="latency-stat-value"
-                id="latencyAverage"
-            >
-                —
-            </div>
-
-        </div>
-
-
-        <div class="latency-stat">
-
-            <div class="latency-stat-label">
-                Peak
-            </div>
-
-            <div
-                class="latency-stat-value"
-                id="latencyPeak"
-            >
-                —
-            </div>
-
-        </div>
-
-    </div>
+<div class="label">
+    Music Library
 </div>
+
+
+<div class="library-grid">
+
+
+    <div class="library-stat">
+
+        <div
+            class="number"
+            id="songCount"
+        >
+            —
+        </div>
+
+        <div class="name">
+            Songs
+        </div>
+
+    </div>
+
+
+    <div class="library-stat">
+
+        <div
+            class="number"
+            id="artistCount"
+        >
+            —
+        </div>
+
+        <div class="name">
+            Artists
+        </div>
+
+    </div>
+
+
+    <div class="library-stat">
+
+        <div
+            class="number"
+            id="albumCount"
+        >
+            —
+        </div>
+
+        <div class="name">
+            Albums
+        </div>
+
+    </div>
+
+
+    <div class="library-stat">
+
+        <div
+            class="number"
+            id="musicSize"
+        >
+            —
+        </div>
+
+        <div class="name">
+            Music
+        </div>
+
+    </div>
+
+</div>
+
+
+<div
+    class="storage-info"
+    style="margin-top:14px"
+>
+
+    <span>
+        Music folder
+    </span>
+
+    <span id="musicFolder">
+        —
+    </span>
+
+</div>
+
+
+<div class="music-storage">
+
+    <div
+        class="music-storage-fill"
+        id="musicStorageFill"
+    ></div>
+
+</div>
+
+
+</div>
+
+<!-- PLAYER -->
+
 <div class="card full">
-                <div class="go-to-pl">
-    GO TO <a href="/">player</a>
+
+
+<a
+    href="/"
+    class="player-link"
+>
+
+    <span>
+        FSX Music Player
+    </span>
+
+    <span>
+        Open player →
+    </span>
+
+</a>
+
+
 </div>
+
+</main>
+
+<!-- =====================================================
+     FOOTER
+===================================================== -->
+
+<footer class="footer">
+
+
+FSX Music Player
+
+<span class="footer-dot"></span>
+
+Server Health
+
+<span class="footer-dot"></span>
+
+<span id="footerStatus">
+    Monitoring
+</span>
+
+
+</footer>
+
 </div>
-    </main>
-
-
-
-
-    <footer class="footer">
-
-        FSX Music Player ·
-        Server Health
-
-    </footer>
-
-</div>
-
 
 <script>
-const uptimeHistory = [];
-const latencyHistory = [];
 
+/* =========================================================
+   CONFIG
+========================================================= */
+
+const HEALTH_ENDPOINT = "/api/raw";
+const MUSIC_ENDPOINT = "/songs";
+
+const POLL_INTERVAL = 5000;
 const MAX_POINTS = 30;
 
-let currentLatency = 0;
-let musicLibrary = [];
 
-/* ─────────────────────────────
-   HEALTH POLLING
-───────────────────────────── */
-function updateLatencyStats() {
+/* =========================================================
+   STATE
+========================================================= */
 
-    if (!latencyHistory.length)
-        return;
+const state = {
 
-    const current =
-        latencyHistory[
-            latencyHistory.length - 1
-        ];
+    online: false,
 
-    const average =
-        latencyHistory.reduce(
-            (sum, value) => sum + value,
-            0
-        ) / latencyHistory.length;
+    checking: true,
 
-    const peak =
-        Math.max(...latencyHistory);
+    failures: 0,
 
+    lastError: null,
 
-    document.getElementById(
-        "latencyCurrent"
-    ).textContent =
-        `${current} ms`;
+    lastSeen: null,
+
+    nextCheck: null,
+
+    latency: 0,
+
+    latencyHistory: [],
+
+    musicLibrary: [],
+
+    diskStorage: null
+
+};
 
 
-    document.getElementById(
-        "latencyAverage"
-    ).textContent =
-        `${Math.round(average)} ms`;
+/* =========================================================
+   DOM
+========================================================= */
+
+const $ = id =>
+    document.getElementById(id);
 
 
-    document.getElementById(
-        "latencyPeak"
-    ).textContent =
-        `${peak} ms`;
+/* =========================================================
+   STATUS
+========================================================= */
 
+function setChecking() {
 
-    /* Hero heartbeat */
+    document.body.classList.remove(
+        "offline",
+        "degraded"
+    );
 
-    document.getElementById(
-        "heartbeatLatency"
-    ).textContent =
-        current;
+    const status = $("status");
+
+    status.className =
+        "status checking";
+
+    status.innerHTML = `
+        <span class="status-dot"></span>
+        CHECKING
+    `;
+
+    $("footerStatus").textContent =
+        "Checking";
 
 }
+
+
+function setOnline(latency) {
+
+    state.online = true;
+
+    document.body.classList.remove(
+        "offline"
+    );
+
+    document.body.classList.toggle(
+        "degraded",
+        latency > 500
+    );
+
+
+    const status = $("status");
+
+    status.className =
+        "status";
+
+    status.innerHTML = `
+        <span class="status-dot"></span>
+        ${latency > 500 ? "DEGRADED" : "ONLINE"}
+    `;
+
+
+    $("heroTitle").textContent =
+        latency > 500
+            ? "Server is slow."
+            : "Server is running.";
+
+
+    $("heroMessage").textContent =
+        latency > 500
+            ? "FSX is responding, but network latency is higher than normal."
+            : "Your FSX instance is healthy and ready to serve music.";
+
+
+    $("footerStatus").textContent =
+        latency > 500
+            ? "Degraded"
+            : "Monitoring";
+
+
+    $("heartbeat").classList.add(
+        "active"
+    );
+
+
+    document
+        .getElementById("themeColor")
+        .setAttribute(
+            "content",
+            latency > 500
+                ? "#ffb84d"
+                : "#1db954"
+        );
+
+}
+
+
+function setOffline(error) {
+
+    state.online = false;
+
+    state.failures++;
+
+    state.lastError =
+        error?.message ||
+        "Server unreachable";
+
+
+    document.body.classList.remove(
+        "degraded"
+    );
+
+    document.body.classList.add(
+        "offline"
+    );
+
+
+    const status = $("status");
+
+    status.className =
+        "status offline";
+
+    status.innerHTML = `
+        <span class="status-dot"></span>
+        OFFLINE
+    `;
+
+
+    $("heroTitle").textContent =
+        "Server is offline.";
+
+
+    $("heroMessage").textContent =
+        "FSX is not responding. The dashboard will keep checking automatically.";
+
+
+    $("errorMessage").textContent =
+        state.lastError;
+
+
+    $("footerStatus").textContent =
+        "Server offline";
+
+
+    $("heartbeat").classList.remove(
+        "active"
+    );
+
+
+    $("failures").textContent =
+        state.failures;
+
+
+    document
+        .getElementById("themeColor")
+        .setAttribute(
+            "content",
+            "#ff4d4d"
+        );
+
+}
+
+
+/* =========================================================
+   HEALTH CHECK
+========================================================= */
+
 async function loadHealth() {
 
-    const start = performance.now();
+    if (
+        document.hidden
+    ) {
+        return;
+    }
+
+
+    setChecking();
+
+
+    const start =
+        performance.now();
+
 
     try {
 
         const response =
             await fetch(
-                "/api/raw",
+                HEALTH_ENDPOINT,
                 {
                     cache: "no-store"
                 }
             );
+
 
         const latency =
             Math.round(
                 performance.now() - start
             );
 
-        if (!response.ok)
+
+        if (!response.ok) {
+
             throw new Error(
-                "HTTP " + response.status
+                `HTTP ${response.status}`
             );
+
+        }
+
 
         const data =
             await response.json();
 
 
-        /* LATENCY */
+        state.latency =
+            latency;
 
-        latencyHistory.push(latency);
-        updateLatencyStats();
+
+        state.lastSeen =
+            new Date();
+
+
+        state.failures = 0;
+
+
+        state.latencyHistory.push(
+            latency
+        );
+
+
         if (
-            latencyHistory.length >
+            state.latencyHistory.length >
             MAX_POINTS
         ) {
-            latencyHistory.shift();
+
+            state.latencyHistory.shift();
+
         }
 
 
-        /* UPTIME */
-
-        uptimeHistory.push(
-            data.server.uptime
-        );
-
-        if (
-            uptimeHistory.length >
-            MAX_POINTS
-        ) {
-            uptimeHistory.shift();
-        }
-
-
-        /* STATUS */
-
-        setOnline();
-
-
-        /* SERVER INFO */
-
-        document.getElementById(
-            "version"
-        ).textContent =
-            data.version;
-
-
-        document.getElementById(
-            "uptime"
-        ).textContent =
-            formatUptime(
-                data.server.uptime
-            );
-
-
-        document.getElementById(
-            "platform"
-        ).textContent =
-            data.server.platform +
-            " " +
-            data.server.platform_version;
-
-
-        document.getElementById(
-            "architecture"
-        ).textContent =
-            data.server.architecture;
-
-
-        document.getElementById(
-            "python"
-        ).textContent =
-            data.server.python;
-
-
-        document.getElementById(
-            "hostname"
-        ).textContent =
-            data.server.hostname;
-
-
-        /* STORAGE */
-
-        const storage =
-            data.storage;
-            window.currentDiskStorage = storage;
-/* MUSIC LIBRARY */
-
-const music =
-    data.music;
-
-
-document.getElementById(
-    "songCount"
-).textContent =
-    music.songs;
-
-
-document.getElementById(
-    "musicSize"
-).textContent =
-    formatBytes(
-        music.size
-    );
-
-
-document.getElementById(
-    "musicFolder"
-).textContent =
-    music.folder;
-        const percentage =
-            (
-                storage.used /
-                storage.total
-            ) * 100;
-
-
-        document.getElementById(
-            "storage"
-        ).textContent =
-            formatBytes(storage.used) +
-            " / " +
-            formatBytes(storage.total);
-
-
-        document.getElementById(
-            "storageFill"
-        ).style.width =
-            percentage + "%";
-
-
-        document.getElementById(
-            "storagePercent"
-        ).textContent =
-            percentage.toFixed(1) + "%";
-
-
-        document.getElementById(
-            "latency"
-        ).textContent =
-            latency + " ms";
-
-
-        document.getElementById(
-            "lastUpdate"
-        ).textContent =
-            new Date().toLocaleTimeString();
-
-
-        /* DRAW CHARTS */
-
-        drawLineChart(
-            "latencyChart",
-            latencyHistory,
-            "ms"
+        setOnline(
+            latency
         );
 
 
-        drawStorageChart(
-            storage.used,
-            storage.free
+        updateServerInfo(
+            data
         );
 
 
-    } catch (error) {
+        updateStorage(
+            data.storage
+        );
+
+
+        updateLatencyStats(
+            latency
+        );
+
+
+        $("latency").textContent =
+            `${latency} ms`;
+
+
+        $("lastUpdate").textContent =
+            new Date()
+                .toLocaleTimeString();
+
+
+        drawLatencyChart();
+
+
+    }
+    catch (error) {
 
         console.error(
             "FSX health error:",
             error
         );
 
-        setOffline();
+
+        setOffline(
+            error
+        );
+
+
+        $("latency").textContent =
+            "—";
+
+
+        $("heartbeatLatency").textContent =
+            "—";
 
     }
 
 }
 
-/* ─────────────────────────────
+
+/* =========================================================
+   SERVER INFO
+========================================================= */
+
+function updateServerInfo(data) {
+
+    const server =
+        data.server;
+
+
+    $("version").textContent =
+        data.version ??
+        "—";
+
+
+    $("uptime").textContent =
+        formatUptime(
+            server?.uptime ?? 0
+        );
+
+
+    $("platform").textContent =
+        [
+            server?.platform,
+            server?.platform_version
+        ]
+        .filter(Boolean)
+        .join(" ") ||
+        "—";
+
+
+    $("architecture").textContent =
+        server?.architecture ??
+        "—";
+
+
+    $("python").textContent =
+        server?.python ??
+        "—";
+
+
+    $("hostname").textContent =
+        server?.hostname ??
+        "—";
+
+}
+
+
+/* =========================================================
+   STORAGE
+========================================================= */
+
+function updateStorage(storage) {
+
+    if (!storage)
+        return;
+
+
+    state.diskStorage =
+        storage;
+
+
+    const total =
+        Number(storage.total || 0);
+
+    const used =
+        Number(storage.used || 0);
+
+    const free =
+        Number(storage.free || 0);
+
+
+    if (!total)
+        return;
+
+
+    const percentage =
+        Math.min(
+            100,
+            (used / total) * 100
+        );
+
+
+    $("storage").textContent =
+        `${formatBytes(used)} / ${formatBytes(total)}`;
+
+
+    $("storageFill").style.width =
+        `${percentage}%`;
+
+
+    $("storagePercent").textContent =
+        `${percentage.toFixed(1)}%`;
+
+
+    $("storageUsed").textContent =
+        formatBytes(used);
+
+
+    $("storageFree").textContent =
+        formatBytes(free);
+
+}
+
+
+/* =========================================================
+   LATENCY STATS
+========================================================= */
+
+function updateLatencyStats(
+    current
+) {
+
+    const history =
+        state.latencyHistory;
+
+
+    if (!history.length)
+        return;
+
+
+    const average =
+        history.reduce(
+            (sum, value) =>
+                sum + value,
+            0
+        ) /
+        history.length;
+
+
+    const peak =
+        Math.max(
+            ...history
+        );
+
+
+    $("latencyCurrent").textContent =
+        `${current} ms`;
+
+
+    $("latencyAverage").textContent =
+        `${Math.round(average)} ms`;
+
+
+    $("latencyPeak").textContent =
+        `${peak} ms`;
+
+
+    $("latencySamples").textContent =
+        history.length;
+
+
+    $("heartbeatLatency").textContent =
+        current;
+
+}
+
+
+/* =========================================================
    MUSIC LIBRARY
-───────────────────────────── */
+========================================================= */
 
 async function loadMusicLibrary() {
+
+    if (
+        document.hidden ||
+        !state.online
+    ) {
+        return;
+    }
+
 
     try {
 
         const response =
             await fetch(
-                "/songs",
+                MUSIC_ENDPOINT,
                 {
                     cache: "no-store"
                 }
             );
 
+
         if (!response.ok)
             throw new Error(
-                "HTTP " + response.status
+                `HTTP ${response.status}`
             );
+
 
         const songs =
             await response.json();
 
-        musicLibrary = songs;
+
+        state.musicLibrary =
+            songs;
 
 
-        /* SONG COUNT */
+        updateMusicStats(
+            songs
+        );
 
-        const songCount =
-            songs.length;
+    }
+    catch (error) {
 
-
-        /* UNIQUE ARTISTS */
-
-        const artists =
-            new Set(
-                songs
-                    .map(song => song.artist)
-                    .filter(Boolean)
-            );
-
-
-        /* UNIQUE ALBUMS */
-
-        const albums =
-            new Set(
-                songs
-                    .map(song => song.album)
-                    .filter(
-                        album =>
-                            album &&
-                            album.trim()
-                    )
-            );
-
-
-        /* TOTAL MUSIC SIZE */
-
-        const musicSize =
-            songs.reduce(
-                (total, song) =>
-                    total +
-                    Number(song.size || 0),
-                0
-            );
-
-
-        document.getElementById(
-            "songCount"
-        ).textContent =
-            songCount;
-
-
-        document.getElementById(
-            "artistCount"
-        ).textContent =
-            artists.size;
-
-
-        document.getElementById(
-            "albumCount"
-        ).textContent =
-            albums.size;
-
-
-        document.getElementById(
-            "musicSize"
-        ).textContent =
-            formatBytes(musicSize);
-
-
-        /*
-            MUSIC STORAGE
-
-            Compare music library size
-            against the actual server disk.
-        */
-
-        if (
-            window.currentDiskStorage &&
-            window.currentDiskStorage.total
-        ) {
-
-            const disk =
-                window.currentDiskStorage;
-
-
-            const percentage =
-                (
-                    musicSize /
-                    disk.total
-                ) * 100;
-
-
-            document.getElementById(
-                "musicStorageFill"
-            ).style.width =
-                Math.min(
-                    percentage,
-                    100
-                ) + "%";
-
-        }
-
-
-    } catch (error) {
-
-        console.error(
+        console.warn(
             "FSX music library error:",
             error
         );
@@ -1581,98 +2341,167 @@ async function loadMusicLibrary() {
     }
 
 }
-/* ─────────────────────────────
-   STATUS
-───────────────────────────── */
 
-function setOnline() {
 
-    const status =
-        document.querySelector(
-            ".status"
+/* =========================================================
+   MUSIC STATS
+========================================================= */
+
+function updateMusicStats(
+    songs
+) {
+
+    const artists =
+        new Set(
+            songs
+                .map(
+                    song =>
+                        song.artist
+                )
+                .filter(Boolean)
         );
 
-    const dot =
-        document.querySelector(
-            ".status-dot"
+
+    const albums =
+        new Set(
+            songs
+                .map(
+                    song =>
+                        song.album
+                )
+                .filter(
+                    album =>
+                        album &&
+                        album.trim()
+                )
         );
 
 
-    status.classList.remove(
-        "offline"
-    );
+    const musicSize =
+        songs.reduce(
+            (total, song) =>
+                total +
+                Number(
+                    song.size || 0
+                ),
+            0
+        );
 
-    status.innerHTML = `
-        <span class="status-dot"></span>
-        ONLINE
-    `;
+
+    $("songCount").textContent =
+        songs.length;
+
+
+    $("artistCount").textContent =
+        artists.size;
+
+
+    $("albumCount").textContent =
+        albums.size;
+
+
+    $("musicSize").textContent =
+        formatBytes(
+            musicSize
+        );
+
+
+    const folder =
+        songs.length &&
+        songs[0].folder;
+
+
+    if (folder) {
+
+        $("musicFolder").textContent =
+            folder;
+
+    }
+
+
+    if (
+        state.diskStorage?.total
+    ) {
+
+        const percentage =
+            (
+                musicSize /
+                state.diskStorage.total
+            ) * 100;
+
+
+        $("musicStorageFill")
+            .style.width =
+                Math.min(
+                    percentage,
+                    100
+                ) + "%";
+
+    }
 
 }
 
 
-function setOffline() {
+/* =========================================================
+   LATENCY CHART
+========================================================= */
 
-    const status =
-        document.querySelector(
-            ".status"
-        );
-
-    status.classList.add(
-        "offline"
-    );
-
-    status.innerHTML = `
-        <span class="status-dot"></span>
-        OFFLINE
-    `;
-
-}
-
-
-/* ─────────────────────────────
-   CANVAS SETUP
-───────────────────────────── */
-
-function setupCanvas(canvas) {
+function setupCanvas(
+    canvas
+) {
 
     const rect =
         canvas.getBoundingClientRect();
 
+
     const dpr =
         window.devicePixelRatio || 1;
+
 
     canvas.width =
         rect.width * dpr;
 
+
     canvas.height =
         rect.height * dpr;
 
-    const ctx =
-        canvas.getContext("2d");
 
-    ctx.scale(dpr, dpr);
+    const ctx =
+        canvas.getContext(
+            "2d"
+        );
+
+
+    ctx.setTransform(
+        dpr,
+        0,
+        0,
+        dpr,
+        0,
+        0
+    );
+
 
     return {
+
         ctx,
-        width: rect.width,
-        height: rect.height
+
+        width:
+            rect.width,
+
+        height:
+            rect.height
+
     };
 
 }
 
 
-/* ─────────────────────────────
-   LINE CHART
-───────────────────────────── */
-
-function drawLineChart(
-    id,
-    values,
-    unit
-) {
+function drawLatencyChart() {
 
     const canvas =
-        document.getElementById(id);
+        $("latencyChart");
+
 
     if (!canvas)
         return;
@@ -1683,7 +2512,9 @@ function drawLineChart(
         width,
         height
     } =
-        setupCanvas(canvas);
+        setupCanvas(
+            canvas
+        );
 
 
     ctx.clearRect(
@@ -1694,26 +2525,42 @@ function drawLineChart(
     );
 
 
+    const values =
+        state.latencyHistory;
+
+
     if (!values.length)
         return;
 
 
-    const padding = 12;
+    const padding = 10;
+
 
     const max =
-        Math.max(...values, 1);
+        Math.max(
+            ...values,
+            10
+        );
+
 
     const min =
-        Math.min(...values, 0);
+        Math.min(
+            ...values,
+            0
+        );
+
 
     const range =
-        Math.max(max - min, 1);
+        Math.max(
+            max - min,
+            10
+        );
 
 
     /* GRID */
 
     ctx.strokeStyle =
-        "rgba(255,255,255,.06)";
+        "rgba(255,255,255,.055)";
 
     ctx.lineWidth = 1;
 
@@ -1731,6 +2578,7 @@ function drawLineChart(
                 padding * 2
             ) *
             (i / 4);
+
 
         ctx.beginPath();
 
@@ -1755,7 +2603,10 @@ function drawLineChart(
 
 
     values.forEach(
-        (value, index) => {
+        (
+            value,
+            index
+        ) => {
 
             const x =
                 values.length === 1
@@ -1768,7 +2619,10 @@ function drawLineChart(
                     ) *
                     (
                         index /
-                        (values.length - 1)
+                        (
+                            values.length -
+                            1
+                        )
                     );
 
 
@@ -1788,41 +2642,82 @@ function drawLineChart(
                 );
 
 
-            if (index === 0)
-                ctx.moveTo(x, y);
-            else
-                ctx.lineTo(x, y);
+            if (
+                index === 0
+            ) {
+
+                ctx.moveTo(
+                    x,
+                    y
+                );
+
+            }
+            else {
+
+                ctx.lineTo(
+                    x,
+                    y
+                );
+
+            }
 
         }
     );
 
 
-    ctx.strokeStyle =
+    const style =
         getComputedStyle(
             document.documentElement
-        )
-        .getPropertyValue(
-            "--accent"
         );
+
+
+    const accent =
+        state.online
+            ? style.getPropertyValue(
+                "--accent"
+            )
+            : style.getPropertyValue(
+                "--danger"
+            );
+
+
+    const accentLight =
+        state.online
+            ? style.getPropertyValue(
+                "--accent-light"
+            )
+            : style.getPropertyValue(
+                "--danger-light"
+            );
+
+
+    ctx.strokeStyle =
+        accent.trim();
+
 
     ctx.lineWidth = 2;
 
-    ctx.lineJoin = "round";
+    ctx.lineJoin =
+        "round";
+
+    ctx.lineCap =
+        "round";
 
     ctx.stroke();
 
 
-    /* CURRENT DOT */
+    /* CURRENT POINT */
 
     const last =
-        values[values.length - 1];
+        values[
+            values.length - 1
+        ];
 
 
     const x =
         values.length === 1
             ? width / 2
-            :
-            width - padding;
+            : width - padding;
 
 
     const y =
@@ -1851,137 +2746,36 @@ function drawLineChart(
         Math.PI * 2
     );
 
+
     ctx.fillStyle =
-        getComputedStyle(
-            document.documentElement
-        )
-        .getPropertyValue(
-            "--accent-light"
-        );
+        accentLight.trim();
+
 
     ctx.fill();
 
 }
 
 
-/* ─────────────────────────────
-   STORAGE CHART
-───────────────────────────── */
+/* =========================================================
+   FORMAT BYTES
+========================================================= */
 
-function drawStorageChart(
-    used,
-    free
+function formatBytes(
+    bytes
 ) {
 
-    const canvas =
-        document.getElementById(
-            "storageChart"
-        );
-
-    if (!canvas)
-        return;
+    bytes =
+        Number(bytes);
 
 
-    const {
-        ctx,
-        width,
-        height
-    } =
-        setupCanvas(canvas);
+    if (
+        !Number.isFinite(bytes) ||
+        bytes <= 0
+    ) {
 
-
-    ctx.clearRect(
-        0,
-        0,
-        width,
-        height
-    );
-
-
-    const total =
-        used + free;
-
-
-    if (!total)
-        return;
-
-
-    const usedWidth =
-        (
-            used /
-            total
-        ) *
-        width;
-
-
-    /* FREE */
-
-    ctx.fillStyle =
-        "rgba(255,255,255,.06)";
-
-    ctx.fillRect(
-        0,
-        0,
-        width,
-        height
-    );
-
-
-    /* USED */
-
-    const gradient =
-        ctx.createLinearGradient(
-            0,
-            0,
-            width,
-            0
-        );
-
-
-    gradient.addColorStop(
-        0,
-        getComputedStyle(
-            document.documentElement
-        )
-        .getPropertyValue(
-            "--accent"
-        )
-    );
-
-
-    gradient.addColorStop(
-        1,
-        getComputedStyle(
-            document.documentElement
-        )
-        .getPropertyValue(
-            "--accent-light"
-        )
-    );
-
-
-    ctx.fillStyle =
-        gradient;
-
-
-    ctx.fillRect(
-        0,
-        0,
-        usedWidth,
-        height
-    );
-
-}
-
-
-/* ─────────────────────────────
-   FORMATTERS
-───────────────────────────── */
-
-function formatBytes(bytes) {
-
-    if (!bytes)
         return "0 B";
+
+    }
 
 
     const units = [
@@ -1994,9 +2788,12 @@ function formatBytes(bytes) {
 
 
     const index =
-        Math.floor(
-            Math.log(bytes) /
-            Math.log(1024)
+        Math.min(
+            Math.floor(
+                Math.log(bytes) /
+                Math.log(1024)
+            ),
+            units.length - 1
         );
 
 
@@ -2008,7 +2805,9 @@ function formatBytes(bytes) {
         )
     )
     .toFixed(
-        index ? 2 : 0
+        index === 0
+            ? 0
+            : 2
     )
     + " "
     + units[index];
@@ -2016,12 +2815,26 @@ function formatBytes(bytes) {
 }
 
 
-function formatUptime(seconds) {
+/* =========================================================
+   FORMAT UPTIME
+========================================================= */
+
+function formatUptime(
+    seconds
+) {
+
+    seconds =
+        Math.max(
+            0,
+            Number(seconds) || 0
+        );
+
 
     const days =
         Math.floor(
             seconds / 86400
         );
+
 
     seconds %= 86400;
 
@@ -2031,6 +2844,7 @@ function formatUptime(seconds) {
             seconds / 3600
         );
 
+
     seconds %= 3600;
 
 
@@ -2038,6 +2852,7 @@ function formatUptime(seconds) {
         Math.floor(
             seconds / 60
         );
+
 
     seconds =
         Math.floor(
@@ -2062,40 +2877,168 @@ function formatUptime(seconds) {
 }
 
 
-/* ─────────────────────────────
-   START
-───────────────────────────── */
+/* =========================================================
+   REFRESH COUNTDOWN
+========================================================= */
 
-loadHealth();
-loadMusicLibrary();
+function updateCountdown() {
+
+    if (!state.nextCheck)
+        return;
 
 
-setInterval(
-    loadHealth,
-    5000
+    const remaining =
+        Math.max(
+            0,
+            state.nextCheck -
+            Date.now()
+        );
+
+
+    $("nextCheck").textContent =
+        `${Math.ceil(
+            remaining / 1000
+        )}s`;
+
+}
+
+
+/* =========================================================
+   MANUAL REFRESH
+========================================================= */
+
+async function manualRefresh() {
+
+    const button =
+        $("refreshButton");
+
+
+    button.classList.add(
+        "spinning"
+    );
+
+
+    try {
+
+        await loadHealth();
+
+        if (state.online) {
+            await loadMusicLibrary();
+        }
+
+    }
+    finally {
+
+        setTimeout(
+            () => {
+
+                button.classList.remove(
+                    "spinning"
+                );
+
+            },
+            250
+        );
+
+    }
+
+}
+
+
+/* =========================================================
+   PAGE VISIBILITY
+========================================================= */
+
+document.addEventListener(
+    "visibilitychange",
+    () => {
+
+        if (
+            !document.hidden
+        ) {
+
+            loadHealth();
+
+        }
+
+    }
 );
 
-setInterval(
-    loadMusicLibrary,
-    5000
-);
 
-/* Redraw on resize */
+/* =========================================================
+   EVENTS
+========================================================= */
+
+$("refreshButton")
+    .addEventListener(
+        "click",
+        manualRefresh
+    );
+
 
 window.addEventListener(
     "resize",
     () => {
 
-        drawLineChart(
-            "latencyChart",
-            latencyHistory,
-            "ms"
-        );
+        drawLatencyChart();
 
     }
 );
 
+
+/* =========================================================
+   INITIAL LOAD
+========================================================= */
+
+loadHealth();
+
+
+setTimeout(
+    loadMusicLibrary,
+    700
+);
+
+
+/* =========================================================
+   POLLING
+========================================================= */
+
+setInterval(
+    async () => {
+
+        state.nextCheck =
+            Date.now() +
+            POLL_INTERVAL;
+
+
+        await loadHealth();
+
+
+        if (
+            state.online
+        ) {
+
+            await loadMusicLibrary();
+
+        }
+
+    },
+    POLL_INTERVAL
+);
+
+
+setInterval(
+    updateCountdown,
+    250
+);
+
+
+state.nextCheck =
+    Date.now() +
+    POLL_INTERVAL;
+
 </script>
+
 </body>
 
 </html>
