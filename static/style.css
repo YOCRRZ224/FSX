@@ -728,6 +728,7 @@ button {
     background: linear-gradient(90deg, #1db954, #1ed760, #1db954);
     background-size: 200% auto;
     -webkit-background-clip: text;
+    background-clip: text;
     -webkit-text-fill-color: transparent;
     animation: gradientMove 4s linear infinite, popIn 0.5s ease forwards;
 }
