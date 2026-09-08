@@ -132,6 +132,7 @@ this was the last step you could run main.py and go on web.
 
 ## Ongoing
 - Optimization -> v2.2.1 (v1)
+- Landing page FSX (Not associated with the working of the player)
 
 ## Done
 - Lyrics -> v2.1.0
