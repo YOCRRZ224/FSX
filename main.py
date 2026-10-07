@@ -1,18 +1,23 @@
-from flask import Flask, send_from_directory, jsonify
-import os
-from mutagen.mp3 import MP3
-from mutagen.id3 import ID3
-import math
-from flask import request
-import requests
-import re
-from bs4 import BeautifulSoup
-import uuid
-from threading import Thread, Lock
-import time
+import base64
 from datetime import datetime, timezone
+import math
+import os
 import platform
+import re
 import shutil
+from threading import Lock, Thread
+import time
+import uuid
+
+from bs4 import BeautifulSoup
+from flask import Flask, jsonify, request, Response, send_from_directory
+from mutagen import File
+from mutagen.flac import FLAC
+from mutagen.id3 import APIC, ID3, TALB, TDRC, TIT2, TPE1, error
+from mutagen.mp3 import MP3
+from mutagen.mp4 import MP4
+import requests
+import yt_dlp
 app = Flask(__name__)
 SERVER_STARTED = time.time()
 MUSIC_FOLDER = "music"
@@ -25,11 +30,6 @@ jobs = {}
 metadata_cache = {}
 metadata_cache_lock = Lock()
 
-HEADERS = {
-    "User-Agent": "Mozilla/5.0",
-    "Origin": "https://spotidown.app",
-    "Referer": "https://spotidown.app/en3"
-}
 import time
 def get_song_metadata(path, filename=None):
     audio = File(path, easy=True)
@@ -94,7 +94,7 @@ def get_cached_song_metadata(path, filename):
 
     return metadata.copy()
 def download_file(url, filename, job_id=None):
-    with requests.get(url, headers=HEADERS, stream=True) as r:
+    with requests.get(url, stream=True) as r:
         r.raise_for_status()
 
         total = int(r.headers.get("content-length", 0))
@@ -135,118 +135,129 @@ def job_status(job_id):
             "eta": ""
         })
     )
-def fetch_track(spotify_url, job_id=None):
-    session = requests.Session()
-    session.headers.update(HEADERS)
+def fetch_track(query, job_id=None):
+    if job_id:
+        jobs[job_id]["stage"] = "Parsing Request"
+        jobs[job_id]["progress"] = 5
+        
+    if "spotify.com" in query:
+        oembed_url = f"https://open.spotify.com/oembed?url={query}"
+        res = requests.get(oembed_url)
+        if res.status_code == 200:
+            res_json = res.json()
+            search_term = f"{res_json.get('title')} {res_json.get('author_name')}"
+        else:
+            raise Exception("Could not extract Spotify link data.")
+    else:
+        search_term = query
 
     if job_id:
-        jobs[job_id]["stage"] = "Loading SpotiDown"
-        jobs[job_id]["progress"] = 10
+        jobs[job_id]["stage"] = "Fetching Open Metadata"
+        jobs[job_id]["progress"] = 15
 
-    response = session.get("https://spotidown.app/en3")
-
-    soup = BeautifulSoup(response.text, "html.parser")
-
-    hidden_input = soup.find(
-        "input",
-        type="hidden",
-        attrs={"name": lambda x: x != "g-recaptcha-response"}
-    )
-
-    token_name = hidden_input["name"]
-    token_value = hidden_input["value"]
-
-    payload = {
-        "url": spotify_url,
-        "g-recaptcha-response": "",
-        token_name: token_value
+    itunes_url = "https://itunes.apple.com/search"
+    params = {"term": search_term, "media": "music", "entity": "song", "limit": 1}
+    response = requests.get(itunes_url, params=params)
+    data = response.json()
+    
+    if not data.get("results"):
+        raise Exception("Track not found in open database.")
+        
+    track = data["results"][0]
+    high_res_cover = track["artworkUrl100"].replace("100x100bb", "600x600bb")
+    
+    metadata = {
+        'title': track['trackName'],
+        'artist': track['artistName'],
+        'album': track.get('collectionName', 'Unknown Album'),
+        'release_date': track.get('releaseDate', '2024')[:4], 
+        'cover_url': high_res_cover
     }
 
     if job_id:
-        jobs[job_id]["stage"] = "Submitting Track"
-        jobs[job_id]["progress"] = 25
+        jobs[job_id]["stage"] = "Connecting to Audio Stream"
+        jobs[job_id]["progress"] = 20
 
-    api_response = session.post(
-        "https://spotidown.app/action",
-        data=payload
-    )
+    os.makedirs(MUSIC_FOLDER, exist_ok=True)
+    search_query = f"{metadata['title']} {metadata['artist']} official audio"
+    
+    clean_name = re.sub(r'[\\/*?:"<>|]', "", f"{metadata['artist']} - {metadata['title']}")
+    
+    save_template = os.path.join(MUSIC_FOLDER, f"{clean_name}.%(ext)s")
+    final_mp3_path = os.path.join(MUSIC_FOLDER, f"{clean_name}.mp3")
 
-    html_content = api_response.json()["data"]
+    def progress_hook(d):
+        if not job_id:
+            return
+            
+        if d['status'] == 'downloading':
+            downloaded = d.get('downloaded_bytes', 0)
+            total = d.get('total_bytes') or d.get('total_bytes_estimate', 1)
+            percent = (downloaded / total) * 100
+            
+            scaled_progress = 20 + (percent * 0.60)
+            jobs[job_id]["progress"] = int(scaled_progress)
+            jobs[job_id]["stage"] = f"Downloading... {percent:.1f}%"
+            
+        elif d['status'] == 'finished':
+            jobs[job_id]["stage"] = "Converting to MP3"
+            jobs[job_id]["progress"] = 80
 
-    track_soup = BeautifulSoup(html_content, "html.parser")
-
-    final_payload = {
-        "data": track_soup.find("input", {"name": "data"})["value"],
-        "base": track_soup.find("input", {"name": "base"})["value"],
-        "token": track_soup.find("input", {"name": "token"})["value"]
+    ydl_opts = {
+        'format': 'bestaudio/best',
+        'outtmpl': save_template,
+        'postprocessors': [{
+            'key': 'FFmpegExtractAudio',
+            'preferredcodec': 'mp3',
+            'preferredquality': '192',
+        }],
+        'progress_hooks': [progress_hook],
+        
+        'extractor_args': {'youtube': ['client=ios,android,tv,web']},
+        
+        'quiet': True,
+        'noplaylist': True
     }
 
-    if job_id:
-        jobs[job_id]["stage"] = "Fetching Track Data"
-        jobs[job_id]["progress"] = 40
-
-    final_response = session.post(
-        "https://spotidown.app/action/track",
-        data=final_payload
-    )
-
-    final_html = final_response.json()["data"]
-
-    result_soup = BeautifulSoup(final_html, "html.parser")
-
-    title_node = result_soup.find("h3", itemprop="name")
-
-    title = (
-        title_node.get_text(strip=True)
-        if title_node else "Unknown Track"
-    )
-
-    links = result_soup.find_all("a", id="popup")
-
-    mp3_url = None
-    cover_url = None
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([f"ytsearch1:{search_query}"])
 
     if job_id:
-        jobs[job_id]["stage"] = "Finding MP3 URL"
-        jobs[job_id]["progress"] = 55
+        jobs[job_id]["stage"] = "Downloading Cover Art"
+        jobs[job_id]["progress"] = 85
 
-    for link in links:
-        text = link.get_text(strip=True)
-        href = link.get("href")
-
-        print(text, href)
-
-        if "Cover" in text:
-            cover_url = href
-
-        elif "Mp3" in text:
-            mp3_url = href
-
-    if not mp3_url:
-        raise Exception("MP3 URL not found")
-
-    filename = re.sub(r'[\\/*?:"<>|]', "", title)
-    filename += ".mp3"
-
-    save_path = os.path.join(MUSIC_FOLDER, filename)
-
+    img_data = requests.get(metadata['cover_url']).content
+    
     if job_id:
-        jobs[job_id]["stage"] = "Downloading MP3"
-        jobs[job_id]["progress"] = 70
+        jobs[job_id]["stage"] = "Forging Metadata"
+        jobs[job_id]["progress"] = 90
 
-    download_file(mp3_url, save_path, job_id)
+    audio = MP3(final_mp3_path, ID3=ID3)
+    try:
+        audio.add_tags()
+    except error:
+        pass
 
-    if job_id:
-        jobs[job_id]["stage"] = "Saving File"
-        jobs[job_id]["progress"] = 95
+    audio.tags.add(TIT2(encoding=3, text=metadata['title']))
+    audio.tags.add(TPE1(encoding=3, text=metadata['artist']))
+    audio.tags.add(TALB(encoding=3, text=metadata['album']))
+    audio.tags.add(TDRC(encoding=3, text=metadata['release_date']))
+    audio.tags.add(APIC(
+        encoding=3, 
+        mime='image/jpeg', 
+        type=3, 
+        desc='Cover',
+        data=img_data
+    ))
+    audio.save()
 
     if job_id:
         jobs[job_id]["stage"] = "Complete"
         jobs[job_id]["progress"] = 100
 
     return {
-        "title": title,
-        "filename": filename
+        "title": f"{metadata['artist']} - {metadata['title']}",
+        "filename": f"{clean_name}.mp3"
     }
 def get_lrc_filename(song):
     return os.path.splitext(song)[0] + ".lrc"
@@ -255,11 +266,6 @@ def fetch_lyrics(title, artist, album, duration):
     headers = {
         "User-Agent": "FSX Music Player/1.0"
     }
-
-    # --------------------------------------------------
-    # 1. Exact match
-    # --------------------------------------------------
-
     try:
         response = requests.get(
             "https://lrclib.net/api/get",
@@ -287,9 +293,6 @@ def fetch_lyrics(title, artist, album, duration):
         print("⚠️ Exact lyrics lookup failed:", e)
 
 
-    # --------------------------------------------------
-    # 2. Search fallback
-    # --------------------------------------------------
 
     try:
 
@@ -526,15 +529,6 @@ def songs():
 @app.route("/play/<song>")
 def play(song):
     return send_from_directory(MUSIC_FOLDER, song)
-# 🎨 COVER API
-from flask import Response
-from flask import Response, send_from_directory
-from mutagen import File
-from mutagen.id3 import ID3
-from mutagen.mp4 import MP4
-from mutagen.flac import FLAC
-import os
-import base64
 
 @app.route("/cover/<path:song>")
 def cover(song):
