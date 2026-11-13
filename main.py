@@ -849,8 +849,7 @@ def delete_song(song):
 
     except Exception as e:
         return jsonify({
-            "success": False,
-            "error": str(e)
+            "success": False
         }), 500
 @app.route("/lyrics/ensure/<path:song>", methods=["POST"])
 def ensure_lyrics(song):
